@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Letter Mole - Learn Your ABCs!</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', 'Chalkboard', 'Arial Rounded MT Bold', sans-serif;
+            background: linear-gradient(180deg, #87CEEB 0%, #98FB98 100%);
+            min-height: 100vh;
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+
+        /* Clouds decoration */
+        .clouds {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 150px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .cloud {
+            position: absolute;
+            background: white;
+            border-radius: 50px;
+            opacity: 0.9;
+            animation: float 20s infinite ease-in-out;
+        }
+
+        .cloud::before, .cloud::after {
+            content: '';
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+        }
+
+        .cloud-1 {
+            width: 100px;
+            height: 40px;
+            top: 20px;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .cloud-1::before {
+            width: 50px;
+            height: 50px;
+            top: -25px;
+            left: 15px;
+        }
+
+        .cloud-1::after {
+            width: 35px;
+            height: 35px;
+            top: -15px;
+            right: 15px;
+        }
+
+        .cloud-2 {
+            width: 120px;
+            height: 45px;
+            top: 40px;
+            right: 15%;
+            animation-delay: -7s;
+        }
+
+        .cloud-2::before {
+            width: 55px;
+            height: 55px;
+            top: -30px;
+            left: 20px;
+        }
+
+        .cloud-2::after {
+            width: 40px;
+            height: 40px;
+            top: -20px;
+            right: 20px;
+        }
+
+        .cloud-3 {
+            width: 80px;
+            height: 35px;
+            top: 60px;
+            left: 50%;
+            animation-delay: -14s;
+        }
+
+        .cloud-3::before {
+            width: 40px;
+            height: 40px;
+            top: -20px;
+            left: 10px;
+        }
+
+        .cloud-3::after {
+            width: 30px;
+            height: 30px;
+            top: -12px;
+            right: 10px;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateX(0) translateY(0); }
+            25% { transform: translateX(20px) translateY(-5px); }
+            50% { transform: translateX(0) translateY(5px); }
+            75% { transform: translateX(-20px) translateY(-5px); }
+        }
+
+        /* Screens */
+        .screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        /* Start Screen */
+        #start-screen {
+            text-align: center;
+        }
+
+        .game-title {
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            color: #FF6B6B;
+            text-shadow:
+                4px 4px 0 #FFE66D,
+                6px 6px 0 #4ECDC4;
+            margin-bottom: 10px;
+            animation: bounce 2s infinite;
+        }
+
+        .game-subtitle {
+            font-size: clamp(1rem, 4vw, 1.8rem);
+            color: #4A4A4A;
+            margin-bottom: 40px;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        .mole-mascot {
+            width: clamp(120px, 30vw, 200px);
+            height: clamp(120px, 30vw, 200px);
+            background: #8B4513;
+            border-radius: 50% 50% 45% 45%;
+            position: relative;
+            margin-bottom: 30px;
+            animation: wiggle 1s infinite;
+        }
+
+        .mole-mascot::before {
+            content: '';
+            position: absolute;
+            width: 70%;
+            height: 50%;
+            background: #D2691E;
+            border-radius: 50%;
+            top: 30%;
+            left: 15%;
+        }
+
+        .mole-eyes {
+            position: absolute;
+            top: 25%;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 25%;
+            z-index: 2;
+        }
+
+        .mole-eye {
+            width: 20%;
+            height: 0;
+            padding-bottom: 20%;
+            background: white;
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .mole-eye::after {
+            content: '';
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            background: #2C2C2C;
+            border-radius: 50%;
+            top: 25%;
+            left: 25%;
+        }
+
+        .mole-nose {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 25%;
+            height: 0;
+            padding-bottom: 18%;
+            background: #FF69B4;
+            border-radius: 50%;
+            z-index: 2;
+        }
+
+        .mole-cheeks {
+            position: absolute;
+            top: 55%;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 50%;
+            z-index: 1;
+        }
+
+        .mole-cheek {
+            width: 15%;
+            height: 0;
+            padding-bottom: 10%;
+            background: rgba(255, 182, 193, 0.7);
+            border-radius: 50%;
+        }
+
+        @keyframes wiggle {
+            0%, 100% { transform: rotate(-3deg); }
+            50% { transform: rotate(3deg); }
+        }
+
+        .play-btn {
+            font-size: clamp(1.8rem, 6vw, 2.5rem);
+            padding: 20px 60px;
+            background: linear-gradient(180deg, #FF6B6B 0%, #EE5A5A 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow:
+                0 8px 0 #CC4444,
+                0 12px 20px rgba(0,0,0,0.2);
+            transition: all 0.1s;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+
+        .play-btn:hover {
+            transform: translateY(2px);
+            box-shadow:
+                0 6px 0 #CC4444,
+                0 10px 15px rgba(0,0,0,0.2);
+        }
+
+        .play-btn:active {
+            transform: translateY(6px);
+            box-shadow:
+                0 2px 0 #CC4444,
+                0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        /* Level Select */
+        .level-info {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .level-badge {
+            display: inline-block;
+            padding: 10px 25px;
+            background: #4ECDC4;
+            color: white;
+            border-radius: 25px;
+            font-size: clamp(0.9rem, 3vw, 1.2rem);
+            margin: 5px;
+            box-shadow: 0 4px 0 #3BA99C;
+        }
+
+        .level-badge.locked {
+            background: #CCC;
+            box-shadow: 0 4px 0 #999;
+        }
+
+        .level-badge.locked::after {
+            content: ' 🔒';
+        }
+
+        /* Game Screen */
+        #game-screen {
+            justify-content: flex-start;
+            padding-top: 10px;
+        }
+
+        .game-header {
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .score-display {
+            font-size: clamp(1.2rem, 4vw, 1.8rem);
+            color: #FF6B6B;
+            font-weight: bold;
+        }
+
+        .score-display span {
+            color: #4ECDC4;
+        }
+
+        .level-display {
+            font-size: clamp(0.9rem, 3vw, 1.2rem);
+            color: #666;
+            background: #FFE66D;
+            padding: 5px 15px;
+            border-radius: 15px;
+        }
+
+        .timer-display {
+            font-size: clamp(1rem, 3.5vw, 1.5rem);
+            color: #666;
+        }
+
+        .target-letter-container {
+            background: linear-gradient(180deg, #FFE66D 0%, #FFD93D 100%);
+            padding: 15px 40px;
+            border-radius: 25px;
+            margin-bottom: 20px;
+            box-shadow:
+                0 6px 0 #E6C235,
+                0 10px 20px rgba(0,0,0,0.15);
+            text-align: center;
+        }
+
+        .target-label {
+            font-size: clamp(0.9rem, 3vw, 1.2rem);
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .target-letter {
+            font-size: clamp(3rem, 12vw, 5rem);
+            color: #FF6B6B;
+            font-weight: bold;
+            text-shadow: 3px 3px 0 rgba(0,0,0,0.1);
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* Game Board */
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: clamp(10px, 3vw, 20px);
+            max-width: 500px;
+            width: 100%;
+            padding: 20px;
+        }
+
+        .hole {
+            position: relative;
+            width: 100%;
+            padding-bottom: 100%;
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        .hole-back {
+            position: absolute;
+            bottom: 0;
+            left: 5%;
+            width: 90%;
+            height: 35%;
+            background: linear-gradient(180deg, #654321 0%, #3D2914 100%);
+            border-radius: 50%;
+            box-shadow: inset 0 -10px 20px rgba(0,0,0,0.4);
+        }
+
+        .hole-front {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 20%;
+            background: linear-gradient(180deg, #228B22 0%, #1A6B1A 100%);
+            border-radius: 50%;
+            z-index: 3;
+        }
+
+        .mole {
+            position: absolute;
+            bottom: 15%;
+            left: 50%;
+            transform: translateX(-50%) translateY(100%);
+            width: 75%;
+            height: 70%;
+            transition: transform 0.2s ease-out;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .mole.active {
+            transform: translateX(-50%) translateY(0);
+            pointer-events: auto;
+        }
+
+        .mole-body {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #D2691E 0%, #8B4513 100%);
+            border-radius: 50% 50% 40% 40%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 -10px 20px rgba(0,0,0,0.2);
+        }
+
+        .mole-letter {
+            font-size: clamp(2rem, 8vw, 3rem);
+            font-weight: bold;
+            color: white;
+            text-shadow:
+                2px 2px 0 rgba(0,0,0,0.3),
+                -1px -1px 0 rgba(0,0,0,0.2);
+            z-index: 1;
+        }
+
+        .mole-face {
+            position: absolute;
+            top: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 40%;
+        }
+
+        .mini-eyes {
+            display: flex;
+            justify-content: center;
+            gap: 30%;
+        }
+
+        .mini-eye {
+            width: 20%;
+            height: 0;
+            padding-bottom: 20%;
+            background: white;
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .mini-eye::after {
+            content: '';
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            background: #2C2C2C;
+            border-radius: 50%;
+            top: 30%;
+            left: 25%;
+        }
+
+        .mole.hit .mole-body {
+            background: linear-gradient(180deg, #90EE90 0%, #32CD32 100%);
+        }
+
+        .mole.wrong .mole-body {
+            animation: shake 0.3s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* Feedback Messages */
+        .feedback {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            font-size: clamp(2rem, 8vw, 4rem);
+            font-weight: bold;
+            z-index: 100;
+            pointer-events: none;
+            text-shadow: 3px 3px 0 rgba(0,0,0,0.2);
+            animation: popFeedback 0.8s ease-out forwards;
+        }
+
+        .feedback.correct {
+            color: #4ECDC4;
+        }
+
+        .feedback.wrong {
+            color: #FF6B6B;
+            font-size: clamp(1.2rem, 5vw, 2rem);
+        }
+
+        @keyframes popFeedback {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+            100% { transform: translate(-50%, -80%) scale(1); opacity: 0; }
+        }
+
+        /* Stars celebration */
+        .stars-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 99;
+        }
+
+        .star {
+            position: absolute;
+            font-size: 2rem;
+            animation: starFall 1s ease-out forwards;
+        }
+
+        @keyframes starFall {
+            0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100px) rotate(360deg); opacity: 0; }
+        }
+
+        /* End Screen */
+        #end-screen {
+            text-align: center;
+        }
+
+        .end-title {
+            font-size: clamp(2rem, 7vw, 4rem);
+            color: #4ECDC4;
+            margin-bottom: 20px;
+            animation: bounce 1s infinite;
+        }
+
+        .final-score {
+            font-size: clamp(1.5rem, 5vw, 2.5rem);
+            color: #FF6B6B;
+            margin-bottom: 10px;
+        }
+
+        .stars-earned {
+            font-size: clamp(2rem, 8vw, 4rem);
+            margin-bottom: 30px;
+        }
+
+        .trophy {
+            font-size: clamp(4rem, 15vw, 8rem);
+            margin-bottom: 20px;
+            animation: wiggle 1s infinite;
+        }
+
+        .encouragement {
+            font-size: clamp(1rem, 4vw, 1.5rem);
+            color: #666;
+            margin-bottom: 30px;
+            max-width: 400px;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .btn {
+            font-size: clamp(1.2rem, 4vw, 1.5rem);
+            padding: 15px 35px;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.1s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(180deg, #4ECDC4 0%, #3BA99C 100%);
+            color: white;
+            box-shadow: 0 6px 0 #2D8A82;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(180deg, #FFE66D 0%, #E6C235 100%);
+            color: #666;
+            box-shadow: 0 6px 0 #C9A82E;
+        }
+
+        .btn:hover {
+            transform: translateY(2px);
+        }
+
+        .btn:active {
+            transform: translateY(5px);
+            box-shadow: 0 1px 0 currentColor;
+        }
+
+        /* Level Up Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 30px;
+            text-align: center;
+            max-width: 90%;
+            animation: modalPop 0.5s ease-out;
+        }
+
+        @keyframes modalPop {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .modal-title {
+            font-size: clamp(1.8rem, 6vw, 2.5rem);
+            color: #FF6B6B;
+            margin-bottom: 15px;
+        }
+
+        .modal-letters {
+            font-size: clamp(2rem, 8vw, 3rem);
+            color: #4ECDC4;
+            margin-bottom: 20px;
+            letter-spacing: 10px;
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            z-index: 201;
+            animation: confettiFall 3s ease-out forwards;
+        }
+
+        @keyframes confettiFall {
+            0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 400px) {
+            .game-board {
+                gap: 8px;
+                padding: 10px;
+            }
+
+            .game-header {
+                padding: 8px 15px;
+            }
+        }
+
+        @media (min-height: 800px) {
+            #game-screen {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Decorative clouds -->
+    <div class="clouds">
+        <div class="cloud cloud-1"></div>
+        <div class="cloud cloud-2"></div>
+        <div class="cloud cloud-3"></div>
+    </div>
+
+    <!-- Start Screen -->
+    <div id="start-screen" class="screen active">
+        <h1 class="game-title">Letter Mole!</h1>
+        <p class="game-subtitle">Match the Letters!</p>
+
+        <div class="mole-mascot">
+            <div class="mole-eyes">
+                <div class="mole-eye"></div>
+                <div class="mole-eye"></div>
+            </div>
+            <div class="mole-nose"></div>
+            <div class="mole-cheeks">
+                <div class="mole-cheek"></div>
+                <div class="mole-cheek"></div>
+            </div>
+        </div>
+
+        <button class="play-btn" onclick="startGame()">Play!</button>
+
+        <div class="level-info">
+            <div id="level-badges"></div>
+        </div>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="game-screen" class="screen">
+        <div class="game-header">
+            <div class="score-display">Score: <span id="score">0</span></div>
+            <div class="level-display" id="level-indicator">Level 1</div>
+            <div class="timer-display" id="timer">⏱️ 60</div>
+        </div>
+
+        <div class="target-letter-container">
+            <div class="target-label">Find the letter:</div>
+            <div class="target-letter" id="target-letter">A</div>
+        </div>
+
+        <div class="game-board" id="game-board">
+            <!-- Holes will be generated by JavaScript -->
+        </div>
+    </div>
+
+    <!-- End Screen -->
+    <div id="end-screen" class="screen">
+        <div class="trophy" id="trophy">🏆</div>
+        <h2 class="end-title" id="end-title">Great Job!</h2>
+        <div class="final-score">Score: <span id="final-score">0</span></div>
+        <div class="stars-earned" id="stars-earned">⭐⭐⭐</div>
+        <p class="encouragement" id="encouragement">You're a letter superstar!</p>
+
+        <div class="btn-group">
+            <button class="btn btn-primary" onclick="startGame()">Play Again</button>
+            <button class="btn btn-secondary" onclick="goToStart()">Home</button>
+        </div>
+    </div>
+
+    <!-- Level Up Modal -->
+    <div id="level-modal" class="modal">
+        <div class="modal-content">
+            <h2 class="modal-title">🎉 Level Up! 🎉</h2>
+            <p>New letters unlocked:</p>
+            <div class="modal-letters" id="new-letters">G H</div>
+            <button class="btn btn-primary" onclick="closeLevelModal()">Keep Playing!</button>
+        </div>
+    </div>
+
+    <!-- Containers for effects -->
+    <div class="stars-container" id="stars-container"></div>
+
+    <script>
+        // Game Configuration
+        const LEVELS = [
+            { letters: ['A', 'B', 'C', 'D', 'E', 'F'], name: 'Level 1', minScore: 0 },
+            { letters: ['G', 'H', 'I', 'J', 'K', 'L'], name: 'Level 2', minScore: 50 },
+            { letters: ['M', 'N', 'O', 'P', 'Q', 'R'], name: 'Level 3', minScore: 120 },
+            { letters: ['S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'], name: 'Level 4', minScore: 200 }
+        ];
+
+        const ENCOURAGEMENTS = {
+            correct: ['Awesome!', 'Great!', 'Wow!', 'Super!', 'Yes!', 'Perfect!', '🌟', '🎉'],
+            wrong: ['Try again!', 'Almost!', 'Keep going!', 'You can do it!', 'Next time!'],
+            end: {
+                high: ["Amazing! You're a letter champion!", "Incredible job! You know your letters!", "Superstar performance!"],
+                medium: ["Great work! Keep practicing!", "Good job! You're getting better!", "Nice try! Practice makes perfect!"],
+                low: ["Good effort! Let's try again!", "Keep practicing, you'll get it!", "Every try makes you better!"]
+            }
+        };
+
+        // Game State
+        let gameState = {
+            score: 0,
+            level: 0,
+            targetLetter: '',
+            timeLeft: 60,
+            isPlaying: false,
+            moleSpeed: 2000,
+            unlockedLevels: 1,
+            currentLetters: [],
+            timerInterval: null,
+            moleInterval: null,
+            activeMoles: new Set()
+        };
+
+        // Audio Context for sounds
+        let audioContext = null;
+
+        function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSound(type) {
+            if (!audioContext) return;
+
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            switch(type) {
+                case 'correct':
+                    // Happy ascending tone
+                    oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime); // C5
+                    oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1); // E5
+                    oscillator.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.2); // G5
+                    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                    gainNode.gain.exponentialDecayTo = 0.01;
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.4);
+                    break;
+                case 'wrong':
+                    // Soft low tone
+                    oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
+                    oscillator.type = 'sine';
+                    gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.2);
+                    break;
+                case 'pop':
+                    // Pop sound
+                    oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
+                    oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.1);
+                    oscillator.type = 'sine';
+                    gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.1);
+                    break;
+                case 'levelup':
+                    // Victory fanfare
+                    const notes = [523.25, 659.25, 783.99, 1046.50];
+                    notes.forEach((freq, i) => {
+                        const osc = audioContext.createOscillator();
+                        const gain = audioContext.createGain();
+                        osc.connect(gain);
+                        gain.connect(audioContext.destination);
+                        osc.frequency.setValueAtTime(freq, audioContext.currentTime + i * 0.15);
+                        gain.gain.setValueAtTime(0.2, audioContext.currentTime + i * 0.15);
+                        gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + i * 0.15 + 0.3);
+                        osc.start(audioContext.currentTime + i * 0.15);
+                        osc.stop(audioContext.currentTime + i * 0.15 + 0.3);
+                    });
+                    break;
+                case 'gameover':
+                    // End game sound
+                    oscillator.frequency.setValueAtTime(600, audioContext.currentTime);
+                    oscillator.frequency.setValueAtTime(500, audioContext.currentTime + 0.2);
+                    oscillator.frequency.setValueAtTime(400, audioContext.currentTime + 0.4);
+                    gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.6);
+                    break;
+            }
+        }
+
+        // Initialize game board
+        function createGameBoard() {
+            const board = document.getElementById('game-board');
+            board.innerHTML = '';
+
+            for (let i = 0; i < 9; i++) {
+                const hole = document.createElement('div');
+                hole.className = 'hole';
+                hole.innerHTML = `
+                    <div class="hole-back"></div>
+                    <div class="mole" id="mole-${i}" onclick="hitMole(${i})">
+                        <div class="mole-body">
+                            <div class="mole-face">
+                                <div class="mini-eyes">
+                                    <div class="mini-eye"></div>
+                                    <div class="mini-eye"></div>
+                                </div>
+                            </div>
+                            <span class="mole-letter" id="letter-${i}">a</span>
+                        </div>
+                    </div>
+                    <div class="hole-front"></div>
+                `;
+                board.appendChild(hole);
+            }
+        }
+
+        // Update level badges on start screen
+        function updateLevelBadges() {
+            const container = document.getElementById('level-badges');
+            container.innerHTML = LEVELS.map((level, i) => {
+                const isUnlocked = i < gameState.unlockedLevels;
+                const letters = level.letters.slice(0, 2).join('-') + '...' + level.letters.slice(-1);
+                return `<span class="level-badge ${isUnlocked ? '' : 'locked'}">${level.name}: ${letters}</span>`;
+            }).join('');
+        }
+
+        // Screen management
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function goToStart() {
+            stopGame();
+            updateLevelBadges();
+            showScreen('start-screen');
+        }
+
+        // Game functions
+        function startGame() {
+            initAudio();
+
+            gameState = {
+                ...gameState,
+                score: 0,
+                level: 0,
+                timeLeft: 60,
+                isPlaying: true,
+                moleSpeed: 2000,
+                activeMoles: new Set()
+            };
+
+            updateCurrentLetters();
+            createGameBoard();
+            updateDisplay();
+            showScreen('game-screen');
+
+            pickNewTarget();
+            startTimer();
+            startMoleLoop();
+        }
+
+        function stopGame() {
+            gameState.isPlaying = false;
+            clearInterval(gameState.timerInterval);
+            clearInterval(gameState.moleInterval);
+            gameState.activeMoles.forEach(id => {
+                const mole = document.getElementById(`mole-${id}`);
+                if (mole) mole.classList.remove('active');
+            });
+            gameState.activeMoles.clear();
+        }
+
+        function updateCurrentLetters() {
+            gameState.currentLetters = [];
+            for (let i = 0; i <= gameState.level && i < LEVELS.length; i++) {
+                gameState.currentLetters = [...gameState.currentLetters, ...LEVELS[i].letters];
+            }
+        }
+
+        function pickNewTarget() {
+            const available = gameState.currentLetters;
+            gameState.targetLetter = available[Math.floor(Math.random() * available.length)];
+            document.getElementById('target-letter').textContent = gameState.targetLetter;
+        }
+
+        function startTimer() {
+            gameState.timerInterval = setInterval(() => {
+                gameState.timeLeft--;
+                document.getElementById('timer').textContent = `⏱️ ${gameState.timeLeft}`;
+
+                if (gameState.timeLeft <= 0) {
+                    endGame();
+                }
+            }, 1000);
+        }
+
+        function startMoleLoop() {
+            spawnMole();
+
+            gameState.moleInterval = setInterval(() => {
+                if (gameState.isPlaying && gameState.activeMoles.size < 4) {
+                    spawnMole();
+                }
+            }, gameState.moleSpeed / 2);
+        }
+
+        function spawnMole() {
+            if (!gameState.isPlaying) return;
+
+            // Find available hole
+            const availableHoles = [];
+            for (let i = 0; i < 9; i++) {
+                if (!gameState.activeMoles.has(i)) {
+                    availableHoles.push(i);
+                }
+            }
+
+            if (availableHoles.length === 0) return;
+
+            const holeIndex = availableHoles[Math.floor(Math.random() * availableHoles.length)];
+            const mole = document.getElementById(`mole-${holeIndex}`);
+            const letterEl = document.getElementById(`letter-${holeIndex}`);
+
+            // Decide letter - 40% chance of showing correct letter
+            let letter;
+            if (Math.random() < 0.4) {
+                letter = gameState.targetLetter.toLowerCase();
+            } else {
+                const otherLetters = gameState.currentLetters.filter(l => l !== gameState.targetLetter);
+                letter = otherLetters[Math.floor(Math.random() * otherLetters.length)].toLowerCase();
+            }
+
+            letterEl.textContent = letter;
+            mole.dataset.letter = letter;
+            mole.classList.add('active');
+            mole.classList.remove('hit', 'wrong');
+            gameState.activeMoles.add(holeIndex);
+
+            playSound('pop');
+
+            // Auto-hide after time
+            setTimeout(() => {
+                if (gameState.activeMoles.has(holeIndex)) {
+                    mole.classList.remove('active');
+                    gameState.activeMoles.delete(holeIndex);
+                }
+            }, gameState.moleSpeed);
+        }
+
+        function hitMole(index) {
+            if (!gameState.isPlaying) return;
+
+            const mole = document.getElementById(`mole-${index}`);
+            if (!mole.classList.contains('active')) return;
+
+            const letter = mole.dataset.letter.toUpperCase();
+            const isCorrect = letter === gameState.targetLetter;
+
+            if (isCorrect) {
+                // Correct hit!
+                gameState.score += 10;
+                mole.classList.add('hit');
+                playSound('correct');
+                showFeedback(true);
+                createStars(event);
+
+                // Check for level up
+                checkLevelUp();
+
+                // Speed up slightly
+                gameState.moleSpeed = Math.max(800, gameState.moleSpeed - 30);
+
+                // Pick new target
+                setTimeout(() => {
+                    pickNewTarget();
+                }, 300);
+            } else {
+                // Wrong hit
+                mole.classList.add('wrong');
+                playSound('wrong');
+                showFeedback(false);
+                gameState.score = Math.max(0, gameState.score - 2);
+            }
+
+            updateDisplay();
+
+            // Hide mole
+            setTimeout(() => {
+                mole.classList.remove('active', 'hit', 'wrong');
+                gameState.activeMoles.delete(index);
+            }, 300);
+        }
+
+        function showFeedback(isCorrect) {
+            const feedback = document.createElement('div');
+            feedback.className = `feedback ${isCorrect ? 'correct' : 'wrong'}`;
+
+            if (isCorrect) {
+                feedback.textContent = ENCOURAGEMENTS.correct[Math.floor(Math.random() * ENCOURAGEMENTS.correct.length)];
+            } else {
+                feedback.textContent = ENCOURAGEMENTS.wrong[Math.floor(Math.random() * ENCOURAGEMENTS.wrong.length)];
+            }
+
+            document.body.appendChild(feedback);
+            setTimeout(() => feedback.remove(), 800);
+        }
+
+        function createStars(e) {
+            const container = document.getElementById('stars-container');
+            const stars = ['⭐', '🌟', '✨', '💫'];
+
+            for (let i = 0; i < 5; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.textContent = stars[Math.floor(Math.random() * stars.length)];
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 30 + 20}%`;
+                star.style.animationDelay = `${Math.random() * 0.3}s`;
+                container.appendChild(star);
+
+                setTimeout(() => star.remove(), 1000);
+            }
+        }
+
+        function checkLevelUp() {
+            const nextLevel = gameState.level + 1;
+            if (nextLevel < LEVELS.length && gameState.score >= LEVELS[nextLevel].minScore) {
+                gameState.level = nextLevel;
+                if (nextLevel >= gameState.unlockedLevels) {
+                    gameState.unlockedLevels = nextLevel + 1;
+                    localStorage.setItem('letterMoleUnlocked', gameState.unlockedLevels);
+                }
+
+                updateCurrentLetters();
+                showLevelUpModal(nextLevel);
+            }
+        }
+
+        function showLevelUpModal(level) {
+            gameState.isPlaying = false;
+            clearInterval(gameState.moleInterval);
+
+            document.getElementById('new-letters').textContent = LEVELS[level].letters.join(' ');
+            document.getElementById('level-modal').classList.add('active');
+
+            playSound('levelup');
+            createConfetti();
+        }
+
+        function closeLevelModal() {
+            document.getElementById('level-modal').classList.remove('active');
+            gameState.isPlaying = true;
+            updateDisplay();
+            startMoleLoop();
+        }
+
+        function createConfetti() {
+            const colors = ['#FF6B6B', '#4ECDC4', '#FFE66D', '#95E1D3', '#F38181'];
+
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = `${Math.random() * 100}%`;
+                confetti.style.top = '-10px';
+                confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animationDelay = `${Math.random() * 2}s`;
+                confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                document.body.appendChild(confetti);
+
+                setTimeout(() => confetti.remove(), 3000);
+            }
+        }
+
+        function updateDisplay() {
+            document.getElementById('score').textContent = gameState.score;
+            document.getElementById('level-indicator').textContent = LEVELS[gameState.level].name;
+        }
+
+        function endGame() {
+            stopGame();
+            playSound('gameover');
+
+            document.getElementById('final-score').textContent = gameState.score;
+
+            // Calculate stars
+            let stars = '';
+            let trophy = '🏆';
+            let title = 'Great Job!';
+            let encouragement = '';
+
+            if (gameState.score >= 150) {
+                stars = '⭐⭐⭐';
+                trophy = '🏆';
+                title = 'Amazing!';
+                encouragement = ENCOURAGEMENTS.end.high[Math.floor(Math.random() * ENCOURAGEMENTS.end.high.length)];
+            } else if (gameState.score >= 80) {
+                stars = '⭐⭐';
+                trophy = '🥈';
+                title = 'Great Job!';
+                encouragement = ENCOURAGEMENTS.end.medium[Math.floor(Math.random() * ENCOURAGEMENTS.end.medium.length)];
+            } else {
+                stars = '⭐';
+                trophy = '🎯';
+                title = 'Good Try!';
+                encouragement = ENCOURAGEMENTS.end.low[Math.floor(Math.random() * ENCOURAGEMENTS.end.low.length)];
+            }
+
+            document.getElementById('stars-earned').textContent = stars;
+            document.getElementById('trophy').textContent = trophy;
+            document.getElementById('end-title').textContent = title;
+            document.getElementById('encouragement').textContent = encouragement;
+
+            showScreen('end-screen');
+            createConfetti();
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            // Load saved progress
+            const savedLevel = localStorage.getItem('letterMoleUnlocked');
+            if (savedLevel) {
+                gameState.unlockedLevels = parseInt(savedLevel);
+            }
+
+            updateLevelBadges();
+            createGameBoard();
+        });
+
+        // Prevent double-tap zoom on mobile
+        document.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            e.target.click();
+        }, { passive: false });
+    </script>
+</body>
+</html>
