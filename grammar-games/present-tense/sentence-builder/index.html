@@ -449,47 +449,155 @@
     <div class="stars-container" id="stars-container"></div>
 
     <script>
-        // Sentences - words array and correct order
+        // Sentences - words array and correct order (100+ sentences)
         const SENTENCES = [
-            // Simple present with "be"
+            // Simple present with "be" - I am
             { words: ['I', 'am', 'happy', '.'], hint: '我很開心。' },
-            { words: ['She', 'is', 'a', 'teacher', '.'], hint: '她是老師。' },
-            { words: ['They', 'are', 'my', 'friends', '.'], hint: '他們是我的朋友。' },
-            { words: ['He', 'is', 'at', 'school', '.'], hint: '他在學校。' },
-            { words: ['We', 'are', 'students', '.'], hint: '我們是學生。' },
+            { words: ['I', 'am', 'hungry', '.'], hint: '我餓了。' },
+            { words: ['I', 'am', 'tired', '.'], hint: '我累了。' },
+            { words: ['I', 'am', 'a', 'student', '.'], hint: '我是學生。' },
+            { words: ['I', 'am', 'at', 'home', '.'], hint: '我在家。' },
+            { words: ['I', 'am', 'ready', '.'], hint: '我準備好了。' },
+            { words: ['I', 'am', 'seven', 'years', 'old', '.'], hint: '我七歲。' },
+            { words: ['I', 'am', 'from', 'Taiwan', '.'], hint: '我來自台灣。' },
 
-            // Simple present with action verbs
+            // Simple present with "be" - He/She/It is
+            { words: ['She', 'is', 'a', 'teacher', '.'], hint: '她是老師。' },
+            { words: ['He', 'is', 'at', 'school', '.'], hint: '他在學校。' },
+            { words: ['It', 'is', 'a', 'cat', '.'], hint: '牠是一隻貓。' },
+            { words: ['She', 'is', 'my', 'friend', '.'], hint: '她是我的朋友。' },
+            { words: ['He', 'is', 'tall', '.'], hint: '他很高。' },
+            { words: ['It', 'is', 'cold', 'today', '.'], hint: '今天很冷。' },
+            { words: ['She', 'is', 'nice', '.'], hint: '她很好。' },
+            { words: ['He', 'is', 'my', 'brother', '.'], hint: '他是我的兄弟。' },
+            { words: ['The', 'cat', 'is', 'cute', '.'], hint: '那隻貓很可愛。' },
+            { words: ['The', 'book', 'is', 'interesting', '.'], hint: '那本書很有趣。' },
+            { words: ['My', 'mom', 'is', 'at', 'home', '.'], hint: '我媽媽在家。' },
+            { words: ['My', 'dad', 'is', 'at', 'work', '.'], hint: '我爸爸在上班。' },
+
+            // Simple present with "be" - You/We/They are
+            { words: ['They', 'are', 'my', 'friends', '.'], hint: '他們是我的朋友。' },
+            { words: ['We', 'are', 'students', '.'], hint: '我們是學生。' },
+            { words: ['You', 'are', 'smart', '.'], hint: '你很聰明。' },
+            { words: ['They', 'are', 'happy', '.'], hint: '他們很開心。' },
+            { words: ['We', 'are', 'at', 'school', '.'], hint: '我們在學校。' },
+            { words: ['You', 'are', 'kind', '.'], hint: '你很善良。' },
+            { words: ['They', 'are', 'my', 'classmates', '.'], hint: '他們是我的同學。' },
+            { words: ['The', 'dogs', 'are', 'big', '.'], hint: '那些狗很大。' },
+            { words: ['The', 'apples', 'are', 'red', '.'], hint: '那些蘋果是紅色的。' },
+
+            // Simple present with action verbs - basic
             { words: ['I', 'like', 'apples', '.'], hint: '我喜歡蘋果。' },
             { words: ['She', 'plays', 'piano', '.'], hint: '她彈鋼琴。' },
             { words: ['He', 'eats', 'breakfast', '.'], hint: '他吃早餐。' },
             { words: ['They', 'read', 'books', '.'], hint: '他們讀書。' },
             { words: ['We', 'go', 'to', 'school', '.'], hint: '我們去學校。' },
+            { words: ['I', 'love', 'my', 'family', '.'], hint: '我愛我的家人。' },
+            { words: ['She', 'sings', 'songs', '.'], hint: '她唱歌。' },
+            { words: ['He', 'runs', 'fast', '.'], hint: '他跑得很快。' },
+            { words: ['They', 'play', 'soccer', '.'], hint: '他們踢足球。' },
+            { words: ['We', 'study', 'English', '.'], hint: '我們學英文。' },
+            { words: ['I', 'drink', 'water', '.'], hint: '我喝水。' },
+            { words: ['She', 'drinks', 'milk', '.'], hint: '她喝牛奶。' },
+            { words: ['He', 'likes', 'ice', 'cream', '.'], hint: '他喜歡冰淇淋。' },
+            { words: ['They', 'eat', 'lunch', '.'], hint: '他們吃午餐。' },
+            { words: ['We', 'walk', 'to', 'school', '.'], hint: '我們走路上學。' },
 
             // With time expressions
             { words: ['I', 'study', 'every', 'day', '.'], hint: '我每天讀書。' },
             { words: ['She', 'runs', 'in', 'the', 'morning', '.'], hint: '她早上跑步。' },
             { words: ['He', 'watches', 'TV', 'at', 'night', '.'], hint: '他晚上看電視。' },
+            { words: ['I', 'sleep', 'at', 'nine', '.'], hint: '我九點睡覺。' },
+            { words: ['She', 'wakes', 'up', 'early', '.'], hint: '她早起。' },
+            { words: ['He', 'eats', 'breakfast', 'at', 'seven', '.'], hint: '他七點吃早餐。' },
+            { words: ['They', 'play', 'after', 'school', '.'], hint: '他們放學後玩。' },
+            { words: ['We', 'read', 'before', 'bed', '.'], hint: '我們睡前閱讀。' },
 
-            // With objects
+            // With objects and places
             { words: ['I', 'have', 'a', 'cat', '.'], hint: '我有一隻貓。' },
             { words: ['She', 'has', 'long', 'hair', '.'], hint: '她有長頭髮。' },
             { words: ['They', 'have', 'three', 'dogs', '.'], hint: '他們有三隻狗。' },
+            { words: ['He', 'has', 'a', 'bike', '.'], hint: '他有一輛腳踏車。' },
+            { words: ['We', 'have', 'homework', '.'], hint: '我們有作業。' },
+            { words: ['I', 'live', 'in', 'Taiwan', '.'], hint: '我住在台灣。' },
+            { words: ['She', 'works', 'at', 'school', '.'], hint: '她在學校工作。' },
+            { words: ['He', 'plays', 'in', 'the', 'park', '.'], hint: '他在公園玩。' },
 
-            // Negative sentences
+            // Actions with objects
+            { words: ['I', 'read', 'comic', 'books', '.'], hint: '我讀漫畫書。' },
+            { words: ['She', 'writes', 'letters', '.'], hint: '她寫信。' },
+            { words: ['He', 'plays', 'video', 'games', '.'], hint: '他玩電動遊戲。' },
+            { words: ['They', 'watch', 'movies', '.'], hint: '他們看電影。' },
+            { words: ['We', 'sing', 'songs', '.'], hint: '我們唱歌。' },
+            { words: ['I', 'brush', 'my', 'teeth', '.'], hint: '我刷牙。' },
+            { words: ['She', 'washes', 'her', 'hands', '.'], hint: '她洗手。' },
+            { words: ['He', 'does', 'his', 'homework', '.'], hint: '他做作業。' },
+
+            // Negative sentences - do not
             { words: ['I', 'do', 'not', 'like', 'spiders', '.'], hint: '我不喜歡蜘蛛。' },
-            { words: ['She', 'does', 'not', 'eat', 'meat', '.'], hint: '她不吃肉。' },
             { words: ['They', 'do', 'not', 'have', 'homework', '.'], hint: '他們沒有作業。' },
+            { words: ['We', 'do', 'not', 'eat', 'meat', '.'], hint: '我們不吃肉。' },
+            { words: ['You', 'do', 'not', 'need', 'help', '.'], hint: '你不需要幫助。' },
+            { words: ['I', 'do', 'not', 'want', 'candy', '.'], hint: '我不想要糖果。' },
+            { words: ['They', 'do', 'not', 'play', 'tennis', '.'], hint: '他們不打網球。' },
 
-            // Questions (simple word order)
+            // Negative sentences - does not
+            { words: ['She', 'does', 'not', 'eat', 'meat', '.'], hint: '她不吃肉。' },
+            { words: ['He', 'does', 'not', 'like', 'cats', '.'], hint: '他不喜歡貓。' },
+            { words: ['It', 'does', 'not', 'rain', 'today', '.'], hint: '今天不下雨。' },
+            { words: ['She', 'does', 'not', 'drink', 'coffee', '.'], hint: '她不喝咖啡。' },
+            { words: ['He', 'does', 'not', 'have', 'a', 'pet', '.'], hint: '他沒有寵物。' },
+            { words: ['My', 'cat', 'does', 'not', 'like', 'water', '.'], hint: '我的貓不喜歡水。' },
+
+            // Yes/No Questions with Do
             { words: ['Do', 'you', 'like', 'ice', 'cream', '?'], hint: '你喜歡冰淇淋嗎？' },
+            { words: ['Do', 'they', 'play', 'basketball', '?'], hint: '他們打籃球嗎？' },
+            { words: ['Do', 'we', 'have', 'class', 'today', '?'], hint: '我們今天有課嗎？' },
+            { words: ['Do', 'you', 'want', 'some', 'water', '?'], hint: '你要喝水嗎？' },
+            { words: ['Do', 'they', 'live', 'here', '?'], hint: '他們住這裡嗎？' },
+            { words: ['Do', 'you', 'speak', 'English', '?'], hint: '你說英文嗎？' },
+
+            // Yes/No Questions with Does
             { words: ['Does', 'he', 'play', 'soccer', '?'], hint: '他踢足球嗎？' },
+            { words: ['Does', 'she', 'like', 'music', '?'], hint: '她喜歡音樂嗎？' },
+            { words: ['Does', 'it', 'rain', 'a', 'lot', '?'], hint: '常常下雨嗎？' },
+            { words: ['Does', 'he', 'have', 'a', 'sister', '?'], hint: '他有姐妹嗎？' },
+            { words: ['Does', 'she', 'eat', 'breakfast', '?'], hint: '她吃早餐嗎？' },
+            { words: ['Does', 'your', 'dog', 'like', 'cats', '?'], hint: '你的狗喜歡貓嗎？' },
+
+            // Questions with be verbs
             { words: ['Is', 'she', 'your', 'sister', '?'], hint: '她是你的姐妹嗎？' },
             { words: ['Are', 'they', 'happy', '?'], hint: '他們開心嗎？' },
+            { words: ['Is', 'he', 'a', 'teacher', '?'], hint: '他是老師嗎？' },
+            { words: ['Are', 'you', 'ready', '?'], hint: '你準備好了嗎？' },
+            { words: ['Is', 'it', 'cold', 'outside', '?'], hint: '外面冷嗎？' },
+            { words: ['Are', 'we', 'late', '?'], hint: '我們遲到了嗎？' },
+            { words: ['Is', 'this', 'your', 'book', '?'], hint: '這是你的書嗎？' },
+            { words: ['Are', 'those', 'your', 'shoes', '?'], hint: '那些是你的鞋子嗎？' },
 
-            // More complex sentences
+            // Family sentences
             { words: ['My', 'mom', 'cooks', 'dinner', '.'], hint: '我媽媽煮晚餐。' },
+            { words: ['My', 'dad', 'drives', 'a', 'car', '.'], hint: '我爸爸開車。' },
+            { words: ['My', 'sister', 'reads', 'books', '.'], hint: '我姐姐讀書。' },
+            { words: ['My', 'brother', 'plays', 'games', '.'], hint: '我哥哥玩遊戲。' },
+            { words: ['My', 'grandma', 'makes', 'cookies', '.'], hint: '我奶奶做餅乾。' },
+            { words: ['My', 'grandpa', 'tells', 'stories', '.'], hint: '我爺爺講故事。' },
+
+            // Animals
             { words: ['The', 'dog', 'runs', 'fast', '.'], hint: '那隻狗跑得很快。' },
-            { words: ['My', 'brother', 'likes', 'video', 'games', '.'], hint: '我哥哥喜歡電動遊戲。' },
+            { words: ['The', 'cat', 'sleeps', 'a', 'lot', '.'], hint: '那隻貓睡很多。' },
+            { words: ['The', 'bird', 'sings', 'in', 'the', 'tree', '.'], hint: '那隻鳥在樹上唱歌。' },
+            { words: ['The', 'fish', 'swims', 'in', 'water', '.'], hint: '魚在水裡游泳。' },
+            { words: ['My', 'dog', 'likes', 'to', 'play', '.'], hint: '我的狗喜歡玩。' },
+            { words: ['The', 'rabbit', 'eats', 'carrots', '.'], hint: '兔子吃紅蘿蔔。' },
+
+            // School sentences
+            { words: ['I', 'go', 'to', 'school', '.'], hint: '我去上學。' },
+            { words: ['The', 'teacher', 'teaches', 'English', '.'], hint: '老師教英文。' },
+            { words: ['We', 'study', 'math', 'in', 'class', '.'], hint: '我們在課堂上學數學。' },
+            { words: ['Students', 'read', 'in', 'the', 'library', '.'], hint: '學生們在圖書館讀書。' },
+            { words: ['I', 'like', 'my', 'teacher', '.'], hint: '我喜歡我的老師。' },
+            { words: ['We', 'have', 'lunch', 'at', 'school', '.'], hint: '我們在學校吃午餐。' },
         ];
 
         const ENCOURAGEMENTS = {
