@@ -402,182 +402,362 @@
     <div class="stars-container" id="stars-container"></div>
 
     <script>
-        // Questions - verb conjugation pairs (100+ questions)
-        const QUESTIONS = [
-            // play/plays
-            { subject: 'I', verb: 'play', baseVerb: 'play', options: ['play', 'plays'], sentence: 'I ___ soccer every day.', hint: '我每天踢足球' },
-            { subject: 'He', verb: 'plays', baseVerb: 'play', options: ['play', 'plays'], sentence: 'He ___ the guitar.', hint: '他彈吉他' },
-            { subject: 'They', verb: 'play', baseVerb: 'play', options: ['play', 'plays'], sentence: 'They ___ video games.', hint: '他們玩電動遊戲' },
-            { subject: 'She', verb: 'plays', baseVerb: 'play', options: ['play', 'plays'], sentence: 'She ___ with her friends.', hint: '她和朋友們玩' },
-            { subject: 'We', verb: 'play', baseVerb: 'play', options: ['play', 'plays'], sentence: 'We ___ basketball.', hint: '我們打籃球' },
-            { subject: 'My brother', verb: 'plays', baseVerb: 'play', options: ['play', 'plays'], sentence: 'My brother ___ piano.', hint: '我哥哥彈鋼琴' },
-            { subject: 'The children', verb: 'play', baseVerb: 'play', options: ['play', 'plays'], sentence: 'The children ___ in the park.', hint: '孩子們在公園玩' },
-            { subject: 'Tom', verb: 'plays', baseVerb: 'play', options: ['play', 'plays'], sentence: 'Tom ___ tennis.', hint: 'Tom打網球' },
+        // Generate 1000+ verb conjugation questions
+        const QUESTIONS = (function() {
+            const questions = [];
 
-            // like/likes
-            { subject: 'I', verb: 'like', baseVerb: 'like', options: ['like', 'likes'], sentence: 'I ___ ice cream.', hint: '我喜歡冰淇淋' },
-            { subject: 'She', verb: 'likes', baseVerb: 'like', options: ['like', 'likes'], sentence: 'She ___ to read books.', hint: '她喜歡看書' },
-            { subject: 'We', verb: 'like', baseVerb: 'like', options: ['like', 'likes'], sentence: 'We ___ our teacher.', hint: '我們喜歡我們的老師' },
-            { subject: 'My dog', verb: 'likes', baseVerb: 'like', options: ['like', 'likes'], sentence: 'My dog ___ to run.', hint: '我的狗喜歡跑步' },
-            { subject: 'They', verb: 'like', baseVerb: 'like', options: ['like', 'likes'], sentence: 'They ___ pizza.', hint: '他們喜歡披薩' },
-            { subject: 'He', verb: 'likes', baseVerb: 'like', options: ['like', 'likes'], sentence: 'He ___ chocolate.', hint: '他喜歡巧克力' },
-            { subject: 'You', verb: 'like', baseVerb: 'like', options: ['like', 'likes'], sentence: 'You ___ music.', hint: '你喜歡音樂' },
-            { subject: 'My cat', verb: 'likes', baseVerb: 'like', options: ['like', 'likes'], sentence: 'My cat ___ fish.', hint: '我的貓喜歡魚' },
-            { subject: 'The students', verb: 'like', baseVerb: 'like', options: ['like', 'likes'], sentence: 'The students ___ art class.', hint: '學生們喜歡美術課' },
-            { subject: 'Mary', verb: 'likes', baseVerb: 'like', options: ['like', 'likes'], sentence: 'Mary ___ to dance.', hint: 'Mary喜歡跳舞' },
+            // Subjects that use base form (I, you, we, they, plural nouns)
+            const pluralSubjects = [
+                ['I', '我'], ['You', '你'], ['We', '我們'], ['They', '他們'],
+                ['The children', '孩子們'], ['The students', '學生們'], ['The boys', '男孩們'],
+                ['The girls', '女孩們'], ['My friends', '我的朋友們'], ['My parents', '我的父母'],
+                ['The dogs', '狗狗們'], ['The cats', '貓咪們'], ['The birds', '鳥兒們'],
+                ['Tom and Jerry', 'Tom和Jerry'], ['My brothers', '我的兄弟們'],
+                ['My sisters', '我的姐妹們'], ['The teachers', '老師們'], ['The babies', '寶寶們']
+            ];
 
-            // eat/eats
-            { subject: 'He', verb: 'eats', baseVerb: 'eat', options: ['eat', 'eats'], sentence: 'He ___ breakfast at 7.', hint: '他7點吃早餐' },
-            { subject: 'You', verb: 'eat', baseVerb: 'eat', options: ['eat', 'eats'], sentence: 'You ___ too fast!', hint: '你吃太快了！' },
-            { subject: 'The cat', verb: 'eats', baseVerb: 'eat', options: ['eat', 'eats'], sentence: 'The cat ___ fish.', hint: '貓吃魚' },
-            { subject: 'I', verb: 'eat', baseVerb: 'eat', options: ['eat', 'eats'], sentence: 'I ___ lunch at school.', hint: '我在學校吃午餐' },
-            { subject: 'She', verb: 'eats', baseVerb: 'eat', options: ['eat', 'eats'], sentence: 'She ___ vegetables.', hint: '她吃蔬菜' },
-            { subject: 'We', verb: 'eat', baseVerb: 'eat', options: ['eat', 'eats'], sentence: 'We ___ dinner together.', hint: '我們一起吃晚餐' },
-            { subject: 'The dog', verb: 'eats', baseVerb: 'eat', options: ['eat', 'eats'], sentence: 'The dog ___ meat.', hint: '狗吃肉' },
-            { subject: 'They', verb: 'eat', baseVerb: 'eat', options: ['eat', 'eats'], sentence: 'They ___ rice every day.', hint: '他們每天吃飯' },
+            // Subjects that use -s/-es form (he, she, it, singular nouns)
+            const singularSubjects = [
+                ['He', '他'], ['She', '她'], ['It', '它'],
+                ['My mom', '我媽媽'], ['My dad', '我爸爸'], ['My brother', '我哥哥'],
+                ['My sister', '我姐姐'], ['The boy', '那個男孩'], ['The girl', '那個女孩'],
+                ['The dog', '那隻狗'], ['The cat', '那隻貓'], ['The bird', '那隻鳥'],
+                ['Tom', 'Tom'], ['Mary', 'Mary'], ['Amy', 'Amy'], ['John', 'John'],
+                ['The teacher', '老師'], ['The baby', '寶寶'], ['My friend', '我的朋友'],
+                ['The student', '那個學生'], ['Grandma', '奶奶'], ['Grandpa', '爺爺'],
+                ['My uncle', '我叔叔'], ['My aunt', '我阿姨'], ['The child', '那個孩子']
+            ];
 
-            // go/goes
-            { subject: 'She', verb: 'goes', baseVerb: 'go', options: ['go', 'goes'], sentence: 'She ___ to school by bus.', hint: '她搭公車上學' },
-            { subject: 'We', verb: 'go', baseVerb: 'go', options: ['go', 'goes'], sentence: 'We ___ to the park.', hint: '我們去公園' },
-            { subject: 'My dad', verb: 'goes', baseVerb: 'go', options: ['go', 'goes'], sentence: 'My dad ___ to work.', hint: '我爸爸去上班' },
-            { subject: 'I', verb: 'go', baseVerb: 'go', options: ['go', 'goes'], sentence: 'I ___ to bed at 9.', hint: '我9點上床睡覺' },
-            { subject: 'He', verb: 'goes', baseVerb: 'go', options: ['go', 'goes'], sentence: 'He ___ swimming.', hint: '他去游泳' },
-            { subject: 'They', verb: 'go', baseVerb: 'go', options: ['go', 'goes'], sentence: 'They ___ shopping.', hint: '他們去購物' },
-            { subject: 'The teacher', verb: 'goes', baseVerb: 'go', options: ['go', 'goes'], sentence: 'The teacher ___ home at 5.', hint: '老師5點回家' },
-            { subject: 'You', verb: 'go', baseVerb: 'go', options: ['go', 'goes'], sentence: 'You ___ to the library.', hint: '你去圖書館' },
+            // Regular verbs (base form adds -s)
+            const regularVerbs = [
+                // [base, -s form, object/complement, Chinese hint]
+                ['play', 'plays', 'soccer', '踢足球'],
+                ['play', 'plays', 'basketball', '打籃球'],
+                ['play', 'plays', 'tennis', '打網球'],
+                ['play', 'plays', 'the piano', '彈鋼琴'],
+                ['play', 'plays', 'the guitar', '彈吉他'],
+                ['play', 'plays', 'video games', '玩電動'],
+                ['play', 'plays', 'with toys', '玩玩具'],
+                ['play', 'plays', 'in the park', '在公園玩'],
+                ['like', 'likes', 'ice cream', '喜歡冰淇淋'],
+                ['like', 'likes', 'chocolate', '喜歡巧克力'],
+                ['like', 'likes', 'pizza', '喜歡披薩'],
+                ['like', 'likes', 'to read', '喜歡閱讀'],
+                ['like', 'likes', 'music', '喜歡音樂'],
+                ['like', 'likes', 'to dance', '喜歡跳舞'],
+                ['like', 'likes', 'animals', '喜歡動物'],
+                ['like', 'likes', 'fruit', '喜歡水果'],
+                ['eat', 'eats', 'breakfast', '吃早餐'],
+                ['eat', 'eats', 'lunch', '吃午餐'],
+                ['eat', 'eats', 'dinner', '吃晚餐'],
+                ['eat', 'eats', 'rice', '吃米飯'],
+                ['eat', 'eats', 'vegetables', '吃蔬菜'],
+                ['eat', 'eats', 'fruit', '吃水果'],
+                ['eat', 'eats', 'noodles', '吃麵'],
+                ['eat', 'eats', 'fish', '吃魚'],
+                ['drink', 'drinks', 'water', '喝水'],
+                ['drink', 'drinks', 'milk', '喝牛奶'],
+                ['drink', 'drinks', 'juice', '喝果汁'],
+                ['drink', 'drinks', 'tea', '喝茶'],
+                ['walk', 'walks', 'to school', '走路上學'],
+                ['walk', 'walks', 'in the park', '在公園散步'],
+                ['walk', 'walks', 'slowly', '走得慢'],
+                ['walk', 'walks', 'home', '走回家'],
+                ['run', 'runs', 'fast', '跑得快'],
+                ['run', 'runs', 'every day', '每天跑步'],
+                ['run', 'runs', 'in the morning', '早上跑步'],
+                ['run', 'runs', 'to school', '跑去學校'],
+                ['jump', 'jumps', 'high', '跳得高'],
+                ['jump', 'jumps', 'over the fence', '跳過籬笆'],
+                ['jump', 'jumps', 'for joy', '開心地跳'],
+                ['swim', 'swims', 'in the pool', '在泳池游泳'],
+                ['swim', 'swims', 'every week', '每週游泳'],
+                ['swim', 'swims', 'fast', '游得快'],
+                ['read', 'reads', 'books', '看書'],
+                ['read', 'reads', 'stories', '讀故事'],
+                ['read', 'reads', 'comics', '看漫畫'],
+                ['read', 'reads', 'every day', '每天閱讀'],
+                ['write', 'writes', 'letters', '寫信'],
+                ['write', 'writes', 'stories', '寫故事'],
+                ['write', 'writes', 'in a diary', '寫日記'],
+                ['write', 'writes', 'neatly', '寫得整齊'],
+                ['draw', 'draws', 'pictures', '畫圖'],
+                ['draw', 'draws', 'animals', '畫動物'],
+                ['draw', 'draws', 'flowers', '畫花'],
+                ['sing', 'sings', 'songs', '唱歌'],
+                ['sing', 'sings', 'beautifully', '唱得好聽'],
+                ['sing', 'sings', 'in the shower', '洗澡時唱歌'],
+                ['cook', 'cooks', 'dinner', '做晚餐'],
+                ['cook', 'cooks', 'breakfast', '做早餐'],
+                ['cook', 'cooks', 'for the family', '為家人做飯'],
+                ['sleep', 'sleeps', 'early', '早睡'],
+                ['sleep', 'sleeps', 'late', '晚睡'],
+                ['sleep', 'sleeps', 'eight hours', '睡八小時'],
+                ['work', 'works', 'hard', '努力工作'],
+                ['work', 'works', 'every day', '每天工作'],
+                ['work', 'works', 'at home', '在家工作'],
+                ['help', 'helps', 'Mom', '幫助媽媽'],
+                ['help', 'helps', 'Dad', '幫助爸爸'],
+                ['help', 'helps', 'friends', '幫助朋友'],
+                ['clean', 'cleans', 'the room', '打掃房間'],
+                ['clean', 'cleans', 'the house', '打掃房子'],
+                ['open', 'opens', 'the door', '開門'],
+                ['open', 'opens', 'the window', '開窗'],
+                ['close', 'closes', 'the door', '關門'],
+                ['close', 'closes', 'the book', '合上書'],
+                ['look', 'looks', 'at the sky', '看天空'],
+                ['look', 'looks', 'happy', '看起來開心'],
+                ['listen', 'listens', 'to music', '聽音樂'],
+                ['listen', 'listens', 'to the teacher', '聽老師說'],
+                ['talk', 'talks', 'to friends', '和朋友聊天'],
+                ['talk', 'talks', 'a lot', '說很多話'],
+                ['wait', 'waits', 'for the bus', '等公車'],
+                ['wait', 'waits', 'patiently', '耐心等待'],
+                ['start', 'starts', 'early', '早開始'],
+                ['start', 'starts', 'school', '開學'],
+                ['need', 'needs', 'help', '需要幫助'],
+                ['need', 'needs', 'water', '需要水'],
+                ['want', 'wants', 'ice cream', '想要冰淇淋'],
+                ['want', 'wants', 'to play', '想玩'],
+                ['love', 'loves', 'animals', '愛動物'],
+                ['love', 'loves', 'to read', '愛閱讀'],
+                ['love', 'loves', 'music', '愛音樂']
+            ];
 
-            // have/has
-            { subject: 'I', verb: 'have', baseVerb: 'have', options: ['have', 'has'], sentence: 'I ___ a new bike.', hint: '我有一輛新腳踏車' },
-            { subject: 'He', verb: 'has', baseVerb: 'have', options: ['have', 'has'], sentence: 'He ___ two brothers.', hint: '他有兩個兄弟' },
-            { subject: 'They', verb: 'have', baseVerb: 'have', options: ['have', 'has'], sentence: 'They ___ a big house.', hint: '他們有一棟大房子' },
-            { subject: 'The girl', verb: 'has', baseVerb: 'have', options: ['have', 'has'], sentence: 'The girl ___ long hair.', hint: '那個女孩有長頭髮' },
-            { subject: 'We', verb: 'have', baseVerb: 'have', options: ['have', 'has'], sentence: 'We ___ three dogs.', hint: '我們有三隻狗' },
-            { subject: 'She', verb: 'has', baseVerb: 'have', options: ['have', 'has'], sentence: 'She ___ a pretty dress.', hint: '她有一件漂亮的裙子' },
-            { subject: 'You', verb: 'have', baseVerb: 'have', options: ['have', 'has'], sentence: 'You ___ many friends.', hint: '你有很多朋友' },
-            { subject: 'My teacher', verb: 'has', baseVerb: 'have', options: ['have', 'has'], sentence: 'My teacher ___ a new car.', hint: '我的老師有一輛新車' },
-            { subject: 'The bird', verb: 'has', baseVerb: 'have', options: ['have', 'has'], sentence: 'The bird ___ colorful feathers.', hint: '那隻鳥有彩色的羽毛' },
-            { subject: 'My parents', verb: 'have', baseVerb: 'have', options: ['have', 'has'], sentence: 'My parents ___ a garden.', hint: '我的父母有一個花園' },
+            // Verbs ending in -es (go, do, watch, wash, teach, etc.)
+            const esVerbs = [
+                ['go', 'goes', 'to school', '去上學'],
+                ['go', 'goes', 'to the park', '去公園'],
+                ['go', 'goes', 'home', '回家'],
+                ['go', 'goes', 'shopping', '去購物'],
+                ['go', 'goes', 'swimming', '去游泳'],
+                ['go', 'goes', 'to bed early', '早睡'],
+                ['do', 'does', 'homework', '做作業'],
+                ['do', 'does', 'the dishes', '洗碗'],
+                ['do', 'does', 'exercise', '做運動'],
+                ['do', 'does', 'chores', '做家事'],
+                ['watch', 'watches', 'TV', '看電視'],
+                ['watch', 'watches', 'movies', '看電影'],
+                ['watch', 'watches', 'cartoons', '看卡通'],
+                ['watch', 'watches', 'videos', '看影片'],
+                ['wash', 'washes', 'hands', '洗手'],
+                ['wash', 'washes', 'the car', '洗車'],
+                ['wash', 'washes', 'clothes', '洗衣服'],
+                ['wash', 'washes', 'dishes', '洗碗'],
+                ['teach', 'teaches', 'English', '教英文'],
+                ['teach', 'teaches', 'math', '教數學'],
+                ['teach', 'teaches', 'music', '教音樂'],
+                ['brush', 'brushes', 'teeth', '刷牙'],
+                ['brush', 'brushes', 'hair', '梳頭'],
+                ['catch', 'catches', 'the ball', '接球'],
+                ['catch', 'catches', 'fish', '抓魚'],
+                ['fix', 'fixes', 'the bike', '修腳踏車'],
+                ['fix', 'fixes', 'toys', '修玩具'],
+                ['mix', 'mixes', 'colors', '混合顏色'],
+                ['pass', 'passes', 'the ball', '傳球'],
+                ['pass', 'passes', 'the test', '通過考試'],
+                ['miss', 'misses', 'the bus', '錯過公車'],
+                ['miss', 'misses', 'school', '想念學校'],
+                ['kiss', 'kisses', 'Mom', '親媽媽'],
+                ['push', 'pushes', 'the door', '推門'],
+                ['finish', 'finishes', 'homework', '完成作業'],
+                ['finish', 'finishes', 'dinner', '吃完晚餐']
+            ];
 
-            // do/does
-            { subject: 'I', verb: 'do', baseVerb: 'do', options: ['do', 'does'], sentence: 'I ___ my homework.', hint: '我做作業' },
-            { subject: 'She', verb: 'does', baseVerb: 'do', options: ['do', 'does'], sentence: 'She ___ the dishes.', hint: '她洗碗' },
-            { subject: 'We', verb: 'do', baseVerb: 'do', options: ['do', 'does'], sentence: 'We ___ exercise.', hint: '我們做運動' },
-            { subject: 'My mom', verb: 'does', baseVerb: 'do', options: ['do', 'does'], sentence: 'My mom ___ the laundry.', hint: '我媽媽洗衣服' },
-            { subject: 'He', verb: 'does', baseVerb: 'do', options: ['do', 'does'], sentence: 'He ___ his best.', hint: '他盡力了' },
-            { subject: 'They', verb: 'do', baseVerb: 'do', options: ['do', 'does'], sentence: 'They ___ their chores.', hint: '他們做家事' },
-            { subject: 'You', verb: 'do', baseVerb: 'do', options: ['do', 'does'], sentence: 'You ___ a good job.', hint: '你做得很好' },
-            { subject: 'The student', verb: 'does', baseVerb: 'do', options: ['do', 'does'], sentence: 'The student ___ well in class.', hint: '那個學生在課堂上表現很好' },
+            // Verbs ending in -ies (study, fly, cry, try, carry)
+            const yToIesVerbs = [
+                ['study', 'studies', 'English', '學英文'],
+                ['study', 'studies', 'math', '學數學'],
+                ['study', 'studies', 'hard', '努力學習'],
+                ['study', 'studies', 'every day', '每天學習'],
+                ['fly', 'flies', 'high', '飛得高'],
+                ['fly', 'flies', 'in the sky', '在天空飛'],
+                ['cry', 'cries', 'loudly', '大聲哭'],
+                ['cry', 'cries', 'sometimes', '有時哭'],
+                ['try', 'tries', 'hard', '努力嘗試'],
+                ['try', 'tries', 'again', '再試一次'],
+                ['carry', 'carries', 'books', '拿書'],
+                ['carry', 'carries', 'a bag', '背書包'],
+                ['hurry', 'hurries', 'to school', '趕去學校'],
+                ['hurry', 'hurries', 'home', '趕回家'],
+                ['worry', 'worries', 'too much', '擔心太多'],
+                ['copy', 'copies', 'notes', '抄筆記'],
+                ['dry', 'dries', 'the dishes', '擦乾碗']
+            ];
 
-            // watch/watches
-            { subject: 'He', verb: 'watches', baseVerb: 'watch', options: ['watch', 'watches'], sentence: 'He ___ TV at night.', hint: '他晚上看電視' },
-            { subject: 'They', verb: 'watch', baseVerb: 'watch', options: ['watch', 'watches'], sentence: 'They ___ movies.', hint: '他們看電影' },
-            { subject: 'I', verb: 'watch', baseVerb: 'watch', options: ['watch', 'watches'], sentence: 'I ___ cartoons.', hint: '我看卡通' },
-            { subject: 'She', verb: 'watches', baseVerb: 'watch', options: ['watch', 'watches'], sentence: 'She ___ the news.', hint: '她看新聞' },
-            { subject: 'We', verb: 'watch', baseVerb: 'watch', options: ['watch', 'watches'], sentence: 'We ___ sports games.', hint: '我們看體育比賽' },
-            { subject: 'My grandpa', verb: 'watches', baseVerb: 'watch', options: ['watch', 'watches'], sentence: 'My grandpa ___ TV every day.', hint: '我爺爺每天看電視' },
+            // Irregular verb: have/has
+            const haveVerbs = [
+                ['have', 'has', 'a dog', '有一隻狗'],
+                ['have', 'has', 'a cat', '有一隻貓'],
+                ['have', 'has', 'a bike', '有一輛腳踏車'],
+                ['have', 'has', 'many friends', '有很多朋友'],
+                ['have', 'has', 'two brothers', '有兩個兄弟'],
+                ['have', 'has', 'a sister', '有一個姐妹'],
+                ['have', 'has', 'a big house', '有一棟大房子'],
+                ['have', 'has', 'long hair', '有長頭髮'],
+                ['have', 'has', 'blue eyes', '有藍眼睛'],
+                ['have', 'has', 'a new toy', '有新玩具'],
+                ['have', 'has', 'breakfast', '吃早餐'],
+                ['have', 'has', 'lunch', '吃午餐'],
+                ['have', 'has', 'fun', '玩得開心'],
+                ['have', 'has', 'a good time', '玩得愉快'],
+                ['have', 'has', 'homework', '有作業']
+            ];
 
-            // study/studies
-            { subject: 'She', verb: 'studies', baseVerb: 'study', options: ['study', 'studies'], sentence: 'She ___ English every day.', hint: '她每天學英文' },
-            { subject: 'We', verb: 'study', baseVerb: 'study', options: ['study', 'studies'], sentence: 'We ___ math together.', hint: '我們一起學數學' },
-            { subject: 'I', verb: 'study', baseVerb: 'study', options: ['study', 'studies'], sentence: 'I ___ hard for tests.', hint: '我努力準備考試' },
-            { subject: 'He', verb: 'studies', baseVerb: 'study', options: ['study', 'studies'], sentence: 'He ___ science.', hint: '他學科學' },
-            { subject: 'They', verb: 'study', baseVerb: 'study', options: ['study', 'studies'], sentence: 'They ___ at the library.', hint: '他們在圖書館讀書' },
-            { subject: 'The girl', verb: 'studies', baseVerb: 'study', options: ['study', 'studies'], sentence: 'The girl ___ Chinese.', hint: '那個女孩學中文' },
+            // Dance-type verbs (ending in -e, just add -s)
+            const eEndingVerbs = [
+                ['dance', 'dances', 'well', '跳舞跳得好'],
+                ['dance', 'dances', 'at parties', '在派對跳舞'],
+                ['dance', 'dances', 'every day', '每天跳舞'],
+                ['ride', 'rides', 'a bike', '騎腳踏車'],
+                ['ride', 'rides', 'a horse', '騎馬'],
+                ['drive', 'drives', 'a car', '開車'],
+                ['drive', 'drives', 'to work', '開車上班'],
+                ['make', 'makes', 'breakfast', '做早餐'],
+                ['make', 'makes', 'the bed', '整理床鋪'],
+                ['make', 'makes', 'friends', '交朋友'],
+                ['take', 'takes', 'a shower', '洗澡'],
+                ['take', 'takes', 'photos', '拍照'],
+                ['take', 'takes', 'the bus', '搭公車'],
+                ['give', 'gives', 'gifts', '送禮物'],
+                ['give', 'gives', 'help', '給予幫助'],
+                ['come', 'comes', 'home early', '早回家'],
+                ['come', 'comes', 'to school', '來學校'],
+                ['smile', 'smiles', 'a lot', '常笑'],
+                ['smile', 'smiles', 'happily', '開心地笑'],
+                ['use', 'uses', 'a computer', '用電腦'],
+                ['use', 'uses', 'a phone', '用手機'],
+                ['move', 'moves', 'slowly', '慢慢移動'],
+                ['move', 'moves', 'fast', '快速移動'],
+                ['live', 'lives', 'in Taiwan', '住在台灣'],
+                ['live', 'lives', 'with family', '和家人住']
+            ];
 
-            // read/reads
-            { subject: 'My sister', verb: 'reads', baseVerb: 'read', options: ['read', 'reads'], sentence: 'My sister ___ stories.', hint: '我姐姐讀故事' },
-            { subject: 'They', verb: 'read', baseVerb: 'read', options: ['read', 'reads'], sentence: 'They ___ in the library.', hint: '他們在圖書館讀書' },
-            { subject: 'I', verb: 'read', baseVerb: 'read', options: ['read', 'reads'], sentence: 'I ___ comic books.', hint: '我讀漫畫書' },
-            { subject: 'He', verb: 'reads', baseVerb: 'read', options: ['read', 'reads'], sentence: 'He ___ the newspaper.', hint: '他讀報紙' },
-            { subject: 'We', verb: 'read', baseVerb: 'read', options: ['read', 'reads'], sentence: 'We ___ together.', hint: '我們一起閱讀' },
-            { subject: 'She', verb: 'reads', baseVerb: 'read', options: ['read', 'reads'], sentence: 'She ___ before bed.', hint: '她睡前閱讀' },
+            // Generate questions for regular verbs
+            regularVerbs.forEach(([base, thirdPerson, complement, hint]) => {
+                // Plural subjects use base form
+                pluralSubjects.forEach(([subj, subjHint]) => {
+                    questions.push({
+                        subject: subj,
+                        verb: base,
+                        baseVerb: base,
+                        options: [base, thirdPerson],
+                        sentence: `${subj} ___ ${complement}.`,
+                        hint: `${subjHint}${hint}`
+                    });
+                });
+                // Singular subjects use -s form
+                singularSubjects.forEach(([subj, subjHint]) => {
+                    questions.push({
+                        subject: subj,
+                        verb: thirdPerson,
+                        baseVerb: base,
+                        options: [base, thirdPerson],
+                        sentence: `${subj} ___ ${complement}.`,
+                        hint: `${subjHint}${hint}`
+                    });
+                });
+            });
 
-            // run/runs
-            { subject: 'The boy', verb: 'runs', baseVerb: 'run', options: ['run', 'runs'], sentence: 'The boy ___ very fast.', hint: '那個男孩跑很快' },
-            { subject: 'We', verb: 'run', baseVerb: 'run', options: ['run', 'runs'], sentence: 'We ___ in the morning.', hint: '我們早上跑步' },
-            { subject: 'I', verb: 'run', baseVerb: 'run', options: ['run', 'runs'], sentence: 'I ___ to school.', hint: '我跑去學校' },
-            { subject: 'She', verb: 'runs', baseVerb: 'run', options: ['run', 'runs'], sentence: 'She ___ every day.', hint: '她每天跑步' },
-            { subject: 'They', verb: 'run', baseVerb: 'run', options: ['run', 'runs'], sentence: 'They ___ in the park.', hint: '他們在公園跑步' },
-            { subject: 'My dog', verb: 'runs', baseVerb: 'run', options: ['run', 'runs'], sentence: 'My dog ___ in the yard.', hint: '我的狗在院子裡跑' },
+            // Generate questions for -es verbs
+            esVerbs.forEach(([base, thirdPerson, complement, hint]) => {
+                pluralSubjects.forEach(([subj, subjHint]) => {
+                    questions.push({
+                        subject: subj,
+                        verb: base,
+                        baseVerb: base,
+                        options: [base, thirdPerson],
+                        sentence: `${subj} ___ ${complement}.`,
+                        hint: `${subjHint}${hint}`
+                    });
+                });
+                singularSubjects.forEach(([subj, subjHint]) => {
+                    questions.push({
+                        subject: subj,
+                        verb: thirdPerson,
+                        baseVerb: base,
+                        options: [base, thirdPerson],
+                        sentence: `${subj} ___ ${complement}.`,
+                        hint: `${subjHint}${hint}`
+                    });
+                });
+            });
 
-            // walk/walks
-            { subject: 'I', verb: 'walk', baseVerb: 'walk', options: ['walk', 'walks'], sentence: 'I ___ to school.', hint: '我走路上學' },
-            { subject: 'He', verb: 'walks', baseVerb: 'walk', options: ['walk', 'walks'], sentence: 'He ___ his dog.', hint: '他遛狗' },
-            { subject: 'We', verb: 'walk', baseVerb: 'walk', options: ['walk', 'walks'], sentence: 'We ___ in the park.', hint: '我們在公園散步' },
-            { subject: 'She', verb: 'walks', baseVerb: 'walk', options: ['walk', 'walks'], sentence: 'She ___ slowly.', hint: '她走得很慢' },
-            { subject: 'They', verb: 'walk', baseVerb: 'walk', options: ['walk', 'walks'], sentence: 'They ___ home together.', hint: '他們一起走回家' },
+            // Generate questions for y-to-ies verbs
+            yToIesVerbs.forEach(([base, thirdPerson, complement, hint]) => {
+                pluralSubjects.forEach(([subj, subjHint]) => {
+                    questions.push({
+                        subject: subj,
+                        verb: base,
+                        baseVerb: base,
+                        options: [base, thirdPerson],
+                        sentence: `${subj} ___ ${complement}.`,
+                        hint: `${subjHint}${hint}`
+                    });
+                });
+                singularSubjects.forEach(([subj, subjHint]) => {
+                    questions.push({
+                        subject: subj,
+                        verb: thirdPerson,
+                        baseVerb: base,
+                        options: [base, thirdPerson],
+                        sentence: `${subj} ___ ${complement}.`,
+                        hint: `${subjHint}${hint}`
+                    });
+                });
+            });
 
-            // sing/sings
-            { subject: 'She', verb: 'sings', baseVerb: 'sing', options: ['sing', 'sings'], sentence: 'She ___ beautifully.', hint: '她唱得很好聽' },
-            { subject: 'I', verb: 'sing', baseVerb: 'sing', options: ['sing', 'sings'], sentence: 'I ___ in the shower.', hint: '我在淋浴時唱歌' },
-            { subject: 'They', verb: 'sing', baseVerb: 'sing', options: ['sing', 'sings'], sentence: 'They ___ in the choir.', hint: '他們在合唱團唱歌' },
-            { subject: 'The bird', verb: 'sings', baseVerb: 'sing', options: ['sing', 'sings'], sentence: 'The bird ___ in the morning.', hint: '鳥兒在早上唱歌' },
+            // Generate questions for have/has
+            haveVerbs.forEach(([base, thirdPerson, complement, hint]) => {
+                pluralSubjects.forEach(([subj, subjHint]) => {
+                    questions.push({
+                        subject: subj,
+                        verb: base,
+                        baseVerb: base,
+                        options: [base, thirdPerson],
+                        sentence: `${subj} ___ ${complement}.`,
+                        hint: `${subjHint}${hint}`
+                    });
+                });
+                singularSubjects.forEach(([subj, subjHint]) => {
+                    questions.push({
+                        subject: subj,
+                        verb: thirdPerson,
+                        baseVerb: base,
+                        options: [base, thirdPerson],
+                        sentence: `${subj} ___ ${complement}.`,
+                        hint: `${subjHint}${hint}`
+                    });
+                });
+            });
 
-            // dance/dances
-            { subject: 'She', verb: 'dances', baseVerb: 'dance', options: ['dance', 'dances'], sentence: 'She ___ very well.', hint: '她跳舞跳得很好' },
-            { subject: 'We', verb: 'dance', baseVerb: 'dance', options: ['dance', 'dances'], sentence: 'We ___ at parties.', hint: '我們在派對上跳舞' },
-            { subject: 'He', verb: 'dances', baseVerb: 'dance', options: ['dance', 'dances'], sentence: 'He ___ with his sister.', hint: '他和姐姐一起跳舞' },
-            { subject: 'I', verb: 'dance', baseVerb: 'dance', options: ['dance', 'dances'], sentence: 'I ___ to music.', hint: '我隨著音樂跳舞' },
+            // Generate questions for -e ending verbs
+            eEndingVerbs.forEach(([base, thirdPerson, complement, hint]) => {
+                pluralSubjects.forEach(([subj, subjHint]) => {
+                    questions.push({
+                        subject: subj,
+                        verb: base,
+                        baseVerb: base,
+                        options: [base, thirdPerson],
+                        sentence: `${subj} ___ ${complement}.`,
+                        hint: `${subjHint}${hint}`
+                    });
+                });
+                singularSubjects.forEach(([subj, subjHint]) => {
+                    questions.push({
+                        subject: subj,
+                        verb: thirdPerson,
+                        baseVerb: base,
+                        options: [base, thirdPerson],
+                        sentence: `${subj} ___ ${complement}.`,
+                        hint: `${subjHint}${hint}`
+                    });
+                });
+            });
 
-            // cook/cooks
-            { subject: 'My mom', verb: 'cooks', baseVerb: 'cook', options: ['cook', 'cooks'], sentence: 'My mom ___ dinner.', hint: '我媽媽做晚餐' },
-            { subject: 'I', verb: 'cook', baseVerb: 'cook', options: ['cook', 'cooks'], sentence: 'I ___ eggs.', hint: '我煮蛋' },
-            { subject: 'He', verb: 'cooks', baseVerb: 'cook', options: ['cook', 'cooks'], sentence: 'He ___ for his family.', hint: '他為家人做飯' },
-            { subject: 'They', verb: 'cook', baseVerb: 'cook', options: ['cook', 'cooks'], sentence: 'They ___ together.', hint: '他們一起做飯' },
-
-            // sleep/sleeps
-            { subject: 'The baby', verb: 'sleeps', baseVerb: 'sleep', options: ['sleep', 'sleeps'], sentence: 'The baby ___ a lot.', hint: '寶寶睡很多' },
-            { subject: 'I', verb: 'sleep', baseVerb: 'sleep', options: ['sleep', 'sleeps'], sentence: 'I ___ eight hours.', hint: '我睡八小時' },
-            { subject: 'The cat', verb: 'sleeps', baseVerb: 'sleep', options: ['sleep', 'sleeps'], sentence: 'The cat ___ on the sofa.', hint: '貓在沙發上睡覺' },
-            { subject: 'We', verb: 'sleep', baseVerb: 'sleep', options: ['sleep', 'sleeps'], sentence: 'We ___ early.', hint: '我們早睡' },
-
-            // drink/drinks
-            { subject: 'I', verb: 'drink', baseVerb: 'drink', options: ['drink', 'drinks'], sentence: 'I ___ water.', hint: '我喝水' },
-            { subject: 'She', verb: 'drinks', baseVerb: 'drink', options: ['drink', 'drinks'], sentence: 'She ___ milk.', hint: '她喝牛奶' },
-            { subject: 'They', verb: 'drink', baseVerb: 'drink', options: ['drink', 'drinks'], sentence: 'They ___ juice.', hint: '他們喝果汁' },
-            { subject: 'He', verb: 'drinks', baseVerb: 'drink', options: ['drink', 'drinks'], sentence: 'He ___ tea.', hint: '他喝茶' },
-
-            // write/writes
-            { subject: 'I', verb: 'write', baseVerb: 'write', options: ['write', 'writes'], sentence: 'I ___ in my diary.', hint: '我寫日記' },
-            { subject: 'She', verb: 'writes', baseVerb: 'write', options: ['write', 'writes'], sentence: 'She ___ stories.', hint: '她寫故事' },
-            { subject: 'They', verb: 'write', baseVerb: 'write', options: ['write', 'writes'], sentence: 'They ___ letters.', hint: '他們寫信' },
-            { subject: 'He', verb: 'writes', baseVerb: 'write', options: ['write', 'writes'], sentence: 'He ___ neatly.', hint: '他寫得很整齊' },
-
-            // speak/speaks
-            { subject: 'She', verb: 'speaks', baseVerb: 'speak', options: ['speak', 'speaks'], sentence: 'She ___ English.', hint: '她說英文' },
-            { subject: 'I', verb: 'speak', baseVerb: 'speak', options: ['speak', 'speaks'], sentence: 'I ___ Chinese at home.', hint: '我在家說中文' },
-            { subject: 'He', verb: 'speaks', baseVerb: 'speak', options: ['speak', 'speaks'], sentence: 'He ___ loudly.', hint: '他說話很大聲' },
-            { subject: 'We', verb: 'speak', baseVerb: 'speak', options: ['speak', 'speaks'], sentence: 'We ___ to the teacher.', hint: '我們和老師說話' },
-
-            // teach/teaches
-            { subject: 'My teacher', verb: 'teaches', baseVerb: 'teach', options: ['teach', 'teaches'], sentence: 'My teacher ___ math.', hint: '我的老師教數學' },
-            { subject: 'They', verb: 'teach', baseVerb: 'teach', options: ['teach', 'teaches'], sentence: 'They ___ English.', hint: '他們教英文' },
-            { subject: 'She', verb: 'teaches', baseVerb: 'teach', options: ['teach', 'teaches'], sentence: 'She ___ us songs.', hint: '她教我們唱歌' },
-            { subject: 'My parents', verb: 'teach', baseVerb: 'teach', options: ['teach', 'teaches'], sentence: 'My parents ___ me to cook.', hint: '我父母教我做飯' },
-
-            // wash/washes
-            { subject: 'She', verb: 'washes', baseVerb: 'wash', options: ['wash', 'washes'], sentence: 'She ___ her hands.', hint: '她洗手' },
-            { subject: 'I', verb: 'wash', baseVerb: 'wash', options: ['wash', 'washes'], sentence: 'I ___ the dishes.', hint: '我洗碗' },
-            { subject: 'He', verb: 'washes', baseVerb: 'wash', options: ['wash', 'washes'], sentence: 'He ___ the car.', hint: '他洗車' },
-            { subject: 'We', verb: 'wash', baseVerb: 'wash', options: ['wash', 'washes'], sentence: 'We ___ our clothes.', hint: '我們洗衣服' },
-
-            // brush/brushes
-            { subject: 'I', verb: 'brush', baseVerb: 'brush', options: ['brush', 'brushes'], sentence: 'I ___ my teeth.', hint: '我刷牙' },
-            { subject: 'She', verb: 'brushes', baseVerb: 'brush', options: ['brush', 'brushes'], sentence: 'She ___ her hair.', hint: '她梳頭髮' },
-            { subject: 'He', verb: 'brushes', baseVerb: 'brush', options: ['brush', 'brushes'], sentence: 'He ___ his teeth twice a day.', hint: '他一天刷兩次牙' },
-
-            // help/helps
-            { subject: 'I', verb: 'help', baseVerb: 'help', options: ['help', 'helps'], sentence: 'I ___ my mom.', hint: '我幫助媽媽' },
-            { subject: 'She', verb: 'helps', baseVerb: 'help', options: ['help', 'helps'], sentence: 'She ___ her friends.', hint: '她幫助朋友' },
-            { subject: 'They', verb: 'help', baseVerb: 'help', options: ['help', 'helps'], sentence: 'They ___ each other.', hint: '他們互相幫助' },
-            { subject: 'He', verb: 'helps', baseVerb: 'help', options: ['help', 'helps'], sentence: 'He ___ with the work.', hint: '他幫忙工作' },
-
-            // love/loves
-            { subject: 'I', verb: 'love', baseVerb: 'love', options: ['love', 'loves'], sentence: 'I ___ my family.', hint: '我愛我的家人' },
-            { subject: 'She', verb: 'loves', baseVerb: 'love', options: ['love', 'loves'], sentence: 'She ___ her cat.', hint: '她愛她的貓' },
-            { subject: 'We', verb: 'love', baseVerb: 'love', options: ['love', 'loves'], sentence: 'We ___ our school.', hint: '我們愛我們的學校' },
-            { subject: 'He', verb: 'loves', baseVerb: 'love', options: ['love', 'loves'], sentence: 'He ___ to play.', hint: '他喜歡玩' },
-        ];
+            console.log('Total Fill the Gap questions:', questions.length);
+            return questions;
+        })();
 
         const ENCOURAGEMENTS = {
             correct: ['Awesome!', 'Perfect!', 'Great!', 'Super!', 'Yes!', '🌟', '🎉', 'Excellent!'],

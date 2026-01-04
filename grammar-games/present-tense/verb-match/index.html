@@ -419,133 +419,256 @@
     <div class="stars-container" id="stars-container"></div>
 
     <script>
-        // Questions database - subjects with correct verb (100+ questions)
-        const QUESTIONS = [
-            // I -> am (35 questions)
-            { subject: 'I', verb: 'am', sentence: 'I ___ happy.', hint: '我很開心' },
-            { subject: 'I', verb: 'am', sentence: 'I ___ a student.', hint: '我是學生' },
-            { subject: 'I', verb: 'am', sentence: 'I ___ hungry.', hint: '我餓了' },
-            { subject: 'I', verb: 'am', sentence: 'I ___ tired.', hint: '我累了' },
-            { subject: 'I', verb: 'am', sentence: 'I ___ ready.', hint: '我準備好了' },
-            { subject: 'I', verb: 'am', sentence: 'I ___ excited.', hint: '我很興奮' },
-            { subject: 'I', verb: 'am', sentence: 'I ___ sorry.', hint: '我很抱歉' },
-            { subject: 'I', verb: 'am', sentence: 'I ___ fine.', hint: '我很好' },
-            { subject: 'I', verb: 'am', sentence: 'I ___ a boy.', hint: '我是男孩' },
-            { subject: 'I', verb: 'am', sentence: 'I ___ a girl.', hint: '我是女孩' },
-            { subject: 'I', verb: 'am', sentence: 'I ___ seven years old.', hint: '我七歲' },
-            { subject: 'I', verb: 'am', sentence: 'I ___ at home.', hint: '我在家' },
-            { subject: 'I', verb: 'am', sentence: 'I ___ in the classroom.', hint: '我在教室裡' },
-            { subject: 'I', verb: 'am', sentence: 'I ___ from Taiwan.', hint: '我來自台灣' },
-            { subject: 'I', verb: 'am', sentence: 'I ___ your friend.', hint: '我是你的朋友' },
-            { subject: 'I', verb: 'am', sentence: 'I ___ cold.', hint: '我很冷' },
-            { subject: 'I', verb: 'am', sentence: 'I ___ hot.', hint: '我很熱' },
-            { subject: 'I', verb: 'am', sentence: 'I ___ thirsty.', hint: '我口渴' },
-            { subject: 'I', verb: 'am', sentence: 'I ___ sleepy.', hint: '我想睡' },
-            { subject: 'I', verb: 'am', sentence: 'I ___ busy.', hint: '我很忙' },
-            { subject: 'I', verb: 'am', sentence: 'I ___ free today.', hint: '我今天有空' },
-            { subject: 'I', verb: 'am', sentence: 'I ___ good at math.', hint: '我數學很好' },
-            { subject: 'I', verb: 'am', sentence: 'I ___ interested in music.', hint: '我對音樂有興趣' },
-            { subject: 'I', verb: 'am', sentence: 'I ___ scared.', hint: '我很害怕' },
-            { subject: 'I', verb: 'am', sentence: 'I ___ brave.', hint: '我很勇敢' },
-            { subject: 'I', verb: 'am', sentence: 'I ___ kind.', hint: '我很善良' },
-            { subject: 'I', verb: 'am', sentence: 'I ___ tall.', hint: '我很高' },
-            { subject: 'I', verb: 'am', sentence: 'I ___ short.', hint: '我很矮' },
-            { subject: 'I', verb: 'am', sentence: 'I ___ strong.', hint: '我很強壯' },
-            { subject: 'I', verb: 'am', sentence: 'I ___ healthy.', hint: '我很健康' },
-            { subject: 'I', verb: 'am', sentence: 'I ___ sick today.', hint: '我今天生病了' },
-            { subject: 'I', verb: 'am', sentence: 'I ___ in third grade.', hint: '我三年級' },
-            { subject: 'I', verb: 'am', sentence: 'I ___ the winner.', hint: '我是贏家' },
-            { subject: 'I', verb: 'am', sentence: 'I ___ late.', hint: '我遲到了' },
-            { subject: 'I', verb: 'am', sentence: 'I ___ early.', hint: '我很早到' },
+        // Question generator for 1000+ questions
+        const QUESTIONS = (function() {
+            const questions = [];
 
-            // He/She/It -> is (40 questions)
-            { subject: 'He', verb: 'is', sentence: 'He ___ my friend.', hint: '他是我的朋友' },
-            { subject: 'She', verb: 'is', sentence: 'She ___ a teacher.', hint: '她是老師' },
-            { subject: 'It', verb: 'is', sentence: 'It ___ a cat.', hint: '牠是一隻貓' },
-            { subject: 'He', verb: 'is', sentence: 'He ___ tall.', hint: '他很高' },
-            { subject: 'She', verb: 'is', sentence: 'She ___ nice.', hint: '她很好' },
-            { subject: 'It', verb: 'is', sentence: 'It ___ cold today.', hint: '今天很冷' },
-            { subject: 'The dog', verb: 'is', sentence: 'The dog ___ cute.', hint: '那隻狗很可愛' },
-            { subject: 'My mom', verb: 'is', sentence: 'My mom ___ at home.', hint: '我媽媽在家' },
-            { subject: 'The book', verb: 'is', sentence: 'The book ___ on the table.', hint: '書在桌上' },
-            { subject: 'He', verb: 'is', sentence: 'He ___ my brother.', hint: '他是我的兄弟' },
-            { subject: 'She', verb: 'is', sentence: 'She ___ my sister.', hint: '她是我的姐妹' },
-            { subject: 'It', verb: 'is', sentence: 'It ___ sunny.', hint: '天氣晴朗' },
-            { subject: 'It', verb: 'is', sentence: 'It ___ rainy.', hint: '下雨了' },
-            { subject: 'He', verb: 'is', sentence: 'He ___ hungry.', hint: '他餓了' },
-            { subject: 'She', verb: 'is', sentence: 'She ___ tired.', hint: '她累了' },
-            { subject: 'My dad', verb: 'is', sentence: 'My dad ___ at work.', hint: '我爸爸在上班' },
-            { subject: 'The cat', verb: 'is', sentence: 'The cat ___ sleeping.', hint: '那隻貓在睡覺' },
-            { subject: 'He', verb: 'is', sentence: 'He ___ a doctor.', hint: '他是醫生' },
-            { subject: 'She', verb: 'is', sentence: 'She ___ a nurse.', hint: '她是護士' },
-            { subject: 'It', verb: 'is', sentence: 'It ___ delicious.', hint: '很好吃' },
-            { subject: 'The apple', verb: 'is', sentence: 'The apple ___ red.', hint: '那個蘋果是紅色的' },
-            { subject: 'The sky', verb: 'is', sentence: 'The sky ___ blue.', hint: '天空是藍色的' },
-            { subject: 'He', verb: 'is', sentence: 'He ___ smart.', hint: '他很聰明' },
-            { subject: 'She', verb: 'is', sentence: 'She ___ beautiful.', hint: '她很漂亮' },
-            { subject: 'It', verb: 'is', sentence: 'It ___ big.', hint: '它很大' },
-            { subject: 'The baby', verb: 'is', sentence: 'The baby ___ crying.', hint: '寶寶在哭' },
-            { subject: 'My teacher', verb: 'is', sentence: 'My teacher ___ kind.', hint: '我的老師很善良' },
-            { subject: 'The ball', verb: 'is', sentence: 'The ball ___ round.', hint: '球是圓的' },
-            { subject: 'He', verb: 'is', sentence: 'He ___ playing soccer.', hint: '他在踢足球' },
-            { subject: 'She', verb: 'is', sentence: 'She ___ reading a book.', hint: '她在看書' },
-            { subject: 'It', verb: 'is', sentence: 'It ___ Monday today.', hint: '今天是星期一' },
-            { subject: 'The flower', verb: 'is', sentence: 'The flower ___ pretty.', hint: '那朵花很漂亮' },
-            { subject: 'My grandma', verb: 'is', sentence: 'My grandma ___ old.', hint: '我奶奶年紀大了' },
-            { subject: 'The bird', verb: 'is', sentence: 'The bird ___ singing.', hint: '那隻鳥在唱歌' },
-            { subject: 'He', verb: 'is', sentence: 'He ___ eight years old.', hint: '他八歲' },
-            { subject: 'She', verb: 'is', sentence: 'She ___ ten years old.', hint: '她十歲' },
-            { subject: 'It', verb: 'is', sentence: 'It ___ hot outside.', hint: '外面很熱' },
-            { subject: 'The movie', verb: 'is', sentence: 'The movie ___ funny.', hint: '那部電影很好笑' },
-            { subject: 'My room', verb: 'is', sentence: 'My room ___ clean.', hint: '我的房間很乾淨' },
-            { subject: 'The pizza', verb: 'is', sentence: 'The pizza ___ yummy.', hint: '那個披薩很好吃' },
-            { subject: 'He', verb: 'is', sentence: 'He ___ the best.', hint: '他是最棒的' },
-            { subject: 'She', verb: 'is', sentence: 'She ___ my best friend.', hint: '她是我最好的朋友' },
-            { subject: 'The test', verb: 'is', sentence: 'The test ___ easy.', hint: '考試很簡單' },
-            { subject: 'The game', verb: 'is', sentence: 'The game ___ fun.', hint: '那個遊戲很好玩' },
+            // I -> am templates
+            const iAmAdjectives = [
+                ['happy', '開心'], ['sad', '傷心'], ['hungry', '餓'], ['tired', '累'], ['ready', '準備好了'],
+                ['excited', '興奮'], ['sorry', '抱歉'], ['fine', '很好'], ['OK', '還好'], ['great', '很棒'],
+                ['cold', '冷'], ['hot', '熱'], ['thirsty', '口渴'], ['sleepy', '想睡'], ['busy', '忙'],
+                ['free', '有空'], ['scared', '害怕'], ['brave', '勇敢'], ['kind', '善良'], ['nice', '好'],
+                ['tall', '高'], ['short', '矮'], ['strong', '強壯'], ['healthy', '健康'], ['sick', '生病'],
+                ['late', '遲到'], ['early', '早到'], ['angry', '生氣'], ['worried', '擔心'], ['nervous', '緊張'],
+                ['proud', '驕傲'], ['shy', '害羞'], ['quiet', '安靜'], ['loud', '大聲'], ['funny', '好笑'],
+                ['serious', '認真'], ['careful', '小心'], ['careless', '粗心'], ['lazy', '懶惰'], ['hard-working', '勤勞'],
+                ['polite', '有禮貌'], ['rude', '沒禮貌'], ['friendly', '友善'], ['mean', '刻薄'], ['smart', '聰明'],
+                ['clever', '聰穎'], ['confused', '困惑'], ['sure', '確定'], ['lost', '迷路'], ['found', '找到了']
+            ];
 
-            // You/We/They -> are (40 questions)
-            { subject: 'You', verb: 'are', sentence: 'You ___ smart.', hint: '你很聰明' },
-            { subject: 'We', verb: 'are', sentence: 'We ___ friends.', hint: '我們是朋友' },
-            { subject: 'They', verb: 'are', sentence: 'They ___ happy.', hint: '他們很開心' },
-            { subject: 'You', verb: 'are', sentence: 'You ___ a good student.', hint: '你是好學生' },
-            { subject: 'We', verb: 'are', sentence: 'We ___ at school.', hint: '我們在學校' },
-            { subject: 'They', verb: 'are', sentence: 'They ___ my classmates.', hint: '他們是我的同學' },
-            { subject: 'The cats', verb: 'are', sentence: 'The cats ___ sleeping.', hint: '那些貓在睡覺' },
-            { subject: 'My friends', verb: 'are', sentence: 'My friends ___ nice.', hint: '我的朋友們很好' },
-            { subject: 'You', verb: 'are', sentence: 'You ___ kind.', hint: '你很善良' },
-            { subject: 'We', verb: 'are', sentence: 'We ___ hungry.', hint: '我們餓了' },
-            { subject: 'They', verb: 'are', sentence: 'They ___ tall.', hint: '他們很高' },
-            { subject: 'The dogs', verb: 'are', sentence: 'The dogs ___ playing.', hint: '那些狗在玩' },
-            { subject: 'You', verb: 'are', sentence: 'You ___ my best friend.', hint: '你是我最好的朋友' },
-            { subject: 'We', verb: 'are', sentence: 'We ___ in the park.', hint: '我們在公園' },
-            { subject: 'They', verb: 'are', sentence: 'They ___ from Japan.', hint: '他們來自日本' },
-            { subject: 'The birds', verb: 'are', sentence: 'The birds ___ flying.', hint: '那些鳥在飛' },
-            { subject: 'You', verb: 'are', sentence: 'You ___ brave.', hint: '你很勇敢' },
-            { subject: 'We', verb: 'are', sentence: 'We ___ ready.', hint: '我們準備好了' },
-            { subject: 'They', verb: 'are', sentence: 'They ___ busy.', hint: '他們很忙' },
-            { subject: 'The flowers', verb: 'are', sentence: 'The flowers ___ beautiful.', hint: '那些花很漂亮' },
-            { subject: 'You', verb: 'are', sentence: 'You ___ funny.', hint: '你很好笑' },
-            { subject: 'We', verb: 'are', sentence: 'We ___ brothers.', hint: '我們是兄弟' },
-            { subject: 'They', verb: 'are', sentence: 'They ___ sisters.', hint: '她們是姐妹' },
-            { subject: 'The apples', verb: 'are', sentence: 'The apples ___ sweet.', hint: '那些蘋果很甜' },
-            { subject: 'You', verb: 'are', sentence: 'You ___ the winner.', hint: '你是贏家' },
-            { subject: 'We', verb: 'are', sentence: 'We ___ a team.', hint: '我們是一個團隊' },
-            { subject: 'They', verb: 'are', sentence: 'They ___ running.', hint: '他們在跑步' },
-            { subject: 'The books', verb: 'are', sentence: 'The books ___ interesting.', hint: '那些書很有趣' },
-            { subject: 'You', verb: 'are', sentence: 'You ___ right.', hint: '你是對的' },
-            { subject: 'We', verb: 'are', sentence: 'We ___ excited.', hint: '我們很興奮' },
-            { subject: 'They', verb: 'are', sentence: 'They ___ tired.', hint: '他們累了' },
-            { subject: 'The children', verb: 'are', sentence: 'The children ___ playing.', hint: '那些孩子在玩' },
-            { subject: 'You', verb: 'are', sentence: 'You ___ awesome.', hint: '你很棒' },
-            { subject: 'We', verb: 'are', sentence: 'We ___ late.', hint: '我們遲到了' },
-            { subject: 'They', verb: 'are', sentence: 'They ___ early.', hint: '他們很早到' },
-            { subject: 'The students', verb: 'are', sentence: 'The students ___ quiet.', hint: '那些學生很安靜' },
-            { subject: 'You', verb: 'are', sentence: 'You ___ helpful.', hint: '你很樂於助人' },
-            { subject: 'We', verb: 'are', sentence: 'We ___ in class.', hint: '我們在上課' },
-            { subject: 'They', verb: 'are', sentence: 'They ___ watching TV.', hint: '他們在看電視' },
-            { subject: 'My parents', verb: 'are', sentence: 'My parents ___ working.', hint: '我的父母在工作' },
-        ];
+            const iAmNouns = [
+                ['a student', '學生'], ['a boy', '男孩'], ['a girl', '女孩'], ['a child', '小孩'], ['a kid', '小朋友'],
+                ['a singer', '歌手'], ['a dancer', '舞者'], ['a reader', '讀者'], ['a writer', '作家'], ['a player', '玩家'],
+                ['a swimmer', '游泳者'], ['a runner', '跑步者'], ['a helper', '幫手'], ['a learner', '學習者'], ['a winner', '贏家'],
+                ['a loser', '輸家'], ['a beginner', '初學者'], ['a friend', '朋友'], ['your friend', '你的朋友'], ['his friend', '他的朋友'],
+                ['her friend', '她的朋友'], ['their friend', '他們的朋友'], ['a good student', '好學生'], ['a hard worker', '努力的人'], ['a fast learner', '學很快的人']
+            ];
+
+            const iAmLocations = [
+                ['at home', '在家'], ['at school', '在學校'], ['in the classroom', '在教室'], ['in the library', '在圖書館'],
+                ['in the park', '在公園'], ['in the kitchen', '在廚房'], ['in my room', '在我房間'], ['in bed', '在床上'],
+                ['at the store', '在商店'], ['at the zoo', '在動物園'], ['at the beach', '在海灘'], ['in the car', '在車上'],
+                ['on the bus', '在公車上'], ['in the garden', '在花園'], ['at the playground', '在遊樂場']
+            ];
+
+            const iAmAges = [
+                ['six years old', '六歲'], ['seven years old', '七歲'], ['eight years old', '八歲'], ['nine years old', '九歲'],
+                ['ten years old', '十歲'], ['eleven years old', '十一歲'], ['twelve years old', '十二歲']
+            ];
+
+            const iAmOrigins = [
+                ['from Taiwan', '來自台灣'], ['from Taipei', '來自台北'], ['from Taichung', '來自台中'], ['from Kaohsiung', '來自高雄'],
+                ['from Tainan', '來自台南'], ['from America', '來自美國'], ['from Japan', '來自日本'], ['from Korea', '來自韓國']
+            ];
+
+            const iAmGrades = [
+                ['in first grade', '一年級'], ['in second grade', '二年級'], ['in third grade', '三年級'],
+                ['in fourth grade', '四年級'], ['in fifth grade', '五年級'], ['in sixth grade', '六年級']
+            ];
+
+            const iAmSkills = [
+                ['good at math', '數學很好'], ['good at English', '英文很好'], ['good at drawing', '畫畫很好'],
+                ['good at singing', '唱歌很好'], ['good at dancing', '跳舞很好'], ['good at sports', '運動很好'],
+                ['good at cooking', '做菜很好'], ['good at reading', '閱讀很好'], ['good at writing', '寫作很好'],
+                ['interested in music', '對音樂有興趣'], ['interested in art', '對美術有興趣'], ['interested in science', '對科學有興趣']
+            ];
+
+            // Generate I am questions
+            iAmAdjectives.forEach(([adj, hint]) => {
+                questions.push({ subject: 'I', verb: 'am', sentence: `I ___ ${adj}.`, hint: `我很${hint}` });
+            });
+            iAmNouns.forEach(([noun, hint]) => {
+                questions.push({ subject: 'I', verb: 'am', sentence: `I ___ ${noun}.`, hint: `我是${hint}` });
+            });
+            iAmLocations.forEach(([loc, hint]) => {
+                questions.push({ subject: 'I', verb: 'am', sentence: `I ___ ${loc}.`, hint: `我${hint}` });
+            });
+            iAmAges.forEach(([age, hint]) => {
+                questions.push({ subject: 'I', verb: 'am', sentence: `I ___ ${age}.`, hint: `我${hint}` });
+            });
+            iAmOrigins.forEach(([origin, hint]) => {
+                questions.push({ subject: 'I', verb: 'am', sentence: `I ___ ${origin}.`, hint: `我${hint}` });
+            });
+            iAmGrades.forEach(([grade, hint]) => {
+                questions.push({ subject: 'I', verb: 'am', sentence: `I ___ ${grade}.`, hint: `我${hint}` });
+            });
+            iAmSkills.forEach(([skill, hint]) => {
+                questions.push({ subject: 'I', verb: 'am', sentence: `I ___ ${skill}.`, hint: `我${hint}` });
+            });
+
+            // He/She/It -> is templates
+            const heSheSingularSubjects = [
+                ['He', '他'], ['She', '她'], ['It', '它'], ['My mom', '我媽媽'], ['My dad', '我爸爸'],
+                ['My brother', '我哥哥'], ['My sister', '我姐姐'], ['My friend', '我朋友'], ['My teacher', '我老師'],
+                ['My grandma', '我奶奶'], ['My grandpa', '我爺爺'], ['The boy', '那個男孩'], ['The girl', '那個女孩'],
+                ['The baby', '寶寶'], ['The child', '那個孩子'], ['The student', '那個學生'], ['The teacher', '那個老師'],
+                ['The doctor', '那個醫生'], ['The nurse', '那個護士'], ['The cook', '那個廚師'], ['Tom', 'Tom'],
+                ['Mary', 'Mary'], ['John', 'John'], ['Amy', 'Amy'], ['David', 'David'], ['Lisa', '麗莎'],
+                ['The dog', '那隻狗'], ['The cat', '那隻貓'], ['The bird', '那隻鳥'], ['The rabbit', '那隻兔子'],
+                ['The fish', '那條魚'], ['My dog', '我的狗'], ['My cat', '我的貓'], ['My pet', '我的寵物'],
+                ['The book', '那本書'], ['The apple', '那顆蘋果'], ['The flower', '那朵花'], ['The ball', '那顆球'],
+                ['The car', '那輛車'], ['The house', '那棟房子'], ['The movie', '那部電影'], ['The song', '那首歌'],
+                ['The game', '那個遊戲'], ['The test', '考試'], ['The food', '食物'], ['The weather', '天氣'],
+                ['This', '這個'], ['That', '那個'], ['The pizza', '披薩'], ['The cake', '蛋糕']
+            ];
+
+            const isAdjectives = [
+                ['happy', '開心'], ['sad', '傷心'], ['hungry', '餓'], ['tired', '累'], ['nice', '好'],
+                ['kind', '善良'], ['tall', '高'], ['short', '矮'], ['big', '大'], ['small', '小'],
+                ['cute', '可愛'], ['pretty', '漂亮'], ['beautiful', '美麗'], ['handsome', '帥'], ['smart', '聰明'],
+                ['clever', '聰穎'], ['funny', '好笑'], ['serious', '認真'], ['busy', '忙'], ['free', '有空'],
+                ['young', '年輕'], ['old', '老'], ['new', '新'], ['clean', '乾淨'], ['dirty', '髒'],
+                ['fast', '快'], ['slow', '慢'], ['loud', '大聲'], ['quiet', '安靜'], ['hot', '熱'],
+                ['cold', '冷'], ['warm', '溫暖'], ['cool', '涼爽'], ['sunny', '晴朗'], ['rainy', '下雨'],
+                ['windy', '有風'], ['cloudy', '多雲'], ['delicious', '好吃'], ['yummy', '美味'], ['sweet', '甜'],
+                ['sour', '酸'], ['spicy', '辣'], ['salty', '鹹'], ['fresh', '新鮮'], ['good', '好'],
+                ['bad', '壞'], ['great', '很棒'], ['wonderful', '很棒'], ['amazing', '驚人'], ['awesome', '超棒'],
+                ['terrible', '糟糕'], ['horrible', '可怕'], ['scary', '嚇人'], ['exciting', '令人興奮'], ['boring', '無聊'],
+                ['interesting', '有趣'], ['fun', '好玩'], ['easy', '簡單'], ['hard', '難'], ['difficult', '困難'],
+                ['important', '重要'], ['useful', '有用'], ['helpful', '有幫助'], ['friendly', '友善'], ['angry', '生氣'],
+                ['sick', '生病'], ['healthy', '健康'], ['strong', '強壯'], ['weak', '虛弱'], ['brave', '勇敢'],
+                ['scared', '害怕'], ['worried', '擔心'], ['nervous', '緊張'], ['calm', '冷靜'], ['excited', '興奮'],
+                ['surprised', '驚訝'], ['confused', '困惑'], ['proud', '驕傲'], ['shy', '害羞'], ['polite', '有禮貌'],
+                ['rude', '沒禮貌'], ['lazy', '懶惰'], ['hard-working', '勤勞'], ['patient', '有耐心'], ['careful', '小心'],
+                ['careless', '粗心'], ['lucky', '幸運'], ['unlucky', '不幸'], ['rich', '富有'], ['poor', '貧窮'],
+                ['famous', '有名'], ['popular', '受歡迎'], ['special', '特別'], ['different', '不同'], ['the same', '一樣'],
+                ['ready', '準備好'], ['late', '遲到'], ['early', '早到'], ['right', '對的'], ['wrong', '錯的']
+            ];
+
+            const isNouns = [
+                ['a teacher', '老師'], ['a doctor', '醫生'], ['a nurse', '護士'], ['a student', '學生'],
+                ['a cook', '廚師'], ['a singer', '歌手'], ['a dancer', '舞者'], ['a driver', '司機'],
+                ['my friend', '我的朋友'], ['my best friend', '我最好的朋友'], ['your friend', '你的朋友'],
+                ['a good student', '好學生'], ['a hard worker', '努力的人'], ['a fast learner', '學很快的人'],
+                ['the winner', '贏家'], ['the best', '最棒的'], ['the tallest', '最高的'], ['the youngest', '最年輕的']
+            ];
+
+            const isLocations = [
+                ['at home', '在家'], ['at school', '在學校'], ['at work', '在上班'], ['in the kitchen', '在廚房'],
+                ['in the bedroom', '在臥室'], ['in the bathroom', '在浴室'], ['in the living room', '在客廳'],
+                ['in the classroom', '在教室'], ['in the library', '在圖書館'], ['in the park', '在公園'],
+                ['at the store', '在商店'], ['at the hospital', '在醫院'], ['on the table', '在桌上'],
+                ['on the floor', '在地上'], ['on the bed', '在床上'], ['in the box', '在盒子裡'],
+                ['under the tree', '在樹下'], ['behind the door', '在門後'], ['next to me', '在我旁邊']
+            ];
+
+            const isActivities = [
+                ['sleeping', '在睡覺'], ['eating', '在吃東西'], ['drinking', '在喝東西'], ['reading', '在看書'],
+                ['writing', '在寫字'], ['drawing', '在畫畫'], ['singing', '在唱歌'], ['dancing', '在跳舞'],
+                ['playing', '在玩'], ['running', '在跑步'], ['walking', '在走路'], ['swimming', '在游泳'],
+                ['cooking', '在做菜'], ['cleaning', '在打掃'], ['studying', '在讀書'], ['working', '在工作'],
+                ['watching TV', '在看電視'], ['playing games', '在玩遊戲'], ['doing homework', '在做作業'],
+                ['taking a bath', '在洗澡'], ['brushing teeth', '在刷牙'], ['getting dressed', '在穿衣服'],
+                ['having breakfast', '在吃早餐'], ['having lunch', '在吃午餐'], ['having dinner', '在吃晚餐']
+            ];
+
+            // Generate He/She/It is questions
+            heSheSingularSubjects.forEach(([subj, subjHint]) => {
+                isAdjectives.slice(0, 30).forEach(([adj, hint]) => {
+                    questions.push({ subject: subj, verb: 'is', sentence: `${subj} ___ ${adj}.`, hint: `${subjHint}很${hint}` });
+                });
+            });
+
+            // Add more variety with locations and activities
+            heSheSingularSubjects.slice(0, 20).forEach(([subj, subjHint]) => {
+                isLocations.forEach(([loc, hint]) => {
+                    questions.push({ subject: subj, verb: 'is', sentence: `${subj} ___ ${loc}.`, hint: `${subjHint}${hint}` });
+                });
+            });
+
+            heSheSingularSubjects.slice(0, 15).forEach(([subj, subjHint]) => {
+                isActivities.forEach(([act, hint]) => {
+                    questions.push({ subject: subj, verb: 'is', sentence: `${subj} ___ ${act}.`, hint: `${subjHint}${hint}` });
+                });
+            });
+
+            heSheSingularSubjects.slice(0, 10).forEach(([subj, subjHint]) => {
+                isNouns.forEach(([noun, hint]) => {
+                    questions.push({ subject: subj, verb: 'is', sentence: `${subj} ___ ${noun}.`, hint: `${subjHint}是${hint}` });
+                });
+            });
+
+            // You/We/They -> are templates
+            const pluralSubjects = [
+                ['You', '你'], ['We', '我們'], ['They', '他們'], ['My friends', '我的朋友們'], ['My parents', '我的父母'],
+                ['The boys', '那些男孩'], ['The girls', '那些女孩'], ['The children', '那些孩子'], ['The students', '那些學生'],
+                ['The teachers', '那些老師'], ['The dogs', '那些狗'], ['The cats', '那些貓'], ['The birds', '那些鳥'],
+                ['Tom and Mary', 'Tom和Mary'], ['My brother and I', '我和我哥哥'], ['My sister and I', '我和我姐姐'],
+                ['You and I', '你和我'], ['The books', '那些書'], ['The apples', '那些蘋果'], ['The flowers', '那些花'],
+                ['These', '這些'], ['Those', '那些'], ['My classmates', '我的同學們'], ['The people', '那些人'],
+                ['The animals', '那些動物']
+            ];
+
+            const areAdjectives = [
+                ['happy', '開心'], ['sad', '傷心'], ['hungry', '餓'], ['tired', '累'], ['nice', '好'],
+                ['kind', '善良'], ['tall', '高'], ['short', '矮'], ['big', '大'], ['small', '小'],
+                ['cute', '可愛'], ['pretty', '漂亮'], ['smart', '聰明'], ['funny', '好笑'], ['busy', '忙'],
+                ['free', '有空'], ['young', '年輕'], ['old', '老'], ['new', '新'], ['clean', '乾淨'],
+                ['fast', '快'], ['slow', '慢'], ['loud', '大聲'], ['quiet', '安靜'], ['good', '好'],
+                ['great', '很棒'], ['amazing', '驚人'], ['awesome', '超棒'], ['interesting', '有趣'], ['fun', '好玩'],
+                ['easy', '簡單'], ['hard', '難'], ['important', '重要'], ['useful', '有用'], ['friendly', '友善'],
+                ['angry', '生氣'], ['sick', '生病'], ['healthy', '健康'], ['strong', '強壯'], ['brave', '勇敢'],
+                ['scared', '害怕'], ['worried', '擔心'], ['excited', '興奮'], ['surprised', '驚訝'], ['confused', '困惑'],
+                ['proud', '驕傲'], ['shy', '害羞'], ['polite', '有禮貌'], ['lazy', '懶惰'], ['hard-working', '勤勞'],
+                ['patient', '有耐心'], ['careful', '小心'], ['lucky', '幸運'], ['special', '特別'], ['different', '不同'],
+                ['ready', '準備好'], ['late', '遲到'], ['early', '早到'], ['right', '對的'], ['wrong', '錯的'],
+                ['hungry', '餓'], ['thirsty', '渴'], ['sleepy', '想睡'], ['cold', '冷'], ['hot', '熱'],
+                ['nervous', '緊張'], ['calm', '冷靜'], ['sweet', '可愛'], ['lovely', '可愛'], ['helpful', '樂於助人']
+            ];
+
+            const areNouns = [
+                ['friends', '朋友'], ['students', '學生'], ['teachers', '老師'], ['brothers', '兄弟'],
+                ['sisters', '姐妹'], ['classmates', '同學'], ['teammates', '隊友'], ['neighbors', '鄰居'],
+                ['good friends', '好朋友'], ['best friends', '最好的朋友'], ['good students', '好學生'],
+                ['hard workers', '努力的人'], ['fast learners', '學很快的人'], ['winners', '贏家']
+            ];
+
+            const areLocations = [
+                ['at home', '在家'], ['at school', '在學校'], ['in the park', '在公園'], ['in the classroom', '在教室'],
+                ['in the library', '在圖書館'], ['at the store', '在商店'], ['on the playground', '在操場'],
+                ['in the garden', '在花園'], ['at the beach', '在海灘'], ['at the zoo', '在動物園'],
+                ['in the kitchen', '在廚房'], ['in the living room', '在客廳'], ['outside', '在外面'],
+                ['inside', '在裡面'], ['here', '在這裡'], ['there', '在那裡'], ['everywhere', '到處']
+            ];
+
+            const areActivities = [
+                ['playing', '在玩'], ['running', '在跑'], ['walking', '在走'], ['swimming', '在游泳'],
+                ['dancing', '在跳舞'], ['singing', '在唱歌'], ['reading', '在看書'], ['studying', '在讀書'],
+                ['eating', '在吃東西'], ['drinking', '在喝東西'], ['sleeping', '在睡覺'], ['working', '在工作'],
+                ['watching TV', '在看電視'], ['playing games', '在玩遊戲'], ['doing homework', '在做作業'],
+                ['having fun', '在玩得開心'], ['waiting', '在等待'], ['talking', '在說話'], ['laughing', '在笑'],
+                ['crying', '在哭'], ['fighting', '在打架'], ['helping', '在幫忙'], ['cleaning', '在打掃']
+            ];
+
+            // Generate You/We/They are questions
+            pluralSubjects.forEach(([subj, subjHint]) => {
+                areAdjectives.forEach(([adj, hint]) => {
+                    questions.push({ subject: subj, verb: 'are', sentence: `${subj} ___ ${adj}.`, hint: `${subjHint}很${hint}` });
+                });
+            });
+
+            pluralSubjects.forEach(([subj, subjHint]) => {
+                areLocations.forEach(([loc, hint]) => {
+                    questions.push({ subject: subj, verb: 'are', sentence: `${subj} ___ ${loc}.`, hint: `${subjHint}${hint}` });
+                });
+            });
+
+            pluralSubjects.slice(0, 15).forEach(([subj, subjHint]) => {
+                areActivities.forEach(([act, hint]) => {
+                    questions.push({ subject: subj, verb: 'are', sentence: `${subj} ___ ${act}.`, hint: `${subjHint}${hint}` });
+                });
+            });
+
+            pluralSubjects.slice(0, 10).forEach(([subj, subjHint]) => {
+                areNouns.forEach(([noun, hint]) => {
+                    questions.push({ subject: subj, verb: 'are', sentence: `${subj} ___ ${noun}.`, hint: `${subjHint}是${hint}` });
+                });
+            });
+
+            console.log('Total Verb Match questions:', questions.length);
+            return questions;
+        })();
 
         const VERBS = ['am', 'is', 'are'];
         const ENCOURAGEMENTS = {

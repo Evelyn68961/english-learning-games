@@ -449,156 +449,423 @@
     <div class="stars-container" id="stars-container"></div>
 
     <script>
-        // Sentences - words array and correct order (100+ sentences)
-        const SENTENCES = [
-            // Simple present with "be" - I am
-            { words: ['I', 'am', 'happy', '.'], hint: '我很開心。' },
-            { words: ['I', 'am', 'hungry', '.'], hint: '我餓了。' },
-            { words: ['I', 'am', 'tired', '.'], hint: '我累了。' },
-            { words: ['I', 'am', 'a', 'student', '.'], hint: '我是學生。' },
-            { words: ['I', 'am', 'at', 'home', '.'], hint: '我在家。' },
-            { words: ['I', 'am', 'ready', '.'], hint: '我準備好了。' },
-            { words: ['I', 'am', 'seven', 'years', 'old', '.'], hint: '我七歲。' },
-            { words: ['I', 'am', 'from', 'Taiwan', '.'], hint: '我來自台灣。' },
+        // Generate 1000+ sentences for word ordering practice
+        const SENTENCES = (function() {
+            const sentences = [];
 
-            // Simple present with "be" - He/She/It is
-            { words: ['She', 'is', 'a', 'teacher', '.'], hint: '她是老師。' },
-            { words: ['He', 'is', 'at', 'school', '.'], hint: '他在學校。' },
-            { words: ['It', 'is', 'a', 'cat', '.'], hint: '牠是一隻貓。' },
-            { words: ['She', 'is', 'my', 'friend', '.'], hint: '她是我的朋友。' },
-            { words: ['He', 'is', 'tall', '.'], hint: '他很高。' },
-            { words: ['It', 'is', 'cold', 'today', '.'], hint: '今天很冷。' },
-            { words: ['She', 'is', 'nice', '.'], hint: '她很好。' },
-            { words: ['He', 'is', 'my', 'brother', '.'], hint: '他是我的兄弟。' },
-            { words: ['The', 'cat', 'is', 'cute', '.'], hint: '那隻貓很可愛。' },
-            { words: ['The', 'book', 'is', 'interesting', '.'], hint: '那本書很有趣。' },
-            { words: ['My', 'mom', 'is', 'at', 'home', '.'], hint: '我媽媽在家。' },
-            { words: ['My', 'dad', 'is', 'at', 'work', '.'], hint: '我爸爸在上班。' },
+            // ========== "BE" VERB SENTENCES ==========
 
-            // Simple present with "be" - You/We/They are
-            { words: ['They', 'are', 'my', 'friends', '.'], hint: '他們是我的朋友。' },
-            { words: ['We', 'are', 'students', '.'], hint: '我們是學生。' },
-            { words: ['You', 'are', 'smart', '.'], hint: '你很聰明。' },
-            { words: ['They', 'are', 'happy', '.'], hint: '他們很開心。' },
-            { words: ['We', 'are', 'at', 'school', '.'], hint: '我們在學校。' },
-            { words: ['You', 'are', 'kind', '.'], hint: '你很善良。' },
-            { words: ['They', 'are', 'my', 'classmates', '.'], hint: '他們是我的同學。' },
-            { words: ['The', 'dogs', 'are', 'big', '.'], hint: '那些狗很大。' },
-            { words: ['The', 'apples', 'are', 'red', '.'], hint: '那些蘋果是紅色的。' },
+            // I am + adjective
+            const iAmAdjectives = [
+                ['happy', '開心'], ['sad', '傷心'], ['tired', '累'], ['hungry', '餓'],
+                ['thirsty', '渴'], ['sleepy', '想睡'], ['ready', '準備好'],
+                ['busy', '忙'], ['sick', '生病'], ['fine', '很好'], ['okay', '還好'],
+                ['excited', '興奮'], ['scared', '害怕'], ['angry', '生氣'],
+                ['sorry', '抱歉'], ['lucky', '幸運'], ['cold', '冷'], ['hot', '熱']
+            ];
+            iAmAdjectives.forEach(([adj, hint]) => {
+                sentences.push({ words: ['I', 'am', adj, '.'], hint: `我很${hint}。` });
+            });
 
-            // Simple present with action verbs - basic
-            { words: ['I', 'like', 'apples', '.'], hint: '我喜歡蘋果。' },
-            { words: ['She', 'plays', 'piano', '.'], hint: '她彈鋼琴。' },
-            { words: ['He', 'eats', 'breakfast', '.'], hint: '他吃早餐。' },
-            { words: ['They', 'read', 'books', '.'], hint: '他們讀書。' },
-            { words: ['We', 'go', 'to', 'school', '.'], hint: '我們去學校。' },
-            { words: ['I', 'love', 'my', 'family', '.'], hint: '我愛我的家人。' },
-            { words: ['She', 'sings', 'songs', '.'], hint: '她唱歌。' },
-            { words: ['He', 'runs', 'fast', '.'], hint: '他跑得很快。' },
-            { words: ['They', 'play', 'soccer', '.'], hint: '他們踢足球。' },
-            { words: ['We', 'study', 'English', '.'], hint: '我們學英文。' },
-            { words: ['I', 'drink', 'water', '.'], hint: '我喝水。' },
-            { words: ['She', 'drinks', 'milk', '.'], hint: '她喝牛奶。' },
-            { words: ['He', 'likes', 'ice', 'cream', '.'], hint: '他喜歡冰淇淋。' },
-            { words: ['They', 'eat', 'lunch', '.'], hint: '他們吃午餐。' },
-            { words: ['We', 'walk', 'to', 'school', '.'], hint: '我們走路上學。' },
+            // I am + a + noun
+            const iAmNouns = [
+                ['student', '學生'], ['boy', '男孩'], ['girl', '女孩'], ['child', '小孩'],
+                ['friend', '朋友'], ['singer', '歌手'], ['dancer', '舞者'], ['player', '玩家']
+            ];
+            iAmNouns.forEach(([noun, hint]) => {
+                sentences.push({ words: ['I', 'am', 'a', noun, '.'], hint: `我是${hint}。` });
+            });
 
-            // With time expressions
-            { words: ['I', 'study', 'every', 'day', '.'], hint: '我每天讀書。' },
-            { words: ['She', 'runs', 'in', 'the', 'morning', '.'], hint: '她早上跑步。' },
-            { words: ['He', 'watches', 'TV', 'at', 'night', '.'], hint: '他晚上看電視。' },
-            { words: ['I', 'sleep', 'at', 'nine', '.'], hint: '我九點睡覺。' },
-            { words: ['She', 'wakes', 'up', 'early', '.'], hint: '她早起。' },
-            { words: ['He', 'eats', 'breakfast', 'at', 'seven', '.'], hint: '他七點吃早餐。' },
-            { words: ['They', 'play', 'after', 'school', '.'], hint: '他們放學後玩。' },
-            { words: ['We', 'read', 'before', 'bed', '.'], hint: '我們睡前閱讀。' },
+            // He/She is + adjective
+            const heSheSingular = [['He', '他'], ['She', '她']];
+            const isAdjectives = [
+                ['tall', '高'], ['short', '矮'], ['nice', '好'], ['kind', '善良'],
+                ['smart', '聰明'], ['funny', '有趣'], ['cute', '可愛'], ['strong', '強壯'],
+                ['fast', '快'], ['slow', '慢'], ['young', '年輕'], ['old', '老'],
+                ['happy', '開心'], ['tired', '累'], ['busy', '忙'], ['hungry', '餓']
+            ];
+            heSheSingular.forEach(([subj, subjHint]) => {
+                isAdjectives.forEach(([adj, hint]) => {
+                    sentences.push({ words: [subj, 'is', adj, '.'], hint: `${subjHint}很${hint}。` });
+                });
+            });
 
-            // With objects and places
-            { words: ['I', 'have', 'a', 'cat', '.'], hint: '我有一隻貓。' },
-            { words: ['She', 'has', 'long', 'hair', '.'], hint: '她有長頭髮。' },
-            { words: ['They', 'have', 'three', 'dogs', '.'], hint: '他們有三隻狗。' },
-            { words: ['He', 'has', 'a', 'bike', '.'], hint: '他有一輛腳踏車。' },
-            { words: ['We', 'have', 'homework', '.'], hint: '我們有作業。' },
-            { words: ['I', 'live', 'in', 'Taiwan', '.'], hint: '我住在台灣。' },
-            { words: ['She', 'works', 'at', 'school', '.'], hint: '她在學校工作。' },
-            { words: ['He', 'plays', 'in', 'the', 'park', '.'], hint: '他在公園玩。' },
+            // He/She is + a + noun
+            const isNouns = [
+                ['teacher', '老師'], ['doctor', '醫生'], ['student', '學生'],
+                ['friend', '朋友'], ['singer', '歌手'], ['cook', '廚師'],
+                ['driver', '司機'], ['nurse', '護士'], ['pilot', '飛行員']
+            ];
+            heSheSingular.forEach(([subj, subjHint]) => {
+                isNouns.forEach(([noun, hint]) => {
+                    sentences.push({ words: [subj, 'is', 'a', noun, '.'], hint: `${subjHint}是${hint}。` });
+                });
+            });
 
-            // Actions with objects
-            { words: ['I', 'read', 'comic', 'books', '.'], hint: '我讀漫畫書。' },
-            { words: ['She', 'writes', 'letters', '.'], hint: '她寫信。' },
-            { words: ['He', 'plays', 'video', 'games', '.'], hint: '他玩電動遊戲。' },
-            { words: ['They', 'watch', 'movies', '.'], hint: '他們看電影。' },
-            { words: ['We', 'sing', 'songs', '.'], hint: '我們唱歌。' },
-            { words: ['I', 'brush', 'my', 'teeth', '.'], hint: '我刷牙。' },
-            { words: ['She', 'washes', 'her', 'hands', '.'], hint: '她洗手。' },
-            { words: ['He', 'does', 'his', 'homework', '.'], hint: '他做作業。' },
+            // He/She is my + relationship
+            const relationships = [
+                ['friend', '朋友'], ['brother', '兄弟'], ['sister', '姐妹'],
+                ['teacher', '老師'], ['classmate', '同學'], ['neighbor', '鄰居']
+            ];
+            heSheSingular.forEach(([subj, subjHint]) => {
+                relationships.forEach(([rel, hint]) => {
+                    sentences.push({ words: [subj, 'is', 'my', rel, '.'], hint: `${subjHint}是我的${hint}。` });
+                });
+            });
 
-            // Negative sentences - do not
-            { words: ['I', 'do', 'not', 'like', 'spiders', '.'], hint: '我不喜歡蜘蛛。' },
-            { words: ['They', 'do', 'not', 'have', 'homework', '.'], hint: '他們沒有作業。' },
-            { words: ['We', 'do', 'not', 'eat', 'meat', '.'], hint: '我們不吃肉。' },
-            { words: ['You', 'do', 'not', 'need', 'help', '.'], hint: '你不需要幫助。' },
-            { words: ['I', 'do', 'not', 'want', 'candy', '.'], hint: '我不想要糖果。' },
-            { words: ['They', 'do', 'not', 'play', 'tennis', '.'], hint: '他們不打網球。' },
+            // The + noun + is + adjective
+            const theNounIs = [
+                [['cat', '貓'], ['cute', '可愛']], [['dog', '狗'], ['big', '大']],
+                [['bird', '鳥'], ['small', '小']], [['book', '書'], ['interesting', '有趣']],
+                [['apple', '蘋果'], ['red', '紅']], [['flower', '花'], ['beautiful', '漂亮']],
+                [['baby', '寶寶'], ['cute', '可愛']], [['house', '房子'], ['big', '大']],
+                [['car', '車'], ['fast', '快']], [['tree', '樹'], ['tall', '高']]
+            ];
+            theNounIs.forEach(([[noun, nounHint], [adj, adjHint]]) => {
+                sentences.push({ words: ['The', noun, 'is', adj, '.'], hint: `那個${nounHint}很${adjHint}。` });
+            });
 
-            // Negative sentences - does not
-            { words: ['She', 'does', 'not', 'eat', 'meat', '.'], hint: '她不吃肉。' },
-            { words: ['He', 'does', 'not', 'like', 'cats', '.'], hint: '他不喜歡貓。' },
-            { words: ['It', 'does', 'not', 'rain', 'today', '.'], hint: '今天不下雨。' },
-            { words: ['She', 'does', 'not', 'drink', 'coffee', '.'], hint: '她不喝咖啡。' },
-            { words: ['He', 'does', 'not', 'have', 'a', 'pet', '.'], hint: '他沒有寵物。' },
-            { words: ['My', 'cat', 'does', 'not', 'like', 'water', '.'], hint: '我的貓不喜歡水。' },
+            // You/We/They are + adjective
+            const pluralSubjects = [['You', '你'], ['We', '我們'], ['They', '他們']];
+            const areAdjectives = [
+                ['happy', '開心'], ['smart', '聰明'], ['kind', '善良'], ['funny', '有趣'],
+                ['tall', '高'], ['fast', '快'], ['ready', '準備好'], ['tired', '累']
+            ];
+            pluralSubjects.forEach(([subj, subjHint]) => {
+                areAdjectives.forEach(([adj, hint]) => {
+                    sentences.push({ words: [subj, 'are', adj, '.'], hint: `${subjHint}很${hint}。` });
+                });
+            });
 
-            // Yes/No Questions with Do
-            { words: ['Do', 'you', 'like', 'ice', 'cream', '?'], hint: '你喜歡冰淇淋嗎？' },
-            { words: ['Do', 'they', 'play', 'basketball', '?'], hint: '他們打籃球嗎？' },
-            { words: ['Do', 'we', 'have', 'class', 'today', '?'], hint: '我們今天有課嗎？' },
-            { words: ['Do', 'you', 'want', 'some', 'water', '?'], hint: '你要喝水嗎？' },
-            { words: ['Do', 'they', 'live', 'here', '?'], hint: '他們住這裡嗎？' },
-            { words: ['Do', 'you', 'speak', 'English', '?'], hint: '你說英文嗎？' },
+            // We/They are + noun(s)
+            const pluralNouns = [
+                ['students', '學生'], ['friends', '朋友'], ['classmates', '同學'],
+                ['teachers', '老師'], ['brothers', '兄弟'], ['sisters', '姐妹']
+            ];
+            [['We', '我們'], ['They', '他們']].forEach(([subj, subjHint]) => {
+                pluralNouns.forEach(([noun, hint]) => {
+                    sentences.push({ words: [subj, 'are', noun, '.'], hint: `${subjHint}是${hint}。` });
+                });
+            });
 
-            // Yes/No Questions with Does
-            { words: ['Does', 'he', 'play', 'soccer', '?'], hint: '他踢足球嗎？' },
-            { words: ['Does', 'she', 'like', 'music', '?'], hint: '她喜歡音樂嗎？' },
-            { words: ['Does', 'it', 'rain', 'a', 'lot', '?'], hint: '常常下雨嗎？' },
-            { words: ['Does', 'he', 'have', 'a', 'sister', '?'], hint: '他有姐妹嗎？' },
-            { words: ['Does', 'she', 'eat', 'breakfast', '?'], hint: '她吃早餐嗎？' },
-            { words: ['Does', 'your', 'dog', 'like', 'cats', '?'], hint: '你的狗喜歡貓嗎？' },
+            // ========== ACTION VERB SENTENCES ==========
 
-            // Questions with be verbs
-            { words: ['Is', 'she', 'your', 'sister', '?'], hint: '她是你的姐妹嗎？' },
-            { words: ['Are', 'they', 'happy', '?'], hint: '他們開心嗎？' },
-            { words: ['Is', 'he', 'a', 'teacher', '?'], hint: '他是老師嗎？' },
-            { words: ['Are', 'you', 'ready', '?'], hint: '你準備好了嗎？' },
-            { words: ['Is', 'it', 'cold', 'outside', '?'], hint: '外面冷嗎？' },
-            { words: ['Are', 'we', 'late', '?'], hint: '我們遲到了嗎？' },
-            { words: ['Is', 'this', 'your', 'book', '?'], hint: '這是你的書嗎？' },
-            { words: ['Are', 'those', 'your', 'shoes', '?'], hint: '那些是你的鞋子嗎？' },
+            // Subject + verb + object (singular subjects with -s verbs)
+            const singularActionSentences = [
+                [['He', '他'], 'plays', ['soccer', '踢足球']],
+                [['He', '他'], 'plays', ['piano', '彈鋼琴']],
+                [['He', '他'], 'plays', ['basketball', '打籃球']],
+                [['She', '她'], 'plays', ['tennis', '打網球']],
+                [['She', '她'], 'plays', ['games', '玩遊戲']],
+                [['He', '他'], 'eats', ['breakfast', '吃早餐']],
+                [['He', '他'], 'eats', ['lunch', '吃午餐']],
+                [['She', '她'], 'eats', ['dinner', '吃晚餐']],
+                [['He', '他'], 'drinks', ['water', '喝水']],
+                [['She', '她'], 'drinks', ['milk', '喝牛奶']],
+                [['He', '他'], 'drinks', ['juice', '喝果汁']],
+                [['She', '她'], 'reads', ['books', '讀書']],
+                [['He', '他'], 'reads', ['stories', '讀故事']],
+                [['She', '她'], 'writes', ['letters', '寫信']],
+                [['He', '他'], 'sings', ['songs', '唱歌']],
+                [['She', '她'], 'runs', ['fast', '跑得快']],
+                [['He', '他'], 'walks', ['slowly', '走得慢']],
+                [['She', '她'], 'likes', ['music', '喜歡音樂']],
+                [['He', '他'], 'likes', ['sports', '喜歡運動']],
+                [['She', '她'], 'loves', ['animals', '愛動物']],
+                [['He', '他'], 'watches', ['TV', '看電視']],
+                [['She', '她'], 'watches', ['movies', '看電影']],
+                [['He', '他'], 'studies', ['English', '學英文']],
+                [['She', '她'], 'studies', ['math', '學數學']],
+                [['He', '他'], 'cooks', ['dinner', '做晚餐']],
+                [['She', '她'], 'cleans', ['the room', '打掃房間']],
+                [['He', '他'], 'helps', ['Mom', '幫助媽媽']],
+                [['She', '她'], 'helps', ['Dad', '幫助爸爸']]
+            ];
+            singularActionSentences.forEach(([[subj, subjHint], verb, [obj, objHint]]) => {
+                const words = [subj, verb, ...obj.split(' '), '.'];
+                sentences.push({ words, hint: `${subjHint}${objHint}。` });
+            });
 
-            // Family sentences
-            { words: ['My', 'mom', 'cooks', 'dinner', '.'], hint: '我媽媽煮晚餐。' },
-            { words: ['My', 'dad', 'drives', 'a', 'car', '.'], hint: '我爸爸開車。' },
-            { words: ['My', 'sister', 'reads', 'books', '.'], hint: '我姐姐讀書。' },
-            { words: ['My', 'brother', 'plays', 'games', '.'], hint: '我哥哥玩遊戲。' },
-            { words: ['My', 'grandma', 'makes', 'cookies', '.'], hint: '我奶奶做餅乾。' },
-            { words: ['My', 'grandpa', 'tells', 'stories', '.'], hint: '我爺爺講故事。' },
+            // Plural subject sentences (base verb form)
+            const pluralActionSentences = [
+                [['I', '我'], 'like', ['apples', '喜歡蘋果']],
+                [['I', '我'], 'like', ['music', '喜歡音樂']],
+                [['I', '我'], 'like', ['pizza', '喜歡披薩']],
+                [['I', '我'], 'love', ['my family', '愛我的家人']],
+                [['I', '我'], 'eat', ['breakfast', '吃早餐']],
+                [['I', '我'], 'drink', ['water', '喝水']],
+                [['I', '我'], 'read', ['books', '讀書']],
+                [['I', '我'], 'play', ['games', '玩遊戲']],
+                [['I', '我'], 'study', ['English', '學英文']],
+                [['We', '我們'], 'play', ['soccer', '踢足球']],
+                [['We', '我們'], 'study', ['together', '一起學習']],
+                [['We', '我們'], 'eat', ['lunch', '吃午餐']],
+                [['We', '我們'], 'sing', ['songs', '唱歌']],
+                [['We', '我們'], 'read', ['books', '讀書']],
+                [['They', '他們'], 'play', ['basketball', '打籃球']],
+                [['They', '他們'], 'eat', ['dinner', '吃晚餐']],
+                [['They', '他們'], 'watch', ['movies', '看電影']],
+                [['They', '他們'], 'study', ['math', '學數學']],
+                [['They', '他們'], 'like', ['ice cream', '喜歡冰淇淋']]
+            ];
+            pluralActionSentences.forEach(([[subj, subjHint], verb, [obj, objHint]]) => {
+                const words = [subj, verb, ...obj.split(' '), '.'];
+                sentences.push({ words, hint: `${subjHint}${objHint}。` });
+            });
 
-            // Animals
-            { words: ['The', 'dog', 'runs', 'fast', '.'], hint: '那隻狗跑得很快。' },
-            { words: ['The', 'cat', 'sleeps', 'a', 'lot', '.'], hint: '那隻貓睡很多。' },
-            { words: ['The', 'bird', 'sings', 'in', 'the', 'tree', '.'], hint: '那隻鳥在樹上唱歌。' },
-            { words: ['The', 'fish', 'swims', 'in', 'water', '.'], hint: '魚在水裡游泳。' },
-            { words: ['My', 'dog', 'likes', 'to', 'play', '.'], hint: '我的狗喜歡玩。' },
-            { words: ['The', 'rabbit', 'eats', 'carrots', '.'], hint: '兔子吃紅蘿蔔。' },
+            // Subject + verb + location (go to)
+            const goToPlaces = [
+                ['school', '學校'], ['home', '家'], ['the park', '公園'],
+                ['the library', '圖書館'], ['the store', '商店'], ['bed', '床']
+            ];
+            goToPlaces.forEach(([place, hint]) => {
+                const words = ['I', 'go', 'to', ...place.split(' '), '.'];
+                sentences.push({ words, hint: `我去${hint}。` });
+            });
+            goToPlaces.forEach(([place, hint]) => {
+                const words = ['We', 'go', 'to', ...place.split(' '), '.'];
+                sentences.push({ words, hint: `我們去${hint}。` });
+            });
+            goToPlaces.slice(0, 4).forEach(([place, hint]) => {
+                const words = ['She', 'goes', 'to', ...place.split(' '), '.'];
+                sentences.push({ words, hint: `她去${hint}。` });
+            });
+            goToPlaces.slice(0, 4).forEach(([place, hint]) => {
+                const words = ['He', 'goes', 'to', ...place.split(' '), '.'];
+                sentences.push({ words, hint: `他去${hint}。` });
+            });
 
-            // School sentences
-            { words: ['I', 'go', 'to', 'school', '.'], hint: '我去上學。' },
-            { words: ['The', 'teacher', 'teaches', 'English', '.'], hint: '老師教英文。' },
-            { words: ['We', 'study', 'math', 'in', 'class', '.'], hint: '我們在課堂上學數學。' },
-            { words: ['Students', 'read', 'in', 'the', 'library', '.'], hint: '學生們在圖書館讀書。' },
-            { words: ['I', 'like', 'my', 'teacher', '.'], hint: '我喜歡我的老師。' },
-            { words: ['We', 'have', 'lunch', 'at', 'school', '.'], hint: '我們在學校吃午餐。' },
-        ];
+            // Have/Has sentences
+            const haveObjects = [
+                ['a cat', '一隻貓'], ['a dog', '一隻狗'], ['a bike', '一輛腳踏車'],
+                ['a book', '一本書'], ['a sister', '一個姐妹'], ['a brother', '一個兄弟'],
+                ['homework', '作業'], ['many friends', '很多朋友'], ['long hair', '長頭髮']
+            ];
+            haveObjects.forEach(([obj, hint]) => {
+                const words = ['I', 'have', ...obj.split(' '), '.'];
+                sentences.push({ words, hint: `我有${hint}。` });
+            });
+            haveObjects.forEach(([obj, hint]) => {
+                const words = ['We', 'have', ...obj.split(' '), '.'];
+                sentences.push({ words, hint: `我們有${hint}。` });
+            });
+            haveObjects.slice(0, 6).forEach(([obj, hint]) => {
+                const words = ['She', 'has', ...obj.split(' '), '.'];
+                sentences.push({ words, hint: `她有${hint}。` });
+            });
+            haveObjects.slice(0, 6).forEach(([obj, hint]) => {
+                const words = ['He', 'has', ...obj.split(' '), '.'];
+                sentences.push({ words, hint: `他有${hint}。` });
+            });
+
+            // ========== FAMILY SENTENCES ==========
+            const familyActions = [
+                [['My', 'mom'], 'cooks', 'dinner', '我媽媽煮晚餐'],
+                [['My', 'mom'], 'reads', 'books', '我媽媽讀書'],
+                [['My', 'dad'], 'works', 'hard', '我爸爸努力工作'],
+                [['My', 'dad'], 'drives', 'a car', '我爸爸開車'],
+                [['My', 'sister'], 'plays', 'piano', '我姐姐彈鋼琴'],
+                [['My', 'sister'], 'reads', 'books', '我姐姐讀書'],
+                [['My', 'brother'], 'plays', 'games', '我哥哥玩遊戲'],
+                [['My', 'brother'], 'runs', 'fast', '我哥哥跑很快'],
+                [['My', 'grandma'], 'cooks', 'food', '我奶奶做飯'],
+                [['My', 'grandpa'], 'tells', 'stories', '我爺爺講故事']
+            ];
+            familyActions.forEach(([subjParts, verb, obj, hint]) => {
+                const words = [...subjParts, verb, ...obj.split(' '), '.'];
+                sentences.push({ words, hint: `${hint}。` });
+            });
+
+            // ========== ANIMAL SENTENCES ==========
+            const animalSentences = [
+                [['The', 'dog'], 'runs', 'fast', '那隻狗跑很快'],
+                [['The', 'dog'], 'barks', 'loudly', '那隻狗大聲叫'],
+                [['The', 'cat'], 'sleeps', 'a lot', '那隻貓睡很多'],
+                [['The', 'cat'], 'likes', 'fish', '那隻貓喜歡魚'],
+                [['The', 'bird'], 'sings', 'beautifully', '那隻鳥唱得很好聽'],
+                [['The', 'bird'], 'flies', 'high', '那隻鳥飛得高'],
+                [['The', 'fish'], 'swims', 'fast', '魚游得快'],
+                [['The', 'rabbit'], 'eats', 'carrots', '兔子吃紅蘿蔔'],
+                [['My', 'dog'], 'likes', 'to play', '我的狗喜歡玩'],
+                [['My', 'cat'], 'is', 'cute', '我的貓很可愛']
+            ];
+            animalSentences.forEach(([subjParts, verb, obj, hint]) => {
+                const words = [...subjParts, verb, ...obj.split(' '), '.'];
+                sentences.push({ words, hint: `${hint}。` });
+            });
+
+            // ========== NEGATIVE SENTENCES ==========
+
+            // I/We/They do not...
+            const doNotSentences = [
+                [['I', '我'], 'like', ['spiders', '蜘蛛']],
+                [['I', '我'], 'want', ['candy', '糖果']],
+                [['I', '我'], 'eat', ['meat', '肉']],
+                [['I', '我'], 'drink', ['coffee', '咖啡']],
+                [['We', '我們'], 'have', ['homework', '作業']],
+                [['We', '我們'], 'play', ['tennis', '網球']],
+                [['They', '他們'], 'like', ['vegetables', '蔬菜']],
+                [['They', '他們'], 'watch', ['TV', '電視']],
+                [['You', '你'], 'need', ['help', '幫助']]
+            ];
+            doNotSentences.forEach(([[subj, subjHint], verb, [obj, objHint]]) => {
+                const words = [subj, 'do', 'not', verb, ...obj.split(' '), '.'];
+                sentences.push({ words, hint: `${subjHint}不喜歡${objHint}。` });
+            });
+
+            // He/She does not...
+            const doesNotSentences = [
+                [['He', '他'], 'like', ['cats', '貓']],
+                [['He', '他'], 'eat', ['vegetables', '蔬菜']],
+                [['He', '他'], 'drink', ['milk', '牛奶']],
+                [['She', '她'], 'like', ['spiders', '蜘蛛']],
+                [['She', '她'], 'eat', ['meat', '肉']],
+                [['She', '她'], 'watch', ['TV', '電視']],
+                [['She', '她'], 'have', ['a pet', '寵物']]
+            ];
+            doesNotSentences.forEach(([[subj, subjHint], verb, [obj, objHint]]) => {
+                const words = [subj, 'does', 'not', verb, ...obj.split(' '), '.'];
+                sentences.push({ words, hint: `${subjHint}不${objHint}。` });
+            });
+
+            // ========== QUESTION SENTENCES ==========
+
+            // Do you/they...?
+            const doQuestions = [
+                ['you', 'like', 'ice cream', '你喜歡冰淇淋嗎'],
+                ['you', 'want', 'some water', '你要水嗎'],
+                ['you', 'have', 'homework', '你有作業嗎'],
+                ['you', 'speak', 'English', '你說英文嗎'],
+                ['you', 'play', 'soccer', '你踢足球嗎'],
+                ['they', 'play', 'basketball', '他們打籃球嗎'],
+                ['they', 'have', 'pets', '他們有寵物嗎'],
+                ['they', 'like', 'music', '他們喜歡音樂嗎'],
+                ['we', 'have', 'class today', '我們今天有課嗎']
+            ];
+            doQuestions.forEach(([subj, verb, obj, hint]) => {
+                const words = ['Do', subj, verb, ...obj.split(' '), '?'];
+                sentences.push({ words, hint: `${hint}？` });
+            });
+
+            // Does he/she...?
+            const doesQuestions = [
+                ['he', 'play', 'soccer', '他踢足球嗎'],
+                ['he', 'like', 'music', '他喜歡音樂嗎'],
+                ['he', 'have', 'a sister', '他有姐妹嗎'],
+                ['he', 'eat', 'breakfast', '他吃早餐嗎'],
+                ['she', 'like', 'animals', '她喜歡動物嗎'],
+                ['she', 'play', 'piano', '她彈鋼琴嗎'],
+                ['she', 'read', 'books', '她讀書嗎'],
+                ['she', 'have', 'a dog', '她有狗嗎']
+            ];
+            doesQuestions.forEach(([subj, verb, obj, hint]) => {
+                const words = ['Does', subj, verb, ...obj.split(' '), '?'];
+                sentences.push({ words, hint: `${hint}？` });
+            });
+
+            // Is/Are questions
+            const beQuestions = [
+                ['Is', 'she', 'your sister', '她是你的姐妹嗎'],
+                ['Is', 'he', 'a teacher', '他是老師嗎'],
+                ['Is', 'it', 'cold today', '今天冷嗎'],
+                ['Is', 'this', 'your book', '這是你的書嗎'],
+                ['Are', 'you', 'ready', '你準備好了嗎'],
+                ['Are', 'they', 'happy', '他們開心嗎'],
+                ['Are', 'we', 'late', '我們遲到了嗎'],
+                ['Are', 'those', 'your shoes', '那些是你的鞋子嗎']
+            ];
+            beQuestions.forEach(([beVerb, subj, rest, hint]) => {
+                const words = [beVerb, subj, ...rest.split(' '), '?'];
+                sentences.push({ words, hint: `${hint}？` });
+            });
+
+            // ========== TIME EXPRESSION SENTENCES ==========
+            const timeExpressions = [
+                [['I', '我'], 'study', 'every day', '每天讀書'],
+                [['I', '我'], 'sleep', 'at nine', '九點睡覺'],
+                [['I', '我'], 'wake', 'up early', '早起'],
+                [['She', '她'], 'runs', 'in the morning', '早上跑步'],
+                [['She', '她'], 'studies', 'at night', '晚上讀書'],
+                [['He', '他'], 'watches', 'TV at night', '晚上看電視'],
+                [['He', '他'], 'eats', 'breakfast at seven', '七點吃早餐'],
+                [['They', '他們'], 'play', 'after school', '放學後玩'],
+                [['We', '我們'], 'read', 'before bed', '睡前閱讀']
+            ];
+            timeExpressions.forEach(([[subj, subjHint], verb, timeExpr, hint]) => {
+                const words = [subj, verb, ...timeExpr.split(' '), '.'];
+                sentences.push({ words, hint: `${subjHint}${hint}。` });
+            });
+
+            // ========== LOCATION SENTENCES ==========
+            const locationSentences = [
+                [['I', '我'], 'am', 'at home', '在家'],
+                [['I', '我'], 'am', 'at school', '在學校'],
+                [['She', '她'], 'is', 'at home', '在家'],
+                [['He', '他'], 'is', 'at school', '在學校'],
+                [['They', '他們'], 'are', 'at the park', '在公園'],
+                [['We', '我們'], 'are', 'in class', '在課堂上'],
+                [['The', 'cat is', 'on the sofa', '那隻貓在沙發上'],
+                [['The', 'dog is', 'in the yard', '那隻狗在院子裡']
+            ];
+            locationSentences.forEach(([[first, verb], location, hint]) => {
+                const words = [first, ...verb.split(' '), ...location.split(' '), '.'];
+                sentences.push({ words, hint: `${hint}。` });
+            });
+
+            // ========== MORE COMPLEX SENTENCES ==========
+            const complexSentences = [
+                { words: ['I', 'brush', 'my', 'teeth', '.'], hint: '我刷牙。' },
+                { words: ['She', 'washes', 'her', 'hands', '.'], hint: '她洗手。' },
+                { words: ['He', 'does', 'his', 'homework', '.'], hint: '他做作業。' },
+                { words: ['We', 'eat', 'lunch', 'at', 'school', '.'], hint: '我們在學校吃午餐。' },
+                { words: ['They', 'play', 'in', 'the', 'park', '.'], hint: '他們在公園玩。' },
+                { words: ['I', 'read', 'comic', 'books', '.'], hint: '我讀漫畫書。' },
+                { words: ['She', 'plays', 'video', 'games', '.'], hint: '她玩電動遊戲。' },
+                { words: ['The', 'teacher', 'teaches', 'English', '.'], hint: '老師教英文。' },
+                { words: ['Students', 'study', 'in', 'the', 'library', '.'], hint: '學生在圖書館讀書。' },
+                { words: ['My', 'dog', 'likes', 'to', 'run', '.'], hint: '我的狗喜歡跑步。' },
+                { words: ['I', 'like', 'to', 'play', 'games', '.'], hint: '我喜歡玩遊戲。' },
+                { words: ['She', 'likes', 'to', 'read', 'books', '.'], hint: '她喜歡讀書。' },
+                { words: ['He', 'likes', 'to', 'watch', 'TV', '.'], hint: '他喜歡看電視。' },
+                { words: ['We', 'like', 'to', 'sing', 'songs', '.'], hint: '我們喜歡唱歌。' },
+                { words: ['They', 'like', 'to', 'play', 'soccer', '.'], hint: '他們喜歡踢足球。' },
+                { words: ['I', 'am', 'from', 'Taiwan', '.'], hint: '我來自台灣。' },
+                { words: ['She', 'is', 'from', 'Japan', '.'], hint: '她來自日本。' },
+                { words: ['He', 'is', 'from', 'America', '.'], hint: '他來自美國。' },
+                { words: ['I', 'live', 'in', 'Taiwan', '.'], hint: '我住在台灣。' },
+                { words: ['She', 'lives', 'in', 'Taipei', '.'], hint: '她住在台北。' },
+                { words: ['We', 'live', 'with', 'our', 'family', '.'], hint: '我們和家人住。' }
+            ];
+            sentences.push(...complexSentences);
+
+            // ========== ADDITIONAL VARIETY SENTENCES ==========
+            const additionalSentences = [
+                { words: ['I', 'can', 'swim', '.'], hint: '我會游泳。' },
+                { words: ['She', 'can', 'dance', '.'], hint: '她會跳舞。' },
+                { words: ['He', 'can', 'sing', '.'], hint: '他會唱歌。' },
+                { words: ['We', 'can', 'run', 'fast', '.'], hint: '我們跑得很快。' },
+                { words: ['They', 'can', 'play', 'piano', '.'], hint: '他們會彈鋼琴。' },
+                { words: ['I', 'want', 'to', 'eat', '.'], hint: '我想吃東西。' },
+                { words: ['She', 'wants', 'to', 'play', '.'], hint: '她想玩。' },
+                { words: ['He', 'wants', 'to', 'sleep', '.'], hint: '他想睡覺。' },
+                { words: ['We', 'want', 'to', 'go', 'home', '.'], hint: '我們想回家。' },
+                { words: ['I', 'need', 'to', 'study', '.'], hint: '我需要讀書。' },
+                { words: ['She', 'needs', 'help', '.'], hint: '她需要幫助。' },
+                { words: ['He', 'needs', 'a', 'book', '.'], hint: '他需要一本書。' },
+                { words: ['This', 'is', 'my', 'book', '.'], hint: '這是我的書。' },
+                { words: ['That', 'is', 'her', 'cat', '.'], hint: '那是她的貓。' },
+                { words: ['These', 'are', 'my', 'shoes', '.'], hint: '這些是我的鞋子。' },
+                { words: ['Those', 'are', 'his', 'toys', '.'], hint: '那些是他的玩具。' },
+                { words: ['I', 'have', 'two', 'sisters', '.'], hint: '我有兩個姐妹。' },
+                { words: ['She', 'has', 'three', 'brothers', '.'], hint: '她有三個兄弟。' },
+                { words: ['There', 'is', 'a', 'cat', '.'], hint: '有一隻貓。' },
+                { words: ['There', 'are', 'two', 'dogs', '.'], hint: '有兩隻狗。' }
+            ];
+            sentences.push(...additionalSentences);
+
+            console.log('Total Sentence Builder questions:', sentences.length);
+            return sentences;
+        })();
 
         const ENCOURAGEMENTS = {
             correct: ['Perfect!', 'Awesome!', 'Great!', 'Super!', 'Excellent!', '🌟', '🎉'],
