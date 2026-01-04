@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grammar Games - Learn English Grammar!</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', 'Chalkboard', 'Arial Rounded MT Bold', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Floating shapes background */
+        .shapes {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .shape {
+            position: absolute;
+            opacity: 0.15;
+            animation: float 15s infinite ease-in-out;
+        }
+
+        .shape-1 { width: 80px; height: 80px; background: #FFE66D; border-radius: 50%; top: 10%; left: 5%; }
+        .shape-2 { width: 60px; height: 60px; background: #4ECDC4; border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; top: 20%; right: 10%; animation-delay: -5s; }
+        .shape-3 { width: 100px; height: 100px; background: #FF6B6B; border-radius: 50%; bottom: 15%; left: 15%; animation-delay: -10s; }
+        .shape-4 { width: 70px; height: 70px; background: #95E1D3; transform: rotate(45deg); bottom: 20%; right: 20%; animation-delay: -7s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-30px) rotate(5deg); }
+            50% { transform: translateY(0) rotate(0deg); }
+            75% { transform: translateY(30px) rotate(-5deg); }
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 12px 25px;
+            background: rgba(255,255,255,0.9);
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            color: #666;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+
+        .title {
+            font-size: clamp(2rem, 8vw, 3.5rem);
+            color: white;
+            text-shadow: 4px 4px 0 #FF6B6B, 6px 6px 0 #4ECDC4, 8px 8px 15px rgba(0,0,0,0.3);
+            margin-bottom: 10px;
+            animation: bounce 3s infinite ease-in-out;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .subtitle {
+            font-size: clamp(1rem, 4vw, 1.5rem);
+            color: rgba(255, 255, 255, 0.9);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        /* Category Section */
+        .category-section {
+            width: 100%;
+            max-width: 1200px;
+            margin-bottom: 40px;
+        }
+
+        .category-title {
+            font-size: clamp(1.5rem, 5vw, 2rem);
+            color: white;
+            text-shadow: 2px 2px 0 rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+            padding-left: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .category-badge {
+            background: #FFE66D;
+            color: #666;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.7em;
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            padding: 0 20px;
+        }
+
+        .game-card {
+            background: white;
+            border-radius: 25px;
+            padding: 25px;
+            text-align: center;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 0 rgba(0,0,0,0.1), 0 12px 30px rgba(0,0,0,0.15);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #4ECDC4, #FFE66D, #FF6B6B);
+        }
+
+        .game-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 16px 0 rgba(0,0,0,0.1), 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        .game-icon {
+            font-size: 4rem;
+            margin-bottom: 15px;
+            display: block;
+            animation: wiggle 2s infinite ease-in-out;
+        }
+
+        @keyframes wiggle {
+            0%, 100% { transform: rotate(-5deg); }
+            50% { transform: rotate(5deg); }
+        }
+
+        .game-title {
+            font-size: clamp(1.3rem, 4vw, 1.6rem);
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .game-description {
+            font-size: clamp(0.85rem, 2.5vw, 1rem);
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        .game-skill {
+            display: inline-block;
+            background: #E8F8F5;
+            color: #1ABC9C;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            margin-bottom: 15px;
+        }
+
+        .play-button {
+            display: inline-block;
+            padding: 12px 30px;
+            background: linear-gradient(180deg, #4ECDC4 0%, #3BA99C 100%);
+            color: white;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 0 #2D8A82;
+            transition: all 0.1s;
+        }
+
+        .game-card:hover .play-button {
+            background: linear-gradient(180deg, #FF6B6B 0%, #EE5A5A 100%);
+            box-shadow: 0 4px 0 #CC4444;
+        }
+
+        /* Card color variations */
+        .game-card.blue { background: linear-gradient(180deg, #E8F6FF 0%, #FFFFFF 100%); }
+        .game-card.green { background: linear-gradient(180deg, #E8FFF0 0%, #FFFFFF 100%); }
+        .game-card.yellow { background: linear-gradient(180deg, #FFFBE8 0%, #FFFFFF 100%); }
+
+        .footer {
+            margin-top: auto;
+            padding: 30px;
+            text-align: center;
+            color: rgba(255,255,255,0.8);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 600px) {
+            .container { padding: 20px 10px; }
+            .games-grid { padding: 0 10px; gap: 15px; }
+            .game-card { padding: 20px; }
+            .back-btn { top: 10px; left: 10px; padding: 10px 20px; font-size: 0.9rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+        <div class="shape shape-4"></div>
+    </div>
+
+    <div class="container">
+        <a href="../index.html" class="back-btn">← Home</a>
+
+        <header class="header">
+            <h1 class="title">Grammar Games</h1>
+            <p class="subtitle">Master English grammar through fun!</p>
+        </header>
+
+        <!-- Present Tense Section -->
+        <section class="category-section">
+            <h2 class="category-title">
+                Present Tense
+                <span class="category-badge">Beginner</span>
+            </h2>
+            <div class="games-grid">
+                <!-- Verb Match Game -->
+                <a href="present-tense/verb-match/index.html" class="game-card blue">
+                    <span class="game-icon">🎯</span>
+                    <h3 class="game-title">Verb Match</h3>
+                    <p class="game-description">
+                        Match subjects with the correct form of "be" - am, is, or are!
+                    </p>
+                    <span class="game-skill">am / is / are</span>
+                    <div class="play-button">Play Now!</div>
+                </a>
+
+                <!-- Fill the Gap Game -->
+                <a href="present-tense/fill-gap/index.html" class="game-card green">
+                    <span class="game-icon">✏️</span>
+                    <h3 class="game-title">Fill the Gap</h3>
+                    <p class="game-description">
+                        Choose the right verb to complete the sentence correctly!
+                    </p>
+                    <span class="game-skill">Verb Forms</span>
+                    <div class="play-button">Play Now!</div>
+                </a>
+
+                <!-- Sentence Builder Game -->
+                <a href="present-tense/sentence-builder/index.html" class="game-card yellow">
+                    <span class="game-icon">🧩</span>
+                    <h3 class="game-title">Sentence Builder</h3>
+                    <p class="game-description">
+                        Put the words in the right order to make perfect sentences!
+                    </p>
+                    <span class="game-skill">Word Order</span>
+                    <div class="play-button">Play Now!</div>
+                </a>
+            </div>
+        </section>
+
+        <footer class="footer">
+            <div>Learning grammar is fun!</div>
+        </footer>
+    </div>
+</body>
+</html>

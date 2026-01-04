@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Fill the Gap - Present Tense Verbs</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', 'Chalkboard', 'Arial Rounded MT Bold', sans-serif;
+            background: linear-gradient(180deg, #E8FFF0 0%, #B8F5CC 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            touch-action: manipulation;
+        }
+
+        .screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        /* Start Screen */
+        .game-title {
+            font-size: clamp(2.5rem, 8vw, 4rem);
+            color: #2ECC71;
+            text-shadow: 4px 4px 0 #FFE66D, 6px 6px 0 #FF6B6B;
+            margin-bottom: 10px;
+            text-align: center;
+            animation: bounce 2s infinite;
+        }
+
+        .game-subtitle {
+            font-size: clamp(1rem, 4vw, 1.5rem);
+            color: #666;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .mascot {
+            font-size: clamp(5rem, 20vw, 8rem);
+            margin-bottom: 20px;
+            animation: wiggle 1.5s infinite;
+        }
+
+        @keyframes wiggle {
+            0%, 100% { transform: rotate(-5deg); }
+            50% { transform: rotate(5deg); }
+        }
+
+        .info-box {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .info-box h3 {
+            color: #2ECC71;
+            margin-bottom: 10px;
+            font-size: clamp(1rem, 3.5vw, 1.3rem);
+        }
+
+        .info-box p {
+            color: #666;
+            font-size: clamp(0.9rem, 3vw, 1.1rem);
+            line-height: 1.5;
+        }
+
+        .example {
+            background: #E8FFF0;
+            padding: 10px 15px;
+            border-radius: 10px;
+            margin-top: 10px;
+            font-size: clamp(0.85rem, 2.5vw, 1rem);
+        }
+
+        .example .correct { color: #2ECC71; font-weight: bold; }
+        .example .wrong { color: #E74C3C; text-decoration: line-through; }
+
+        .play-btn {
+            font-size: clamp(1.5rem, 5vw, 2rem);
+            padding: 20px 50px;
+            background: linear-gradient(180deg, #2ECC71 0%, #27AE60 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #1D8348, 0 10px 20px rgba(0,0,0,0.2);
+            transition: all 0.1s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .play-btn:hover { transform: translateY(2px); box-shadow: 0 4px 0 #1D8348; }
+        .play-btn:active { transform: translateY(5px); box-shadow: 0 1px 0 #1D8348; }
+
+        .back-link {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            background: white;
+            border-radius: 20px;
+            color: #666;
+            text-decoration: none;
+            font-size: 1rem;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        /* Game Screen */
+        #game-screen {
+            justify-content: flex-start;
+            padding-top: 20px;
+        }
+
+        .game-header {
+            width: 100%;
+            max-width: 500px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+            background: white;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .score-display { font-size: clamp(1rem, 4vw, 1.4rem); color: #2ECC71; font-weight: bold; }
+        .progress-display { font-size: clamp(0.9rem, 3vw, 1.1rem); color: #666; background: #E8FFF0; padding: 5px 15px; border-radius: 15px; }
+        .streak-display { font-size: clamp(0.9rem, 3vw, 1.1rem); color: #FFB347; }
+
+        /* Question Card */
+        .question-card {
+            background: white;
+            border-radius: 30px;
+            padding: 30px;
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 10px 0 rgba(0,0,0,0.05), 0 15px 40px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+        }
+
+        .question-label {
+            font-size: clamp(0.9rem, 3vw, 1.1rem);
+            color: #999;
+            margin-bottom: 10px;
+        }
+
+        .verb-info {
+            background: #E8FFF0;
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            font-size: clamp(0.9rem, 3vw, 1.1rem);
+            color: #2ECC71;
+        }
+
+        .sentence {
+            font-size: clamp(1.4rem, 5vw, 1.8rem);
+            color: #333;
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+
+        .subject { color: #3498DB; font-weight: bold; }
+
+        .blank {
+            display: inline-block;
+            min-width: 100px;
+            padding: 5px 15px;
+            background: #FFF9E6;
+            border: 3px dashed #FFE66D;
+            border-radius: 10px;
+            margin: 0 5px;
+            color: #2ECC71;
+            font-weight: bold;
+        }
+
+        .hint {
+            font-size: clamp(0.85rem, 2.5vw, 1rem);
+            color: #999;
+            margin-top: 15px;
+            font-style: italic;
+        }
+
+        /* Answer Buttons */
+        .answers {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .answer-btn {
+            min-width: 120px;
+            padding: 18px 25px;
+            font-size: clamp(1.2rem, 4vw, 1.5rem);
+            font-weight: bold;
+            background: linear-gradient(180deg, #3498DB 0%, #2980B9 100%);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #1F618D, 0 8px 20px rgba(0,0,0,0.15);
+            transition: all 0.1s;
+            font-family: inherit;
+        }
+
+        .answer-btn:hover { transform: translateY(2px); box-shadow: 0 3px 0 #1F618D; }
+        .answer-btn:active { transform: translateY(4px); box-shadow: 0 1px 0 #1F618D; }
+
+        .answer-btn.correct {
+            background: linear-gradient(180deg, #2ECC71 0%, #27AE60 100%);
+            box-shadow: 0 5px 0 #1D8348;
+            animation: pulse 0.3s;
+        }
+
+        .answer-btn.wrong {
+            background: linear-gradient(180deg, #E74C3C 0%, #C0392B 100%);
+            box-shadow: 0 5px 0 #922B21;
+            animation: shake 0.3s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* Feedback */
+        .feedback {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            font-size: clamp(2rem, 8vw, 4rem);
+            font-weight: bold;
+            z-index: 100;
+            pointer-events: none;
+            text-shadow: 3px 3px 0 rgba(0,0,0,0.2);
+            animation: popFeedback 0.8s ease-out forwards;
+        }
+
+        .feedback.correct { color: #2ECC71; }
+        .feedback.wrong { color: #E74C3C; font-size: clamp(1.2rem, 5vw, 2rem); }
+
+        @keyframes popFeedback {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+            100% { transform: translate(-50%, -80%) scale(1); opacity: 0; }
+        }
+
+        .stars-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 99;
+        }
+
+        .star {
+            position: absolute;
+            font-size: 2rem;
+            animation: starFall 1s ease-out forwards;
+        }
+
+        @keyframes starFall {
+            0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100px) rotate(360deg); opacity: 0; }
+        }
+
+        /* End Screen */
+        .trophy { font-size: clamp(5rem, 20vw, 8rem); margin-bottom: 20px; animation: wiggle 1s infinite; }
+        .end-title { font-size: clamp(2rem, 7vw, 3rem); color: #2ECC71; margin-bottom: 15px; }
+        .final-score { font-size: clamp(1.3rem, 5vw, 2rem); color: #E74C3C; margin-bottom: 10px; }
+        .stars-earned { font-size: clamp(2rem, 8vw, 3.5rem); margin-bottom: 20px; }
+        .encouragement { font-size: clamp(1rem, 3.5vw, 1.3rem); color: #666; margin-bottom: 30px; text-align: center; max-width: 400px; line-height: 1.5; }
+
+        .btn-group { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; }
+
+        .btn {
+            font-size: clamp(1rem, 4vw, 1.3rem);
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.1s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: inherit;
+        }
+
+        .btn-primary { background: linear-gradient(180deg, #2ECC71 0%, #27AE60 100%); color: white; box-shadow: 0 5px 0 #1D8348; }
+        .btn-secondary { background: linear-gradient(180deg, #FFE66D 0%, #E6C235 100%); color: #666; box-shadow: 0 5px 0 #C9A82E; }
+
+        .btn:hover { transform: translateY(2px); }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            z-index: 101;
+            animation: confettiFall 3s ease-out forwards;
+        }
+
+        @keyframes confettiFall {
+            0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+
+        @media (max-width: 400px) {
+            .question-card { padding: 20px; }
+            .answer-btn { padding: 15px 20px; min-width: 100px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Start Screen -->
+    <div id="start-screen" class="screen active">
+        <a href="../../index.html" class="back-link">← Back</a>
+        <div class="mascot">✏️</div>
+        <h1 class="game-title">Fill the Gap!</h1>
+        <p class="game-subtitle">Choose the correct verb form</p>
+
+        <div class="info-box">
+            <h3>Remember the Rule!</h3>
+            <p>For <strong>he, she, it</strong> - add <strong>-s</strong> or <strong>-es</strong></p>
+            <div class="example">
+                He <span class="correct">plays</span> / <span class="wrong">play</span> soccer.
+            </div>
+        </div>
+
+        <button class="play-btn" onclick="startGame()">Play!</button>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="game-screen" class="screen">
+        <div class="game-header">
+            <div class="score-display">Score: <span id="score">0</span></div>
+            <div class="progress-display"><span id="current">1</span> / <span id="total">10</span></div>
+            <div class="streak-display" id="streak"></div>
+        </div>
+
+        <div class="question-card">
+            <div class="question-label">Fill in the blank:</div>
+            <div class="verb-info" id="verb-info"></div>
+            <div class="sentence" id="sentence"></div>
+            <div class="hint" id="hint"></div>
+        </div>
+
+        <div class="answers" id="answers"></div>
+    </div>
+
+    <!-- End Screen -->
+    <div id="end-screen" class="screen">
+        <div class="trophy" id="trophy">🏆</div>
+        <h2 class="end-title" id="end-title">Great Job!</h2>
+        <div class="final-score">Score: <span id="final-score">0</span></div>
+        <div class="stars-earned" id="stars-earned">⭐⭐⭐</div>
+        <p class="encouragement" id="encouragement"></p>
+
+        <div class="btn-group">
+            <button class="btn btn-primary" onclick="startGame()">Play Again</button>
+            <button class="btn btn-secondary" onclick="goBack()">Back</button>
+        </div>
+    </div>
+
+    <div class="stars-container" id="stars-container"></div>
+
+    <script>
+        // Questions - verb conjugation pairs
+        const QUESTIONS = [
+            // Regular verbs: play/plays
+            { subject: 'I', verb: 'play', baseVerb: 'play', options: ['play', 'plays'], sentence: 'I ___ soccer every day.', hint: '我每天踢足球' },
+            { subject: 'He', verb: 'plays', baseVerb: 'play', options: ['play', 'plays'], sentence: 'He ___ the guitar.', hint: '他彈吉他' },
+            { subject: 'They', verb: 'play', baseVerb: 'play', options: ['play', 'plays'], sentence: 'They ___ video games.', hint: '他們玩電動遊戲' },
+            { subject: 'She', verb: 'plays', baseVerb: 'play', options: ['play', 'plays'], sentence: 'She ___ with her friends.', hint: '她和朋友們玩' },
+
+            // like/likes
+            { subject: 'I', verb: 'like', baseVerb: 'like', options: ['like', 'likes'], sentence: 'I ___ ice cream.', hint: '我喜歡冰淇淋' },
+            { subject: 'She', verb: 'likes', baseVerb: 'like', options: ['like', 'likes'], sentence: 'She ___ to read books.', hint: '她喜歡看書' },
+            { subject: 'We', verb: 'like', baseVerb: 'like', options: ['like', 'likes'], sentence: 'We ___ our teacher.', hint: '我們喜歡我們的老師' },
+            { subject: 'My dog', verb: 'likes', baseVerb: 'like', options: ['like', 'likes'], sentence: 'My dog ___ to run.', hint: '我的狗喜歡跑步' },
+
+            // eat/eats
+            { subject: 'He', verb: 'eats', baseVerb: 'eat', options: ['eat', 'eats'], sentence: 'He ___ breakfast at 7.', hint: '他7點吃早餐' },
+            { subject: 'You', verb: 'eat', baseVerb: 'eat', options: ['eat', 'eats'], sentence: 'You ___ too fast!', hint: '你吃太快了！' },
+            { subject: 'The cat', verb: 'eats', baseVerb: 'eat', options: ['eat', 'eats'], sentence: 'The cat ___ fish.', hint: '貓吃魚' },
+
+            // go/goes
+            { subject: 'She', verb: 'goes', baseVerb: 'go', options: ['go', 'goes'], sentence: 'She ___ to school by bus.', hint: '她搭公車上學' },
+            { subject: 'We', verb: 'go', baseVerb: 'go', options: ['go', 'goes'], sentence: 'We ___ to the park.', hint: '我們去公園' },
+            { subject: 'My dad', verb: 'goes', baseVerb: 'go', options: ['go', 'goes'], sentence: 'My dad ___ to work.', hint: '我爸爸去上班' },
+
+            // have/has
+            { subject: 'I', verb: 'have', baseVerb: 'have', options: ['have', 'has'], sentence: 'I ___ a new bike.', hint: '我有一輛新腳踏車' },
+            { subject: 'He', verb: 'has', baseVerb: 'have', options: ['have', 'has'], sentence: 'He ___ two brothers.', hint: '他有兩個兄弟' },
+            { subject: 'They', verb: 'have', baseVerb: 'have', options: ['have', 'has'], sentence: 'They ___ a big house.', hint: '他們有一棟大房子' },
+            { subject: 'The girl', verb: 'has', baseVerb: 'have', options: ['have', 'has'], sentence: 'The girl ___ long hair.', hint: '那個女孩有長頭髮' },
+
+            // do/does
+            { subject: 'I', verb: 'do', baseVerb: 'do', options: ['do', 'does'], sentence: 'I ___ my homework.', hint: '我做作業' },
+            { subject: 'She', verb: 'does', baseVerb: 'do', options: ['do', 'does'], sentence: 'She ___ the dishes.', hint: '她洗碗' },
+            { subject: 'We', verb: 'do', baseVerb: 'do', options: ['do', 'does'], sentence: 'We ___ exercise.', hint: '我們做運動' },
+            { subject: 'My mom', verb: 'does', baseVerb: 'do', options: ['do', 'does'], sentence: 'My mom ___ the laundry.', hint: '我媽媽洗衣服' },
+
+            // watch/watches
+            { subject: 'He', verb: 'watches', baseVerb: 'watch', options: ['watch', 'watches'], sentence: 'He ___ TV at night.', hint: '他晚上看電視' },
+            { subject: 'They', verb: 'watch', baseVerb: 'watch', options: ['watch', 'watches'], sentence: 'They ___ movies.', hint: '他們看電影' },
+
+            // study/studies
+            { subject: 'She', verb: 'studies', baseVerb: 'study', options: ['study', 'studies'], sentence: 'She ___ English every day.', hint: '她每天學英文' },
+            { subject: 'We', verb: 'study', baseVerb: 'study', options: ['study', 'studies'], sentence: 'We ___ math together.', hint: '我們一起學數學' },
+
+            // read/reads
+            { subject: 'My sister', verb: 'reads', baseVerb: 'read', options: ['read', 'reads'], sentence: 'My sister ___ stories.', hint: '我姐姐讀故事' },
+            { subject: 'They', verb: 'read', baseVerb: 'read', options: ['read', 'reads'], sentence: 'They ___ in the library.', hint: '他們在圖書館讀書' },
+
+            // run/runs
+            { subject: 'The boy', verb: 'runs', baseVerb: 'run', options: ['run', 'runs'], sentence: 'The boy ___ very fast.', hint: '那個男孩跑很快' },
+            { subject: 'We', verb: 'run', baseVerb: 'run', options: ['run', 'runs'], sentence: 'We ___ in the morning.', hint: '我們早上跑步' },
+        ];
+
+        const ENCOURAGEMENTS = {
+            correct: ['Awesome!', 'Perfect!', 'Great!', 'Super!', 'Yes!', '🌟', '🎉', 'Excellent!'],
+            wrong: ['Try again!', 'Almost!', 'Keep going!', 'You can do it!'],
+            end: {
+                high: ['Amazing! You understand verb conjugation!', 'Perfect! You are a grammar master!', 'Excellent work!'],
+                medium: ['Good job! Keep practicing!', 'Nice work! You are improving!', 'Well done!'],
+                low: ['Good try! Practice makes perfect!', 'Keep learning! You will get it!']
+            }
+        };
+
+        let gameState = {
+            score: 0,
+            currentQuestion: 0,
+            totalQuestions: 10,
+            streak: 0,
+            questions: [],
+            answered: false
+        };
+
+        let audioContext = null;
+
+        function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSound(type) {
+            if (!audioContext) return;
+            const osc = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+            osc.connect(gain);
+            gain.connect(audioContext.destination);
+
+            if (type === 'correct') {
+                osc.frequency.setValueAtTime(523.25, audioContext.currentTime);
+                osc.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1);
+                osc.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.2);
+                gain.gain.setValueAtTime(0.3, audioContext.currentTime);
+                osc.start(audioContext.currentTime);
+                osc.stop(audioContext.currentTime + 0.4);
+            } else if (type === 'wrong') {
+                osc.frequency.setValueAtTime(200, audioContext.currentTime);
+                gain.gain.setValueAtTime(0.2, audioContext.currentTime);
+                osc.start(audioContext.currentTime);
+                osc.stop(audioContext.currentTime + 0.2);
+            }
+        }
+
+        function shuffleArray(arr) {
+            const shuffled = [...arr];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        function startGame() {
+            initAudio();
+            gameState = {
+                score: 0,
+                currentQuestion: 0,
+                totalQuestions: 10,
+                streak: 0,
+                questions: shuffleArray(QUESTIONS).slice(0, 10),
+                answered: false
+            };
+
+            document.getElementById('score').textContent = '0';
+            document.getElementById('total').textContent = gameState.totalQuestions;
+            updateStreak();
+
+            showScreen('game-screen');
+            showQuestion();
+        }
+
+        function showQuestion() {
+            if (gameState.currentQuestion >= gameState.totalQuestions) {
+                endGame();
+                return;
+            }
+
+            gameState.answered = false;
+            const q = gameState.questions[gameState.currentQuestion];
+
+            document.getElementById('current').textContent = gameState.currentQuestion + 1;
+            document.getElementById('verb-info').textContent = `Verb: ${q.baseVerb}`;
+
+            const sentenceHtml = q.sentence.replace(q.subject, `<span class="subject">${q.subject}</span>`)
+                                          .replace('___', '<span class="blank">___</span>');
+            document.getElementById('sentence').innerHTML = sentenceHtml;
+            document.getElementById('hint').textContent = q.hint;
+
+            const answersDiv = document.getElementById('answers');
+            answersDiv.innerHTML = '';
+
+            const shuffledOptions = shuffleArray(q.options);
+            shuffledOptions.forEach(option => {
+                const btn = document.createElement('button');
+                btn.className = 'answer-btn';
+                btn.textContent = option;
+                btn.onclick = () => checkAnswer(option, btn);
+                answersDiv.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(answer, btn) {
+            if (gameState.answered) return;
+            gameState.answered = true;
+
+            const q = gameState.questions[gameState.currentQuestion];
+            const isCorrect = answer === q.verb;
+
+            document.querySelectorAll('.answer-btn').forEach(b => {
+                b.style.pointerEvents = 'none';
+                if (b.textContent === q.verb) {
+                    b.classList.add('correct');
+                }
+            });
+
+            if (isCorrect) {
+                gameState.score += 10 + (gameState.streak * 2);
+                gameState.streak++;
+                playSound('correct');
+                showFeedback(true);
+                createStars();
+            } else {
+                btn.classList.add('wrong');
+                gameState.streak = 0;
+                playSound('wrong');
+                showFeedback(false);
+            }
+
+            document.getElementById('score').textContent = gameState.score;
+            updateStreak();
+
+            setTimeout(() => {
+                document.querySelector('.blank').textContent = q.verb;
+                document.querySelector('.blank').style.background = isCorrect ? '#E8FFF0' : '#FFE8E8';
+                document.querySelector('.blank').style.borderColor = isCorrect ? '#2ECC71' : '#E74C3C';
+            }, 300);
+
+            setTimeout(() => {
+                gameState.currentQuestion++;
+                showQuestion();
+            }, 1500);
+        }
+
+        function updateStreak() {
+            const streakEl = document.getElementById('streak');
+            if (gameState.streak >= 2) {
+                streakEl.textContent = '🔥 ' + gameState.streak;
+            } else {
+                streakEl.textContent = '';
+            }
+        }
+
+        function showFeedback(isCorrect) {
+            const feedback = document.createElement('div');
+            feedback.className = `feedback ${isCorrect ? 'correct' : 'wrong'}`;
+            const messages = isCorrect ? ENCOURAGEMENTS.correct : ENCOURAGEMENTS.wrong;
+            feedback.textContent = messages[Math.floor(Math.random() * messages.length)];
+            document.body.appendChild(feedback);
+            setTimeout(() => feedback.remove(), 800);
+        }
+
+        function createStars() {
+            const container = document.getElementById('stars-container');
+            const stars = ['⭐', '🌟', '✨', '💫'];
+            for (let i = 0; i < 5; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.textContent = stars[Math.floor(Math.random() * stars.length)];
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 30 + 20}%`;
+                container.appendChild(star);
+                setTimeout(() => star.remove(), 1000);
+            }
+        }
+
+        function createConfetti() {
+            const colors = ['#2ECC71', '#3498DB', '#FFE66D', '#E74C3C', '#9B59B6'];
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = `${Math.random() * 100}%`;
+                confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animationDelay = `${Math.random() * 2}s`;
+                confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                document.body.appendChild(confetti);
+                setTimeout(() => confetti.remove(), 3000);
+            }
+        }
+
+        function endGame() {
+            const maxScore = gameState.totalQuestions * 10;
+            const percentage = gameState.score / maxScore;
+
+            let stars, trophy, title, encouragement;
+
+            if (percentage >= 0.9) {
+                stars = '⭐⭐⭐'; trophy = '🏆'; title = 'Amazing!';
+                encouragement = ENCOURAGEMENTS.end.high[Math.floor(Math.random() * ENCOURAGEMENTS.end.high.length)];
+            } else if (percentage >= 0.6) {
+                stars = '⭐⭐'; trophy = '🥈'; title = 'Great Job!';
+                encouragement = ENCOURAGEMENTS.end.medium[Math.floor(Math.random() * ENCOURAGEMENTS.end.medium.length)];
+            } else {
+                stars = '⭐'; trophy = '🎯'; title = 'Good Try!';
+                encouragement = ENCOURAGEMENTS.end.low[Math.floor(Math.random() * ENCOURAGEMENTS.end.low.length)];
+            }
+
+            document.getElementById('final-score').textContent = gameState.score;
+            document.getElementById('stars-earned').textContent = stars;
+            document.getElementById('trophy').textContent = trophy;
+            document.getElementById('end-title').textContent = title;
+            document.getElementById('encouragement').textContent = encouragement;
+
+            showScreen('end-screen');
+            createConfetti();
+        }
+
+        function goBack() {
+            window.location.href = '../../index.html';
+        }
+
+        document.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            e.target.click();
+        }, { passive: false });
+    </script>
+</body>
+</html>
