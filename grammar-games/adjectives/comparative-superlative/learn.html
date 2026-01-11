@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Learn Comparatives & Superlatives</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', 'Chalkboard', 'Arial Rounded MT Bold', sans-serif;
+            background: linear-gradient(180deg, #FFF5E6 0%, #FFE4C4 100%);
+            min-height: 100vh;
+            padding: 20px;
+            padding-bottom: 100px;
+        }
+
+        .back-link {
+            display: inline-block;
+            padding: 10px 20px;
+            background: white;
+            border-radius: 20px;
+            color: #666;
+            text-decoration: none;
+            font-size: 1rem;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+            margin-bottom: 20px;
+        }
+
+        .back-link:hover {
+            transform: translateY(-2px);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .mascot {
+            font-size: clamp(4rem, 15vw, 6rem);
+            animation: wiggle 2s infinite;
+        }
+
+        @keyframes wiggle {
+            0%, 100% { transform: rotate(-5deg); }
+            50% { transform: rotate(5deg); }
+        }
+
+        .title {
+            font-size: clamp(1.8rem, 6vw, 2.8rem);
+            color: #FF6B6B;
+            text-shadow: 3px 3px 0 #FFE66D;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: clamp(1rem, 3vw, 1.3rem);
+            color: #666;
+        }
+
+        /* Section Cards */
+        .section-card {
+            background: white;
+            border-radius: 25px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 0 rgba(0,0,0,0.05), 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .section-title {
+            font-size: clamp(1.3rem, 4vw, 1.6rem);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title.comparative {
+            color: #3498DB;
+        }
+
+        .section-title.superlative {
+            color: #E74C8C;
+        }
+
+        .section-title.irregular {
+            color: #9B59B6;
+        }
+
+        .section-title.tips {
+            color: #27AE60;
+        }
+
+        .section-icon {
+            font-size: 1.5em;
+        }
+
+        .explanation {
+            font-size: clamp(1rem, 3vw, 1.15rem);
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .explanation-zh {
+            font-size: clamp(0.9rem, 2.5vw, 1rem);
+            color: #888;
+            font-style: italic;
+            margin-bottom: 15px;
+        }
+
+        /* Rule Box */
+        .rule-box {
+            background: linear-gradient(135deg, #E8F6FF 0%, #F0F8FF 100%);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            border-left: 5px solid #3498DB;
+        }
+
+        .rule-box.superlative {
+            background: linear-gradient(135deg, #FFE8F0 0%, #FFF0F5 100%);
+            border-left-color: #E74C8C;
+        }
+
+        .rule-box.irregular {
+            background: linear-gradient(135deg, #F3E8FF 0%, #FAF0FF 100%);
+            border-left-color: #9B59B6;
+        }
+
+        .rule-label {
+            font-size: clamp(0.85rem, 2.5vw, 0.95rem);
+            color: #666;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .rule-formula {
+            font-size: clamp(1.2rem, 4vw, 1.5rem);
+            color: #333;
+            font-weight: bold;
+        }
+
+        .highlight {
+            color: #FF6B6B;
+            background: #FFE66D;
+            padding: 2px 8px;
+            border-radius: 5px;
+        }
+
+        /* Examples Table */
+        .examples-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: clamp(0.9rem, 3vw, 1.1rem);
+        }
+
+        .examples-table th {
+            background: #4ECDC4;
+            color: white;
+            padding: 12px 10px;
+            text-align: center;
+        }
+
+        .examples-table th:first-child {
+            border-radius: 10px 0 0 0;
+        }
+
+        .examples-table th:last-child {
+            border-radius: 0 10px 0 0;
+        }
+
+        .examples-table td {
+            padding: 12px 10px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+        }
+
+        .examples-table tr:nth-child(even) {
+            background: #F8F9FA;
+        }
+
+        .examples-table tr:last-child td:first-child {
+            border-radius: 0 0 0 10px;
+        }
+
+        .examples-table tr:last-child td:last-child {
+            border-radius: 0 0 10px 0;
+        }
+
+        .arrow {
+            color: #4ECDC4;
+            font-weight: bold;
+        }
+
+        /* Visual Example */
+        .visual-example {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 20px;
+            padding: 20px;
+            background: #F8F9FA;
+            border-radius: 15px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+
+        .visual-item {
+            text-align: center;
+        }
+
+        .visual-icon {
+            font-size: clamp(2rem, 8vw, 4rem);
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .visual-icon.small {
+            font-size: clamp(1.5rem, 6vw, 2.5rem);
+        }
+
+        .visual-icon.medium {
+            font-size: clamp(2.5rem, 10vw, 4rem);
+        }
+
+        .visual-icon.large {
+            font-size: clamp(3.5rem, 12vw, 5.5rem);
+        }
+
+        .visual-label {
+            font-size: clamp(0.9rem, 3vw, 1.1rem);
+            color: #333;
+            font-weight: bold;
+        }
+
+        .visual-label span {
+            color: #FF6B6B;
+        }
+
+        /* Tips List */
+        .tips-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .tips-list li {
+            padding: 12px 15px;
+            margin: 10px 0;
+            background: #E8FFF0;
+            border-radius: 10px;
+            font-size: clamp(0.95rem, 3vw, 1.1rem);
+            color: #333;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .tip-icon {
+            font-size: 1.3em;
+            flex-shrink: 0;
+        }
+
+        /* Play Button */
+        .play-section {
+            text-align: center;
+            margin-top: 40px;
+            padding: 30px;
+            background: white;
+            border-radius: 25px;
+            box-shadow: 0 8px 0 rgba(0,0,0,0.05), 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .ready-text {
+            font-size: clamp(1.3rem, 4vw, 1.8rem);
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .play-btn {
+            display: inline-block;
+            font-size: clamp(1.5rem, 5vw, 2rem);
+            padding: 20px 50px;
+            background: linear-gradient(180deg, #FF6B6B 0%, #EE5A5A 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #CC4444, 0 10px 20px rgba(0,0,0,0.2);
+            transition: all 0.1s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-decoration: none;
+        }
+
+        .play-btn:hover {
+            transform: translateY(2px);
+            box-shadow: 0 4px 0 #CC4444;
+        }
+
+        .play-btn:active {
+            transform: translateY(5px);
+            box-shadow: 0 1px 0 #CC4444;
+        }
+
+        /* Responsive */
+        @media (max-width: 500px) {
+            .section-card {
+                padding: 18px;
+            }
+            .visual-example {
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="../../index.html" class="back-link">← Back to Games</a>
+
+        <header class="header">
+            <div class="mascot">📏</div>
+            <h1 class="title">Comparatives & Superlatives</h1>
+            <p class="subtitle">Learn how to compare things in English!</p>
+        </header>
+
+        <!-- What are they? -->
+        <div class="section-card">
+            <h2 class="section-title comparative">
+                <span class="section-icon">🤔</span>
+                What are Comparatives & Superlatives?
+            </h2>
+            <p class="explanation">
+                When we want to <strong>compare things</strong>, we change adjectives (describing words) in special ways!
+            </p>
+            <p class="explanation-zh">
+                當我們想要比較事物時，我們會用特別的方式改變形容詞！
+            </p>
+
+            <div class="visual-example">
+                <div class="visual-item">
+                    <span class="visual-icon small">🐱</span>
+                    <div class="visual-label">big</div>
+                </div>
+                <div class="visual-item">
+                    <span class="visual-icon medium">🐕</span>
+                    <div class="visual-label">big<span>ger</span></div>
+                </div>
+                <div class="visual-item">
+                    <span class="visual-icon large">🐘</span>
+                    <div class="visual-label">big<span>gest</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comparative -->
+        <div class="section-card">
+            <h2 class="section-title comparative">
+                <span class="section-icon">👤👤</span>
+                Comparative (比較級) - Comparing 2 Things
+            </h2>
+            <p class="explanation">
+                Use comparatives when comparing <strong>TWO</strong> things. We usually add <strong>"-er"</strong> or use <strong>"more"</strong>.
+            </p>
+            <p class="explanation-zh">
+                比較兩個事物時使用比較級。通常加 "-er" 或使用 "more"。
+            </p>
+
+            <div class="rule-box">
+                <div class="rule-label">Rule 1: Short words (1-2 syllables)</div>
+                <div class="rule-formula">adjective + <span class="highlight">-er</span></div>
+            </div>
+
+            <table class="examples-table">
+                <tr>
+                    <th>Adjective</th>
+                    <th></th>
+                    <th>Comparative</th>
+                    <th>Example</th>
+                </tr>
+                <tr>
+                    <td>tall</td>
+                    <td class="arrow">→</td>
+                    <td><strong>taller</strong></td>
+                    <td>Tom is <strong>taller</strong> than Amy.</td>
+                </tr>
+                <tr>
+                    <td>fast</td>
+                    <td class="arrow">→</td>
+                    <td><strong>faster</strong></td>
+                    <td>A car is <strong>faster</strong> than a bike.</td>
+                </tr>
+                <tr>
+                    <td>old</td>
+                    <td class="arrow">→</td>
+                    <td><strong>older</strong></td>
+                    <td>Dad is <strong>older</strong> than Mom.</td>
+                </tr>
+            </table>
+
+            <div class="rule-box">
+                <div class="rule-label">Rule 2: Long words (3+ syllables)</div>
+                <div class="rule-formula"><span class="highlight">more</span> + adjective</div>
+            </div>
+
+            <table class="examples-table">
+                <tr>
+                    <th>Adjective</th>
+                    <th></th>
+                    <th>Comparative</th>
+                </tr>
+                <tr>
+                    <td>beautiful</td>
+                    <td class="arrow">→</td>
+                    <td><strong>more beautiful</strong></td>
+                </tr>
+                <tr>
+                    <td>interesting</td>
+                    <td class="arrow">→</td>
+                    <td><strong>more interesting</strong></td>
+                </tr>
+                <tr>
+                    <td>expensive</td>
+                    <td class="arrow">→</td>
+                    <td><strong>more expensive</strong></td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Superlative -->
+        <div class="section-card">
+            <h2 class="section-title superlative">
+                <span class="section-icon">👤👤👤</span>
+                Superlative (最高級) - Comparing 3+ Things
+            </h2>
+            <p class="explanation">
+                Use superlatives when comparing <strong>THREE or more</strong> things. We add <strong>"-est"</strong> or use <strong>"most"</strong>.
+            </p>
+            <p class="explanation-zh">
+                比較三個或更多事物時使用最高級。加 "-est" 或使用 "most"。
+            </p>
+
+            <div class="rule-box superlative">
+                <div class="rule-label">Rule 1: Short words (1-2 syllables)</div>
+                <div class="rule-formula">the + adjective + <span class="highlight">-est</span></div>
+            </div>
+
+            <table class="examples-table">
+                <tr>
+                    <th>Adjective</th>
+                    <th></th>
+                    <th>Superlative</th>
+                    <th>Example</th>
+                </tr>
+                <tr>
+                    <td>tall</td>
+                    <td class="arrow">→</td>
+                    <td><strong>the tallest</strong></td>
+                    <td>He is <strong>the tallest</strong> in class.</td>
+                </tr>
+                <tr>
+                    <td>fast</td>
+                    <td class="arrow">→</td>
+                    <td><strong>the fastest</strong></td>
+                    <td>The cheetah is <strong>the fastest</strong> animal.</td>
+                </tr>
+                <tr>
+                    <td>small</td>
+                    <td class="arrow">→</td>
+                    <td><strong>the smallest</strong></td>
+                    <td>This is <strong>the smallest</strong> phone.</td>
+                </tr>
+            </table>
+
+            <div class="rule-box superlative">
+                <div class="rule-label">Rule 2: Long words (3+ syllables)</div>
+                <div class="rule-formula">the + <span class="highlight">most</span> + adjective</div>
+            </div>
+
+            <table class="examples-table">
+                <tr>
+                    <th>Adjective</th>
+                    <th></th>
+                    <th>Superlative</th>
+                </tr>
+                <tr>
+                    <td>beautiful</td>
+                    <td class="arrow">→</td>
+                    <td><strong>the most beautiful</strong></td>
+                </tr>
+                <tr>
+                    <td>interesting</td>
+                    <td class="arrow">→</td>
+                    <td><strong>the most interesting</strong></td>
+                </tr>
+                <tr>
+                    <td>expensive</td>
+                    <td class="arrow">→</td>
+                    <td><strong>the most expensive</strong></td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Special Rules -->
+        <div class="section-card">
+            <h2 class="section-title tips">
+                <span class="section-icon">✨</span>
+                Special Spelling Rules
+            </h2>
+            <p class="explanation">
+                Some words need special changes when adding -er or -est:
+            </p>
+
+            <ul class="tips-list">
+                <li>
+                    <span class="tip-icon">1️⃣</span>
+                    <div>
+                        <strong>Words ending in -e:</strong> Just add -r or -st<br/>
+                        <span style="color: #666;">nice → nice<span style="color:#FF6B6B">r</span> → nice<span style="color:#FF6B6B">st</span></span>
+                    </div>
+                </li>
+                <li>
+                    <span class="tip-icon">2️⃣</span>
+                    <div>
+                        <strong>Words ending in consonant + y:</strong> Change y to i, then add -er or -est<br/>
+                        <span style="color: #666;">happy → happ<span style="color:#FF6B6B">ier</span> → happ<span style="color:#FF6B6B">iest</span></span>
+                    </div>
+                </li>
+                <li>
+                    <span class="tip-icon">3️⃣</span>
+                    <div>
+                        <strong>Short words ending in consonant-vowel-consonant:</strong> Double the last letter<br/>
+                        <span style="color: #666;">big → bi<span style="color:#FF6B6B">gg</span>er → bi<span style="color:#FF6B6B">gg</span>est</span><br/>
+                        <span style="color: #666;">hot → ho<span style="color:#FF6B6B">tt</span>er → ho<span style="color:#FF6B6B">tt</span>est</span>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Irregular -->
+        <div class="section-card">
+            <h2 class="section-title irregular">
+                <span class="section-icon">⚡</span>
+                Irregular Adjectives (不規則變化)
+            </h2>
+            <p class="explanation">
+                Some adjectives are <strong>special</strong> - they don't follow the rules! You need to memorize these:
+            </p>
+            <p class="explanation-zh">
+                有些形容詞很特別，不遵循規則！你需要記住這些：
+            </p>
+
+            <table class="examples-table">
+                <tr>
+                    <th>Adjective</th>
+                    <th>Comparative</th>
+                    <th>Superlative</th>
+                </tr>
+                <tr>
+                    <td><strong>good</strong> 好</td>
+                    <td><strong style="color:#3498DB">better</strong></td>
+                    <td><strong style="color:#E74C8C">best</strong></td>
+                </tr>
+                <tr>
+                    <td><strong>bad</strong> 壞</td>
+                    <td><strong style="color:#3498DB">worse</strong></td>
+                    <td><strong style="color:#E74C8C">worst</strong></td>
+                </tr>
+                <tr>
+                    <td><strong>many/much</strong> 多</td>
+                    <td><strong style="color:#3498DB">more</strong></td>
+                    <td><strong style="color:#E74C8C">most</strong></td>
+                </tr>
+                <tr>
+                    <td><strong>little</strong> 少</td>
+                    <td><strong style="color:#3498DB">less</strong></td>
+                    <td><strong style="color:#E74C8C">least</strong></td>
+                </tr>
+                <tr>
+                    <td><strong>far</strong> 遠</td>
+                    <td><strong style="color:#3498DB">farther</strong></td>
+                    <td><strong style="color:#E74C8C">farthest</strong></td>
+                </tr>
+            </table>
+
+            <div class="visual-example">
+                <div class="visual-item">
+                    <span class="visual-icon">😊</span>
+                    <div class="visual-label">good</div>
+                </div>
+                <div class="visual-item">
+                    <span class="visual-icon">😄</span>
+                    <div class="visual-label"><span>better</span></div>
+                </div>
+                <div class="visual-item">
+                    <span class="visual-icon">🤩</span>
+                    <div class="visual-label"><span>best</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Summary -->
+        <div class="section-card">
+            <h2 class="section-title tips">
+                <span class="section-icon">📝</span>
+                Quick Summary (快速總結)
+            </h2>
+
+            <table class="examples-table">
+                <tr>
+                    <th>Type</th>
+                    <th>Comparative (比較級)</th>
+                    <th>Superlative (最高級)</th>
+                </tr>
+                <tr>
+                    <td>Short words</td>
+                    <td>+ <strong>er</strong></td>
+                    <td>+ <strong>est</strong></td>
+                </tr>
+                <tr>
+                    <td>Long words</td>
+                    <td><strong>more</strong> + word</td>
+                    <td><strong>most</strong> + word</td>
+                </tr>
+                <tr>
+                    <td>good</td>
+                    <td><strong>better</strong></td>
+                    <td><strong>best</strong></td>
+                </tr>
+                <tr>
+                    <td>bad</td>
+                    <td><strong>worse</strong></td>
+                    <td><strong>worst</strong></td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Play Button -->
+        <div class="play-section">
+            <div class="ready-text">Ready to practice? Let's play! 🎮</div>
+            <a href="index.html" class="play-btn">Play Game!</a>
+        </div>
+    </div>
+</body>
+</html>
