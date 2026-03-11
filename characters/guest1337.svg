@@ -1,39 +1,57 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120">
-  <!-- Guest 1337: Blue hair, tactical vest, cyberpunk look -->
+  <!-- Guest 1337: White face, blue swept hair, angry look, camo tactical vest -->
 
-  <!-- Blue spiky hair -->
-  <rect x="22" y="-2" width="56" height="18" rx="4" fill="#2266cc"/>
-  <rect x="26" y="-6" width="10" height="14" rx="2" fill="#3377dd"/>
-  <rect x="40" y="-8" width="10" height="16" rx="2" fill="#3377dd"/>
-  <rect x="54" y="-5" width="10" height="13" rx="2" fill="#3377dd"/>
-  <rect x="66" y="-2" width="10" height="10" rx="2" fill="#2266cc"/>
+  <!-- Blue swept hair (swept to the right) -->
+  <path d="M30 12 Q35 -2 55 -4 Q70 -5 75 5 L72 14 L28 14 Z" fill="#2244bb"/>
+  <path d="M55 -4 Q72 -8 80 2 L76 10 L70 -2 Z" fill="#3355cc"/>
+  <path d="M35 0 Q42 -6 55 -6 L50 -1 Z" fill="#3355cc"/>
 
-  <!-- Head -->
-  <rect x="25" y="10" width="50" height="46" rx="5" fill="#5588cc"/>
+  <!-- Head - WHITE face -->
+  <rect x="25" y="10" width="50" height="48" rx="5" fill="#e8e8e8"/>
+  <rect x="28" y="13" width="44" height="42" rx="3" fill="#f0f0f0"/>
 
-  <!-- Visor/goggles -->
-  <rect x="28" y="22" width="44" height="12" rx="4" fill="#1a1a2e"/>
-  <rect x="31" y="24" width="16" height="8" rx="2" fill="#00ddff" opacity="0.8"/>
-  <rect x="53" y="24" width="16" height="8" rx="2" fill="#00ddff" opacity="0.8"/>
+  <!-- Angry eyebrows -->
+  <line x1="33" y1="24" x2="44" y2="28" stroke="#1a1a1a" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="56" y1="28" x2="67" y2="24" stroke="#1a1a1a" stroke-width="2.5" stroke-linecap="round"/>
 
-  <!-- Mouth -->
-  <rect x="38" y="44" width="24" height="4" rx="2" fill="#c0c0c0"/>
+  <!-- Small serious eyes -->
+  <circle cx="40" cy="32" r="3" fill="#1a1a1a"/>
+  <circle cx="60" cy="32" r="3" fill="#1a1a1a"/>
 
-  <!-- Body - tactical/military vest -->
-  <rect x="22" y="56" width="56" height="42" rx="4" fill="#3d5c3d"/>
-  <rect x="26" y="59" width="48" height="36" rx="2" fill="#4a6e4a"/>
-  <!-- Vest pockets/pouches -->
-  <rect x="30" y="62" width="16" height="10" rx="2" fill="#5a3a2a"/>
-  <rect x="54" y="62" width="16" height="10" rx="2" fill="#5a3a2a"/>
-  <rect x="36" y="78" width="28" height="8" rx="2" fill="#5a3a2a"/>
-  <!-- Belt -->
-  <rect x="24" y="88" width="52" height="4" fill="#4a3a2a"/>
+  <!-- Small frown/serious mouth -->
+  <path d="M42 46 Q50 42 58 46" stroke="#1a1a1a" stroke-width="2" fill="none" stroke-linecap="round"/>
 
-  <!-- Legs -->
-  <rect x="22" y="98" width="24" height="20" rx="3" fill="#2a3a2a"/>
-  <rect x="54" y="98" width="24" height="20" rx="3" fill="#2a3a2a"/>
+  <!-- Body - camo tactical vest -->
+  <rect x="22" y="58" width="56" height="40" rx="4" fill="#6b7a5a"/>
+  <!-- Camo patches -->
+  <rect x="26" y="62" width="14" height="10" rx="2" fill="#8a9a6a"/>
+  <rect x="42" y="60" width="12" height="8" rx="1" fill="#5a6a4a"/>
+  <rect x="58" y="64" width="16" height="12" rx="2" fill="#7a8a5a"/>
+  <rect x="28" y="76" width="18" height="8" rx="1" fill="#5a6a4a"/>
+  <rect x="50" y="78" width="14" height="10" rx="2" fill="#8a9a6a"/>
+  <rect x="34" y="86" width="12" height="8" rx="1" fill="#6b7a5a"/>
+  <rect x="56" y="62" width="8" height="6" rx="1" fill="#9aaa7a"/>
+  <!-- Tan/beige chest panel -->
+  <rect x="36" y="60" width="28" height="16" rx="2" fill="#c4b090"/>
+  <rect x="40" y="62" width="20" height="12" rx="1" fill="#b8a480"/>
+  <!-- White stripe details on vest -->
+  <rect x="22" y="88" width="56" height="3" fill="#d0d0d0"/>
 
-  <!-- Arms -->
-  <rect x="10" y="58" width="14" height="28" rx="5" fill="#5588cc"/>
-  <rect x="76" y="58" width="14" height="28" rx="5" fill="#5588cc"/>
+  <!-- Legs - brown/tan -->
+  <rect x="22" y="98" width="24" height="20" rx="3" fill="#7a6a50"/>
+  <rect x="54" y="98" width="24" height="20" rx="3" fill="#7a6a50"/>
+  <!-- Boot detail -->
+  <rect x="22" y="112" width="24" height="6" rx="2" fill="#5a4a3a"/>
+  <rect x="54" y="112" width="24" height="6" rx="2" fill="#5a4a3a"/>
+
+  <!-- Arms - white/gray armored -->
+  <rect x="8" y="58" width="16" height="30" rx="5" fill="#d0d0d0"/>
+  <rect x="10" y="60" width="12" height="14" rx="3" fill="#e0e0e0"/>
+  <rect x="10" y="76" width="12" height="10" rx="3" fill="#b0b0b0"/>
+  <rect x="76" y="58" width="16" height="30" rx="5" fill="#d0d0d0"/>
+  <rect x="78" y="60" width="12" height="14" rx="3" fill="#e0e0e0"/>
+  <rect x="78" y="76" width="12" height="10" rx="3" fill="#b0b0b0"/>
+
+  <!-- Orange diamond patch on right arm -->
+  <polygon points="84,64 88,68 84,72 80,68" fill="#dd8833"/>
 </svg>
