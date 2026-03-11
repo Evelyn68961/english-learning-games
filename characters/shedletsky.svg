@@ -1,46 +1,50 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120">
-  <!-- Shedletsky: Curly brown hair, casual outfit, friendly look -->
+  <!-- Shedletsky: Yellow face, brown curly hair, derpy excited face, white "BLAME JOHN" shirt, gray+yellow arms, blue jeans -->
 
-  <!-- Big curly hair -->
-  <circle cx="32" cy="6" r="10" fill="#7B4B2A"/>
-  <circle cx="50" cy="2" r="12" fill="#8B5534"/>
-  <circle cx="68" cy="6" r="10" fill="#7B4B2A"/>
-  <circle cx="40" cy="-2" r="9" fill="#9B6544"/>
-  <circle cx="58" cy="-2" r="9" fill="#9B6544"/>
-  <circle cx="25" cy="12" r="8" fill="#7B4B2A"/>
-  <circle cx="75" cy="12" r="8" fill="#7B4B2A"/>
-  <circle cx="50" cy="-6" r="7" fill="#8B5534"/>
+  <!-- Brown curly hair on top -->
+  <circle cx="35" cy="6" r="9" fill="#6B4422"/>
+  <circle cx="50" cy="3" r="10" fill="#7B5232"/>
+  <circle cx="65" cy="6" r="9" fill="#6B4422"/>
+  <circle cx="42" cy="-1" r="8" fill="#7B5232"/>
+  <circle cx="58" cy="-1" r="8" fill="#7B5232"/>
+  <circle cx="50" cy="-4" r="6" fill="#6B4422"/>
 
-  <!-- Head -->
-  <rect x="25" y="10" width="50" height="48" rx="5" fill="#deb887"/>
-  <rect x="28" y="13" width="44" height="42" rx="3" fill="#e8c99b"/>
+  <!-- Head - YELLOW face like Noob -->
+  <rect x="25" y="8" width="50" height="50" rx="5" fill="#f5cd30"/>
+  <rect x="28" y="11" width="44" height="44" rx="3" fill="#fada50"/>
 
-  <!-- Eyes -->
-  <circle cx="40" cy="30" r="5.5" fill="white"/>
-  <circle cx="40" cy="31" r="3" fill="#4a3520"/>
-  <circle cx="40" cy="30" r="1.2" fill="white"/>
-  <circle cx="60" cy="30" r="5.5" fill="white"/>
-  <circle cx="60" cy="31" r="3" fill="#4a3520"/>
-  <circle cx="60" cy="30" r="1.2" fill="white"/>
+  <!-- Derpy eyes - one big, one small -->
+  <circle cx="38" cy="28" r="7" fill="white"/>
+  <circle cx="39" cy="29" r="4" fill="#1a1a1a"/>
+  <circle cx="38" cy="27" r="1.8" fill="white"/>
+  <circle cx="60" cy="30" r="5" fill="white"/>
+  <circle cx="61" cy="31" r="3" fill="#1a1a1a"/>
+  <circle cx="60" cy="29" r="1.2" fill="white"/>
 
-  <!-- Friendly smile -->
-  <path d="M40 44 Q50 52 60 44" stroke="#8a6a4a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <!-- Big excited open mouth grin -->
+  <ellipse cx="50" cy="46" rx="11" ry="8" fill="#cc2244"/>
+  <rect x="40" y="40" width="20" height="6" fill="#fada50"/>
+  <ellipse cx="50" cy="42" rx="9" ry="3" fill="white" opacity="0.9"/>
 
-  <!-- Body - casual red/maroon top -->
-  <rect x="22" y="58" width="56" height="40" rx="4" fill="#cc4444"/>
-  <rect x="28" y="61" width="44" height="34" rx="2" fill="#dd5555"/>
-  <!-- Text/logo on shirt -->
-  <rect x="36" y="68" width="28" height="10" rx="3" fill="#bb3333"/>
+  <!-- Body - WHITE t-shirt -->
+  <rect x="22" y="58" width="56" height="40" rx="4" fill="#e8e8e8"/>
+  <rect x="26" y="61" width="48" height="34" rx="2" fill="#f5f5f5"/>
+  <!-- "BLAME JOHN" red stamp text on shirt -->
+  <text x="50" y="72" font-size="8" fill="#cc2222" font-family="Arial, sans-serif" font-weight="bold" text-anchor="middle" opacity="0.85">BLAME</text>
+  <text x="50" y="82" font-size="8" fill="#cc2222" font-family="Arial, sans-serif" font-weight="bold" text-anchor="middle" opacity="0.85">JOHN.</text>
+  <!-- Tilted stamp border effect -->
+  <rect x="32" y="63" width="36" height="24" rx="2" fill="none" stroke="#cc2222" stroke-width="1.5" opacity="0.4" transform="rotate(-3 50 75)"/>
 
   <!-- Legs - blue jeans -->
-  <rect x="22" y="98" width="24" height="20" rx="3" fill="#3366aa"/>
-  <rect x="54" y="98" width="24" height="20" rx="3" fill="#3366aa"/>
+  <rect x="22" y="98" width="24" height="20" rx="3" fill="#2266aa"/>
+  <rect x="54" y="98" width="24" height="20" rx="3" fill="#2266aa"/>
+  <!-- Yellow feet/shoes -->
+  <rect x="20" y="114" width="28" height="6" rx="2" fill="#f5cd30"/>
+  <rect x="52" y="114" width="28" height="6" rx="2" fill="#f5cd30"/>
 
-  <!-- Arms (skin tone) -->
-  <rect x="10" y="60" width="14" height="28" rx="5" fill="#e8c99b"/>
-  <rect x="76" y="60" width="14" height="28" rx="5" fill="#e8c99b"/>
-
-  <!-- Holding a drink in left hand -->
-  <rect x="4" y="82" width="12" height="16" rx="2" fill="#dd4444"/>
-  <rect x="3" y="80" width="14" height="4" rx="1" fill="#cc3333"/>
+  <!-- Arms - gray upper, yellow lower -->
+  <rect x="8" y="58" width="16" height="18" rx="5" fill="#c0c0c0"/>
+  <rect x="8" y="74" width="16" height="14" rx="5" fill="#f5cd30"/>
+  <rect x="76" y="58" width="16" height="18" rx="5" fill="#c0c0c0"/>
+  <rect x="76" y="74" width="16" height="14" rx="5" fill="#f5cd30"/>
 </svg>
