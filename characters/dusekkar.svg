@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120">
+  <!-- Dusekkar: Dark figure with antlers and glowing purple jack-o-lantern face -->
+
+  <!-- Antlers -->
+  <!-- Left antler -->
+  <line x1="30" y1="10" x2="18" y2="-8" stroke="#4a3a5a" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="18" y1="-8" x2="10" y2="-16" stroke="#4a3a5a" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="18" y1="-8" x2="22" y2="-18" stroke="#4a3a5a" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="24" y1="0" x2="14" y2="-5" stroke="#4a3a5a" stroke-width="2" stroke-linecap="round"/>
+  <!-- Right antler -->
+  <line x1="70" y1="10" x2="82" y2="-8" stroke="#4a3a5a" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="82" y1="-8" x2="90" y2="-16" stroke="#4a3a5a" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="82" y1="-8" x2="78" y2="-18" stroke="#4a3a5a" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="76" y1="0" x2="86" y2="-5" stroke="#4a3a5a" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- Head - dark purple -->
+  <rect x="25" y="5" width="50" height="50" rx="5" fill="#2a1a3a"/>
+  <rect x="28" y="8" width="44" height="44" rx="4" fill="#3a2a4a"/>
+
+  <!-- Glowing purple jack-o-lantern eyes -->
+  <polygon points="36,20 42,20 39,28" fill="#9a44dd"/>
+  <polygon points="36,20 42,20 39,28" fill="#bb66ff" opacity="0.7"/>
+  <polygon points="58,20 64,20 61,28" fill="#9a44dd"/>
+  <polygon points="58,20 64,20 61,28" fill="#bb66ff" opacity="0.7"/>
+
+  <!-- Jack-o-lantern nose -->
+  <polygon points="48,30 52,30 50,35" fill="#9a44dd" opacity="0.8"/>
+
+  <!-- Jack-o-lantern grin -->
+  <path d="M34 40 L38 36 L42 40 L46 36 L50 40 L54 36 L58 40 L62 36 L66 40" stroke="#9a44dd" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M34 40 L38 36 L42 40 L46 36 L50 40 L54 36 L58 40 L62 36 L66 40" stroke="#bb66ff" stroke-width="1.5" fill="none" opacity="0.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Face glow aura -->
+  <rect x="28" y="8" width="44" height="44" rx="4" fill="none" stroke="#9a44dd" stroke-width="1" opacity="0.3"/>
+
+  <!-- Body -->
+  <rect x="20" y="55" width="60" height="45" rx="4" fill="#2a1a3a"/>
+  <rect x="24" y="58" width="52" height="38" rx="2" fill="#3a2a4a"/>
+  <!-- Faint purple symbol on chest -->
+  <circle cx="50" cy="76" r="8" fill="none" stroke="#9a44dd" stroke-width="1.5" opacity="0.25"/>
+  <line x1="50" y1="68" x2="50" y2="84" stroke="#9a44dd" stroke-width="1" opacity="0.2"/>
+  <line x1="42" y1="76" x2="58" y2="76" stroke="#9a44dd" stroke-width="1" opacity="0.2"/>
+
+  <!-- Legs -->
+  <rect x="20" y="100" width="24" height="18" rx="3" fill="#1a0a2a"/>
+  <rect x="56" y="100" width="24" height="18" rx="3" fill="#1a0a2a"/>
+
+  <!-- Arms -->
+  <rect x="8" y="58" width="14" height="30" rx="5" fill="#2a1a3a"/>
+  <rect x="78" y="58" width="14" height="30" rx="5" fill="#2a1a3a"/>
+</svg>

@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120">
+  <!-- C00lkid: Red hooded figure, blocky Roblox style -->
+
+  <!-- Hood -->
+  <path d="M22 8 Q50 -8 78 8 L78 55 L22 55 Z" fill="#cc2222"/>
+  <path d="M26 12 Q50 -2 74 12 L74 52 L26 52 Z" fill="#dd3333"/>
+
+  <!-- Face area inside hood (darker) -->
+  <rect x="30" y="18" width="40" height="30" rx="3" fill="#aa1818"/>
+
+  <!-- Eyes - dark/menacing -->
+  <rect x="34" y="24" width="12" height="8" rx="2" fill="#1a1a1a"/>
+  <rect x="36" y="26" width="8" height="4" rx="1" fill="#ff4444" opacity="0.6"/>
+  <rect x="54" y="24" width="12" height="8" rx="2" fill="#1a1a1a"/>
+  <rect x="56" y="26" width="8" height="4" rx="1" fill="#ff4444" opacity="0.6"/>
+
+  <!-- Mouth -->
+  <rect x="40" y="40" width="20" height="4" rx="2" fill="#1a1a1a"/>
+
+  <!-- Body - red blocky -->
+  <rect x="22" y="55" width="56" height="42" rx="4" fill="#cc2222"/>
+  <rect x="28" y="58" width="44" height="36" rx="2" fill="#bb1a1a"/>
+  <!-- Hoodie pocket -->
+  <rect x="34" y="72" width="32" height="14" rx="3" fill="#aa1111"/>
+  <rect x="46" y="72" width="8" height="10" rx="2" fill="#991010"/>
+
+  <!-- Legs -->
+  <rect x="22" y="97" width="24" height="20" rx="3" fill="#881010"/>
+  <rect x="54" y="97" width="24" height="20" rx="3" fill="#881010"/>
+
+  <!-- Arms -->
+  <rect x="10" y="58" width="14" height="28" rx="5" fill="#cc2222"/>
+  <rect x="76" y="58" width="14" height="28" rx="5" fill="#cc2222"/>
+</svg>

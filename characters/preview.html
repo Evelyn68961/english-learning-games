@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forsaken Characters Preview</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Comic Sans MS', 'Chalkboard', 'Arial Rounded MT Bold', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            min-height: 100vh;
+            padding: 30px;
+        }
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 3px 3px 0 #FF6B6B, 5px 5px 0 #4ECDC4;
+        }
+        p.subtitle {
+            text-align: center;
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px 15px 15px;
+            text-align: center;
+            box-shadow: 0 6px 0 rgba(0,0,0,0.1), 0 10px 25px rgba(0,0,0,0.15);
+            transition: transform 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-8px) scale(1.03);
+        }
+        .card svg {
+            width: 100px;
+            height: 120px;
+            margin-bottom: 10px;
+        }
+        .card .name {
+            font-size: 0.95rem;
+            color: #333;
+            font-weight: bold;
+        }
+        .card .desc {
+            font-size: 0.75rem;
+            color: #888;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Forsaken Characters</h1>
+    <p class="subtitle">Preview all 14 character SVGs - hover to see them pop!</p>
+    <div class="grid">
+        <div class="card">
+            <img src="007n7.svg" alt="007n7">
+            <div class="name">007n7</div>
+            <div class="desc">Spy with burger</div>
+        </div>
+        <div class="card">
+            <img src="elliott.svg" alt="Elliott">
+            <div class="name">Elliott</div>
+            <div class="desc">Red, throwing pizza</div>
+        </div>
+        <div class="card">
+            <img src="jason.svg" alt="Jason">
+            <div class="name">Jason</div>
+            <div class="desc">Hockey mask</div>
+        </div>
+        <div class="card">
+            <img src="guest1337.svg" alt="Guest 1337">
+            <div class="name">Guest 1337</div>
+            <div class="desc">Blue hair, tactical</div>
+        </div>
+        <div class="card">
+            <img src="johndoe.svg" alt="John Doe">
+            <div class="name">John Doe</div>
+            <div class="desc">Dark cape, menacing</div>
+        </div>
+        <div class="card">
+            <img src="chance.svg" alt="Chance">
+            <div class="name">Chance</div>
+            <div class="desc">Fedora, sunglasses</div>
+        </div>
+        <div class="card">
+            <img src="builderman.svg" alt="Builderman">
+            <div class="name">Builderman</div>
+            <div class="desc">Orange hard hat</div>
+        </div>
+        <div class="card">
+            <img src="1x1x1x1.svg" alt="1x1x1x1">
+            <div class="name">1x1x1x1</div>
+            <div class="desc">Teal, glowing green</div>
+        </div>
+        <div class="card">
+            <img src="twotime.svg" alt="Two Time">
+            <div class="name">Two Time</div>
+            <div class="desc">Antlers, blue hair</div>
+        </div>
+        <div class="card">
+            <img src="taph.svg" alt="Taph">
+            <div class="name">Taph</div>
+            <div class="desc">Dark hooded figure</div>
+        </div>
+        <div class="card">
+            <img src="shedletsky.svg" alt="Shedletsky">
+            <div class="name">Shedletsky</div>
+            <div class="desc">Curly hair, casual</div>
+        </div>
+        <div class="card">
+            <img src="noob.svg" alt="Noob">
+            <div class="name">Noob</div>
+            <div class="desc">Classic yellow, teary</div>
+        </div>
+        <div class="card">
+            <img src="c00lkid.svg" alt="C00lkid">
+            <div class="name">C00lkid</div>
+            <div class="desc">Red hoodie</div>
+        </div>
+        <div class="card">
+            <img src="dusekkar.svg" alt="Dusekkar">
+            <div class="name">Dusekkar</div>
+            <div class="desc">Antlers, purple glow</div>
+        </div>
+    </div>
+</body>
+</html>

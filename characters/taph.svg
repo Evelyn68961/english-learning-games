@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120">
+  <!-- Taph: Dark hooded mysterious figure -->
+
+  <!-- Hood/cloak - main shape -->
+  <path d="M18 12 Q50 -8 82 12 L88 105 L12 105 Z" fill="#13132a"/>
+  <path d="M22 16 Q50 -2 78 16 L82 100 L18 100 Z" fill="#0e0e22"/>
+
+  <!-- Hood inner shadow -->
+  <path d="M28 22 Q50 8 72 22 L70 55 L30 55 Z" fill="#0a0a1a"/>
+
+  <!-- Glowing eyes inside hood -->
+  <rect x="35" y="32" width="12" height="7" rx="2" fill="#ffcc00" opacity="0.85"/>
+  <rect x="37" y="34" width="8" height="3" rx="1" fill="#ffee66"/>
+  <rect x="53" y="32" width="12" height="7" rx="2" fill="#ffcc00" opacity="0.85"/>
+  <rect x="55" y="34" width="8" height="3" rx="1" fill="#ffee66"/>
+
+  <!-- Body under cloak -->
+  <rect x="26" y="55" width="48" height="42" rx="4" fill="#13132a"/>
+  <rect x="30" y="58" width="40" height="36" rx="2" fill="#0e0e22"/>
+
+  <!-- Subtle rune/symbol on chest -->
+  <circle cx="50" cy="74" r="8" fill="none" stroke="#ffcc00" stroke-width="1" opacity="0.2"/>
+  <circle cx="50" cy="74" r="3" fill="#ffcc00" opacity="0.1"/>
+
+  <!-- Legs (barely visible, dark) -->
+  <rect x="28" y="97" width="20" height="16" rx="3" fill="#0a0a1a"/>
+  <rect x="52" y="97" width="20" height="16" rx="3" fill="#0a0a1a"/>
+
+  <!-- Arms / cloak sleeves -->
+  <rect x="12" y="58" width="16" height="30" rx="6" fill="#13132a"/>
+  <rect x="72" y="58" width="16" height="30" rx="6" fill="#13132a"/>
+</svg>

@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120">
+  <!-- Shedletsky: Curly brown hair, casual outfit, friendly look -->
+
+  <!-- Big curly hair -->
+  <circle cx="32" cy="6" r="10" fill="#7B4B2A"/>
+  <circle cx="50" cy="2" r="12" fill="#8B5534"/>
+  <circle cx="68" cy="6" r="10" fill="#7B4B2A"/>
+  <circle cx="40" cy="-2" r="9" fill="#9B6544"/>
+  <circle cx="58" cy="-2" r="9" fill="#9B6544"/>
+  <circle cx="25" cy="12" r="8" fill="#7B4B2A"/>
+  <circle cx="75" cy="12" r="8" fill="#7B4B2A"/>
+  <circle cx="50" cy="-6" r="7" fill="#8B5534"/>
+
+  <!-- Head -->
+  <rect x="25" y="10" width="50" height="48" rx="5" fill="#deb887"/>
+  <rect x="28" y="13" width="44" height="42" rx="3" fill="#e8c99b"/>
+
+  <!-- Eyes -->
+  <circle cx="40" cy="30" r="5.5" fill="white"/>
+  <circle cx="40" cy="31" r="3" fill="#4a3520"/>
+  <circle cx="40" cy="30" r="1.2" fill="white"/>
+  <circle cx="60" cy="30" r="5.5" fill="white"/>
+  <circle cx="60" cy="31" r="3" fill="#4a3520"/>
+  <circle cx="60" cy="30" r="1.2" fill="white"/>
+
+  <!-- Friendly smile -->
+  <path d="M40 44 Q50 52 60 44" stroke="#8a6a4a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+  <!-- Body - casual red/maroon top -->
+  <rect x="22" y="58" width="56" height="40" rx="4" fill="#cc4444"/>
+  <rect x="28" y="61" width="44" height="34" rx="2" fill="#dd5555"/>
+  <!-- Text/logo on shirt -->
+  <rect x="36" y="68" width="28" height="10" rx="3" fill="#bb3333"/>
+
+  <!-- Legs - blue jeans -->
+  <rect x="22" y="98" width="24" height="20" rx="3" fill="#3366aa"/>
+  <rect x="54" y="98" width="24" height="20" rx="3" fill="#3366aa"/>
+
+  <!-- Arms (skin tone) -->
+  <rect x="10" y="60" width="14" height="28" rx="5" fill="#e8c99b"/>
+  <rect x="76" y="60" width="14" height="28" rx="5" fill="#e8c99b"/>
+
+  <!-- Holding a drink in left hand -->
+  <rect x="4" y="82" width="12" height="16" rx="2" fill="#dd4444"/>
+  <rect x="3" y="80" width="14" height="4" rx="1" fill="#cc3333"/>
+</svg>

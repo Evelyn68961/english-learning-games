@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120">
+  <!-- Chance: Noir detective, fedora, sunglasses, black suit -->
+
+  <!-- Fedora hat -->
+  <ellipse cx="50" cy="8" rx="32" ry="6" fill="#1a1a1a"/>
+  <rect x="28" y="2" width="44" height="8" rx="3" fill="#2a2a2a"/>
+  <rect x="30" y="0" width="40" height="6" rx="4" fill="#2a2a2a"/>
+  <!-- Hat band -->
+  <rect x="28" y="6" width="44" height="3" fill="#3a3a3a"/>
+
+  <!-- Head -->
+  <rect x="25" y="10" width="50" height="48" rx="5" fill="#2a2a2a"/>
+  <rect x="28" y="13" width="44" height="42" rx="3" fill="#333333"/>
+
+  <!-- Sunglasses -->
+  <rect x="30" y="22" width="40" height="14" rx="4" fill="#0a0a0a"/>
+  <rect x="33" y="24" width="15" height="10" rx="2" fill="#111"/>
+  <circle cx="40" cy="29" r="2" fill="white" opacity="0.15"/>
+  <rect x="52" y="24" width="15" height="10" rx="2" fill="#111"/>
+  <circle cx="60" cy="29" r="2" fill="white" opacity="0.15"/>
+
+  <!-- Mouth - neutral line -->
+  <rect x="40" y="46" width="20" height="3" rx="1.5" fill="#555"/>
+
+  <!-- Body - black suit -->
+  <rect x="22" y="58" width="56" height="40" rx="4" fill="#1a1a1a"/>
+  <rect x="28" y="61" width="44" height="34" rx="2" fill="#222222"/>
+  <!-- White shirt/collar peek -->
+  <rect x="42" y="58" width="16" height="10" rx="2" fill="white"/>
+  <!-- Purple tie -->
+  <rect x="47" y="64" width="6" height="28" fill="#8a2be2"/>
+  <polygon points="47,64 53,64 50,58" fill="#8a2be2"/>
+
+  <!-- Legs -->
+  <rect x="22" y="98" width="24" height="20" rx="3" fill="#1a1a1a"/>
+  <rect x="54" y="98" width="24" height="20" rx="3" fill="#1a1a1a"/>
+
+  <!-- Arms -->
+  <rect x="10" y="60" width="14" height="28" rx="5" fill="#1a1a1a"/>
+  <rect x="76" y="60" width="14" height="28" rx="5" fill="#1a1a1a"/>
+</svg>

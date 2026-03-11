@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120">
+  <!-- Two Time: Cheerful character with antlers/horns, blue hair -->
+
+  <!-- Antlers -->
+  <!-- Left antler -->
+  <line x1="32" y1="12" x2="20" y2="-5" stroke="#8B6B3C" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="20" y1="-5" x2="12" y2="-12" stroke="#8B6B3C" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="20" y1="-5" x2="22" y2="-15" stroke="#8B6B3C" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="25" y1="2" x2="17" y2="-3" stroke="#8B6B3C" stroke-width="2" stroke-linecap="round"/>
+  <!-- Right antler -->
+  <line x1="68" y1="12" x2="80" y2="-5" stroke="#8B6B3C" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="80" y1="-5" x2="88" y2="-12" stroke="#8B6B3C" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="80" y1="-5" x2="78" y2="-15" stroke="#8B6B3C" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="75" y1="2" x2="83" y2="-3" stroke="#8B6B3C" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- Blue hair -->
+  <rect x="22" y="2" width="56" height="16" rx="5" fill="#3366cc"/>
+  <rect x="26" y="-2" width="12" height="12" rx="3" fill="#4477dd"/>
+  <rect x="42" y="-4" width="12" height="14" rx="3" fill="#4477dd"/>
+  <rect x="58" y="-1" width="12" height="11" rx="3" fill="#4477dd"/>
+
+  <!-- Head -->
+  <rect x="25" y="10" width="50" height="48" rx="5" fill="#5599dd"/>
+  <rect x="28" y="13" width="44" height="42" rx="3" fill="#66aaee"/>
+
+  <!-- Happy eyes -->
+  <circle cx="40" cy="30" r="6" fill="white"/>
+  <circle cx="40" cy="31" r="3.5" fill="#2244cc"/>
+  <circle cx="40" cy="30" r="1.5" fill="white"/>
+  <circle cx="60" cy="30" r="6" fill="white"/>
+  <circle cx="60" cy="31" r="3.5" fill="#2244cc"/>
+  <circle cx="60" cy="30" r="1.5" fill="white"/>
+
+  <!-- Big happy smile -->
+  <path d="M36 44 Q50 56 64 44" stroke="#2244aa" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+  <!-- Blush marks -->
+  <ellipse cx="33" cy="40" rx="5" ry="3" fill="#ff9999" opacity="0.4"/>
+  <ellipse cx="67" cy="40" rx="5" ry="3" fill="#ff9999" opacity="0.4"/>
+
+  <!-- Body - blue outfit -->
+  <rect x="22" y="58" width="56" height="40" rx="4" fill="#335599"/>
+  <rect x="28" y="61" width="44" height="34" rx="2" fill="#4466aa"/>
+  <!-- Scarf/bandana -->
+  <rect x="30" y="56" width="40" height="8" rx="3" fill="#cc4444"/>
+
+  <!-- Legs -->
+  <rect x="22" y="98" width="24" height="20" rx="3" fill="#223388"/>
+  <rect x="54" y="98" width="24" height="20" rx="3" fill="#223388"/>
+
+  <!-- Arms -->
+  <rect x="10" y="58" width="14" height="28" rx="5" fill="#5599dd"/>
+  <rect x="76" y="58" width="14" height="28" rx="5" fill="#5599dd"/>
+</svg>
