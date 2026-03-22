@@ -5,373 +5,162 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>English Learning Games for Kids</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@600;700;800&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'Comic Sans MS', 'Chalkboard', 'Arial Rounded MT Bold', sans-serif;
+            font-family: 'Nunito', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
             min-height: 100vh;
             overflow-x: hidden;
         }
 
-        /* Floating shapes background */
         .shapes {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 0;
-            overflow: hidden;
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none; z-index: 0; overflow: hidden;
         }
 
         .shape {
-            position: absolute;
-            opacity: 0.15;
+            position: absolute; opacity: 0.15;
             animation: float 15s infinite ease-in-out;
         }
 
-        .shape-1 {
-            width: 80px;
-            height: 80px;
-            background: #FFE66D;
-            border-radius: 50%;
-            top: 10%;
-            left: 5%;
-            animation-delay: 0s;
-        }
-
-        .shape-2 {
-            width: 60px;
-            height: 60px;
-            background: #4ECDC4;
-            border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
-            top: 20%;
-            right: 10%;
-            animation-delay: -5s;
-        }
-
-        .shape-3 {
-            width: 100px;
-            height: 100px;
-            background: #FF6B6B;
-            border-radius: 50%;
-            bottom: 15%;
-            left: 15%;
-            animation-delay: -10s;
-        }
-
-        .shape-4 {
-            width: 70px;
-            height: 70px;
-            background: #95E1D3;
-            transform: rotate(45deg);
-            bottom: 20%;
-            right: 20%;
-            animation-delay: -7s;
-        }
-
-        .shape-5 {
-            width: 50px;
-            height: 50px;
-            background: #F38181;
-            border-radius: 50%;
-            top: 50%;
-            left: 50%;
-            animation-delay: -3s;
-        }
+        .shape-1 { width: 80px; height: 80px; background: #FFE66D; border-radius: 50%; top: 10%; left: 5%; }
+        .shape-2 { width: 60px; height: 60px; background: #4ECDC4; border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; top: 20%; right: 10%; animation-delay: -5s; }
+        .shape-3 { width: 100px; height: 100px; background: #FF6B6B; border-radius: 50%; bottom: 15%; left: 15%; animation-delay: -10s; }
+        .shape-4 { width: 70px; height: 70px; background: #95E1D3; transform: rotate(45deg); bottom: 20%; right: 20%; animation-delay: -7s; }
+        .shape-5 { width: 50px; height: 50px; background: #F38181; border-radius: 50%; top: 50%; left: 50%; animation-delay: -3s; }
 
         @keyframes float {
             0%, 100% { transform: translateY(0) rotate(0deg); }
-            25% { transform: translateY(-30px) rotate(5deg); }
-            50% { transform: translateY(0) rotate(0deg); }
-            75% { transform: translateY(30px) rotate(-5deg); }
+            33% { transform: translateY(-20px) rotate(5deg); }
+            66% { transform: translateY(10px) rotate(-3deg); }
         }
 
-        /* Main container */
         .container {
-            position: relative;
-            z-index: 1;
+            position: relative; z-index: 1;
+            max-width: 700px; margin: 0 auto;
+            padding: 30px 15px;
+            display: flex; flex-direction: column;
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 40px 20px;
         }
 
-        /* Header */
         .header {
             text-align: center;
-            margin-bottom: 50px;
+            padding: 20px 0 10px;
         }
 
         .title {
-            font-size: clamp(2rem, 8vw, 4rem);
-            color: white;
-            text-shadow:
-                4px 4px 0 #FF6B6B,
-                6px 6px 0 #4ECDC4,
-                8px 8px 15px rgba(0,0,0,0.3);
-            margin-bottom: 15px;
-            animation: bounce 3s infinite ease-in-out;
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+            font-family: 'Lilita One', cursive;
+            font-size: clamp(2rem, 7vw, 3.5rem);
+            color: #fff;
+            text-shadow: 3px 3px 0 rgba(0,0,0,0.15);
         }
 
         .subtitle {
-            font-size: clamp(1rem, 4vw, 1.5rem);
-            color: rgba(255, 255, 255, 0.9);
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            font-size: clamp(1rem, 3vw, 1.3rem);
+            color: rgba(255,255,255,0.85);
+            font-weight: 700;
         }
 
-        /* Games grid */
         .games-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 30px;
-            max-width: 1200px;
-            width: 100%;
-            padding: 20px;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            padding: 20px 0;
         }
 
-        /* Game card */
         .game-card {
             background: white;
-            border-radius: 30px;
-            padding: 30px;
+            border-radius: 22px;
+            padding: 22px 15px;
             text-align: center;
             text-decoration: none;
             transition: all 0.3s ease;
-            box-shadow:
-                0 10px 0 rgba(0,0,0,0.1),
-                0 15px 40px rgba(0,0,0,0.2);
+            box-shadow: 0 6px 0 rgba(0,0,0,0.08), 0 10px 25px rgba(0,0,0,0.12);
             position: relative;
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         .game-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 8px;
-            background: linear-gradient(90deg, #FF6B6B, #FFE66D, #4ECDC4, #FF6B6B);
-            background-size: 300% 100%;
-            animation: rainbow 3s linear infinite;
-        }
-
-        @keyframes rainbow {
-            0% { background-position: 0% 50%; }
-            100% { background-position: 300% 50%; }
+            content: ''; position: absolute;
+            top: 0; left: 0; right: 0; height: 5px;
         }
 
         .game-card:hover {
-            transform: translateY(-10px) scale(1.02);
-            box-shadow:
-                0 20px 0 rgba(0,0,0,0.1),
-                0 25px 50px rgba(0,0,0,0.3);
+            transform: translateY(-6px) scale(1.02);
+            box-shadow: 0 12px 0 rgba(0,0,0,0.08), 0 18px 35px rgba(0,0,0,0.18);
         }
 
-        .game-card:active {
-            transform: translateY(-5px) scale(1);
-        }
+        .game-card.pvz::before { background: linear-gradient(90deg, #4CAF50, #FFD700); }
+        .game-card.runner::before { background: linear-gradient(90deg, #667eea, #FFD93D); }
+        .game-card.mole::before { background: linear-gradient(90deg, #FF6B6B, #FFE66D); }
+        .game-card.grammar::before { background: linear-gradient(90deg, #4ECDC4, #45B7D1); }
 
-        .game-icon {
-            font-size: 5rem;
-            margin-bottom: 20px;
-            display: block;
-            animation: wiggle 2s infinite ease-in-out;
-        }
+        .game-icon { font-size: 3.5rem; margin-bottom: 8px; display: block; }
 
-        @keyframes wiggle {
-            0%, 100% { transform: rotate(-5deg); }
-            50% { transform: rotate(5deg); }
-        }
-
-        .game-card:hover .game-icon {
-            animation: jump 0.5s ease-in-out;
-        }
-
-        @keyframes jump {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(10deg); }
+        .new-badge {
+            position: absolute;
+            top: 12px; right: 12px;
+            background: #FF6B6B;
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .game-title {
-            font-size: clamp(1.5rem, 5vw, 2rem);
+            font-family: 'Lilita One', cursive;
+            font-size: clamp(1rem, 3.5vw, 1.3rem);
             color: #333;
-            margin-bottom: 10px;
+            margin-bottom: 6px;
         }
 
         .game-description {
-            font-size: clamp(0.9rem, 3vw, 1.1rem);
-            color: #666;
-            margin-bottom: 20px;
-            line-height: 1.5;
+            font-size: clamp(0.75rem, 2.2vw, 0.88rem);
+            color: #777;
+            margin-bottom: 12px;
+            line-height: 1.4;
         }
 
         .play-button {
             display: inline-block;
-            padding: 15px 40px;
+            padding: 8px 22px;
             background: linear-gradient(180deg, #4ECDC4 0%, #3BA99C 100%);
             color: white;
-            border-radius: 50px;
-            font-size: 1.2rem;
-            font-weight: bold;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: 2px;
-            box-shadow: 0 5px 0 #2D8A82;
-            transition: all 0.1s;
+            letter-spacing: 1px;
+            box-shadow: 0 3px 0 #2D8A82;
         }
 
-        .game-card:hover .play-button {
-            background: linear-gradient(180deg, #FF6B6B 0%, #EE5A5A 100%);
-            box-shadow: 0 5px 0 #CC4444;
-        }
+        .game-card.pvz .play-button { background: linear-gradient(180deg, #7BC950, #5AA83A); box-shadow: 0 3px 0 #3D7A28; }
+        .game-card.runner .play-button { background: linear-gradient(180deg, #FFD93D, #F0C419); color: #333; box-shadow: 0 3px 0 #C9A30E; }
 
-        /* Letter Mole specific styling */
-        .game-card.letter-mole {
-            background: linear-gradient(180deg, #FFF9E6 0%, #FFFFFF 100%);
-        }
-
-        /* Grammar Games specific styling */
-        .game-card.grammar-games {
-            background: linear-gradient(180deg, #E8F6FF 0%, #FFFFFF 100%);
-        }
-
-        .game-card.grammar-games .game-icon {
-            font-size: 5rem;
-            margin-bottom: 15px;
-        }
-
-        .mole-character {
-            width: 100px;
-            height: 100px;
-            background: #8B4513;
-            border-radius: 50% 50% 45% 45%;
-            margin: 0 auto 20px;
-            position: relative;
-            animation: wiggle 1.5s infinite ease-in-out;
-        }
-
-        .mole-character::before {
-            content: '';
-            position: absolute;
-            width: 70%;
-            height: 50%;
-            background: #D2691E;
-            border-radius: 50%;
-            top: 30%;
-            left: 15%;
-        }
-
-        .mole-eyes {
-            position: absolute;
-            top: 25%;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            gap: 25%;
-            z-index: 2;
-        }
-
-        .mole-eye {
-            width: 18px;
-            height: 18px;
-            background: white;
-            border-radius: 50%;
-            position: relative;
-        }
-
-        .mole-eye::after {
-            content: '';
-            position: absolute;
-            width: 8px;
-            height: 8px;
-            background: #2C2C2C;
-            border-radius: 50%;
-            top: 5px;
-            left: 5px;
-        }
-
-        .mole-nose {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 22px;
-            height: 16px;
-            background: #FF69B4;
-            border-radius: 50%;
-            z-index: 2;
-        }
-
-        /* Coming soon badge */
-        .coming-soon {
-            position: absolute;
-            top: 20px;
-            right: -30px;
-            background: #FFE66D;
-            color: #666;
-            padding: 5px 40px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            transform: rotate(45deg);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        /* Footer */
         .footer {
             margin-top: auto;
-            padding: 30px;
+            padding: 25px;
             text-align: center;
-            color: rgba(255,255,255,0.8);
-            font-size: 0.9rem;
+            color: rgba(255,255,255,0.7);
+            font-size: 0.85rem;
         }
 
-        .footer-hearts {
-            font-size: 1.5rem;
-            animation: heartbeat 1s infinite;
-        }
-
-        @keyframes heartbeat {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.2); }
-        }
-
-        /* Responsive */
-        @media (max-width: 600px) {
-            .container {
-                padding: 20px 10px;
-            }
-
-            .games-grid {
-                padding: 10px;
-                gap: 20px;
-            }
-
-            .game-card {
-                padding: 20px;
-            }
-
-            .mole-character {
-                width: 80px;
-                height: 80px;
-            }
+        @media (max-width: 500px) {
+            .games-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
-    <!-- Background shapes -->
     <div class="shapes">
         <div class="shape shape-1"></div>
         <div class="shape shape-2"></div>
@@ -382,40 +171,56 @@
 
     <div class="container">
         <header class="header">
-            <h1 class="title">Learning Games</h1>
+            <h1 class="title">🎮 Learning Games</h1>
             <p class="subtitle">Fun ways to learn English!</p>
         </header>
 
         <div class="games-grid">
+            <!-- Word Garden Defense -->
+            <a href="word-garden-defense/index.html" class="game-card pvz">
+                <span class="new-badge">NEW</span>
+                <span class="game-icon">🌻🧟</span>
+                <h2 class="game-title">Word Garden</h2>
+                <p class="game-description">
+                    Defend your garden from zombies by answering English questions! Plant sunflowers & peashooters.
+                </p>
+                <span class="play-button">Play Now!</span>
+            </a>
+
+            <!-- Roblox Runner -->
+            <a href="roblox-runner/index.html" class="game-card runner">
+                <span class="new-badge">NEW</span>
+                <span class="game-icon">🏃‍♂️💨</span>
+                <h2 class="game-title">Word Runner</h2>
+                <p class="game-description">
+                    Run through word gates and collect coins! Pick the right answers to keep running.
+                </p>
+                <span class="play-button">Play Now!</span>
+            </a>
+
             <!-- Letter Mole Game -->
-            <a href="letter-mole/index.html" class="game-card letter-mole">
-                <div class="mole-character">
-                    <div class="mole-eyes">
-                        <div class="mole-eye"></div>
-                        <div class="mole-eye"></div>
-                    </div>
-                    <div class="mole-nose"></div>
-                </div>
+            <a href="letter-mole/index.html" class="game-card mole">
+                <span class="game-icon">🔨🐹</span>
                 <h2 class="game-title">Letter Mole</h2>
                 <p class="game-description">
-                    Whack the moles with the matching letters! Learn your ABCs in this fun arcade game.
+                    Whack the moles with matching letters! Learn your ABCs in this arcade game.
                 </p>
                 <span class="play-button">Play Now!</span>
             </a>
 
             <!-- Grammar Games -->
-            <a href="grammar-games/index.html" class="game-card grammar-games">
-                <span class="game-icon">📚</span>
+            <a href="grammar-games/index.html" class="game-card grammar">
+                <span class="game-icon">📚✏️</span>
                 <h2 class="game-title">Grammar Games</h2>
                 <p class="game-description">
-                    Master English grammar with fun games! Start with present tense - am, is, are, and more!
+                    Master English grammar with fun games! Present tense, adverbs, and more!
                 </p>
                 <span class="play-button">Play Now!</span>
             </a>
         </div>
 
         <footer class="footer">
-            <div class="footer-hearts">Made with love for little learners</div>
+            Made with ❤️ for little learners
         </footer>
     </div>
 </body>
