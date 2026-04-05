@@ -278,6 +278,37 @@
                 0 4px 10px rgba(0,0,0,0.2);
         }
 
+        /* Mode Selector */
+        .mode-selector {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .mode-btn {
+            font-size: clamp(1rem, 3.5vw, 1.3rem);
+            padding: 12px 28px;
+            background: rgba(255,255,255,0.6);
+            color: #666;
+            border: 3px solid #CCC;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .mode-btn.active {
+            background: linear-gradient(180deg, #4ECDC4 0%, #3BA99C 100%);
+            color: white;
+            border-color: #3BA99C;
+            box-shadow: 0 4px 0 #2D8A82;
+        }
+
+        .mode-btn:hover:not(.active) {
+            background: rgba(255,255,255,0.9);
+            border-color: #4ECDC4;
+        }
+
         /* Level Select */
         .level-info {
             margin-top: 30px;
@@ -689,7 +720,277 @@
             100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
         }
 
-        /* Responsive adjustments */
+        /* ── Category Selection Screen ── */
+        #category-screen {
+            justify-content: flex-start;
+            padding-top: 10px;
+        }
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: clamp(14px, 4vw, 22px);
+            max-width: 460px;
+            width: 100%;
+            padding: 0 20px;
+            margin-top: 8px;
+        }
+        .category-card {
+            border-radius: 24px;
+            padding: clamp(16px, 4vw, 24px) 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 6px 0 rgba(0,0,0,0.18), 0 10px 20px rgba(0,0,0,0.12);
+            transition: all 0.12s;
+            font-family: inherit;
+            min-height: clamp(130px, 28vw, 170px);
+        }
+        .category-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 9px 0 rgba(0,0,0,0.18), 0 14px 28px rgba(0,0,0,0.15);
+        }
+        .category-card:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 rgba(0,0,0,0.18), 0 4px 10px rgba(0,0,0,0.12);
+        }
+        .cat-emoji-row {
+            font-size: clamp(1.5rem, 5.5vw, 2.1rem);
+            line-height: 1.4;
+            letter-spacing: 3px;
+            margin-bottom: 10px;
+        }
+        .cat-name {
+            font-size: clamp(1.1rem, 4vw, 1.5rem);
+            font-weight: bold;
+            color: white;
+            text-shadow: 1px 2px 0 rgba(0,0,0,0.2);
+            margin-bottom: 3px;
+        }
+        .cat-count {
+            font-size: clamp(0.7rem, 2.5vw, 0.9rem);
+            color: rgba(255,255,255,0.8);
+        }
+        .cat-animals { background: linear-gradient(150deg, #FF9F43 0%, #EE5A24 100%); }
+        .cat-colors  { background: linear-gradient(150deg, #A29BFE 0%, #6C5CE7 100%); }
+        .cat-food    { background: linear-gradient(150deg, #FD79A8 0%, #D63031 100%); }
+        .cat-body    { background: linear-gradient(150deg, #55EFC4 0%, #00B894 100%); }
+
+        /* ── Back Button ── */
+        .back-btn {
+            background: rgba(255,255,255,0.85);
+            border: none;
+            border-radius: 50px;
+            padding: 8px 16px;
+            font-size: clamp(1rem, 3.5vw, 1.2rem);
+            cursor: pointer;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+            transition: all 0.15s;
+            font-family: inherit;
+            flex-shrink: 0;
+        }
+        .back-btn:hover { background: white; transform: translateY(-1px); }
+        .back-btn:active { transform: translateY(2px); box-shadow: 0 1px 4px rgba(0,0,0,0.15); }
+
+        /* ── Learn Header (shared by both learn screens) ── */
+        .learn-header {
+            width: 100%;
+            max-width: 520px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.9);
+            border-radius: 20px;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .learn-header h2 {
+            font-size: clamp(1rem, 3.5vw, 1.4rem);
+            color: #4A4A4A;
+            flex: 1;
+            text-align: center;
+        }
+        .learn-header .spacer { width: 60px; flex-shrink: 0; }
+
+        /* ── Flashcard Screen ── */
+        #flashcard-screen {
+            justify-content: flex-start;
+            padding-top: 10px;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+        }
+        .learn-title {
+            font-size: clamp(1.3rem, 5vw, 2rem);
+            color: #FF6B6B;
+            margin: 5px 0 8px;
+            text-align: center;
+        }
+        .learn-progress {
+            font-size: clamp(0.85rem, 3vw, 1rem);
+            color: #888;
+            margin-bottom: 14px;
+            background: rgba(255,255,255,0.7);
+            padding: 5px 18px;
+            border-radius: 20px;
+        }
+        .flashcard-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: clamp(10px, 3vw, 16px);
+            max-width: 480px;
+            width: 100%;
+            padding: 0 15px;
+            margin-bottom: 20px;
+        }
+        .flashcard-wrapper {
+            perspective: 700px;
+            aspect-ratio: 1;
+            cursor: pointer;
+        }
+        .flashcard-inner {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.45s;
+            border-radius: 18px;
+        }
+        .flashcard-wrapper.flipped .flashcard-inner { transform: rotateY(180deg); }
+        .flashcard-face {
+            position: absolute;
+            inset: 0;
+            border-radius: 18px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            backface-visibility: hidden;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+        }
+        .flashcard-front {
+            background: linear-gradient(160deg, #FFF9E6 0%, #FFE66D 100%);
+            border: 3px solid #FFD93D;
+        }
+        .flashcard-front.seen { border-color: #4ECDC4; }
+        .flashcard-back {
+            background: linear-gradient(160deg, #4ECDC4 0%, #3BA99C 100%);
+            border: 3px solid #2D8A82;
+            transform: rotateY(180deg);
+        }
+        .fc-emoji { font-size: clamp(2rem, 8vw, 3rem); line-height: 1; }
+        .fc-tap-hint {
+            font-size: clamp(0.55rem, 1.8vw, 0.75rem);
+            color: rgba(0,0,0,0.35);
+            margin-top: 4px;
+        }
+        .fc-word {
+            font-size: clamp(1rem, 4vw, 1.5rem);
+            font-weight: bold;
+            color: white;
+            text-shadow: 1px 1px 0 rgba(0,0,0,0.2);
+            margin-top: 4px;
+        }
+        .btn[disabled] { opacity: 0.45; pointer-events: none; }
+
+        /* ── Memory Match Screen ── */
+        #memory-screen {
+            justify-content: flex-start;
+            padding-top: 10px;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+        }
+        .memory-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: clamp(8px, 2.5vw, 12px);
+            max-width: 480px;
+            width: 100%;
+            padding: 0 15px;
+            margin-bottom: 16px;
+        }
+        .memory-card-wrap {
+            perspective: 700px;
+            aspect-ratio: 1;
+            cursor: pointer;
+        }
+        .memory-card {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.38s;
+            border-radius: 14px;
+        }
+        .memory-card-wrap.revealed .memory-card,
+        .memory-card-wrap.matched .memory-card { transform: rotateY(180deg); }
+        .memory-face {
+            position: absolute;
+            inset: 0;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backface-visibility: hidden;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+        }
+        .memory-card-back-face {
+            background: linear-gradient(160deg, #8B4513 0%, #5C2E00 100%);
+            font-size: clamp(1.4rem, 5vw, 2rem);
+        }
+        .memory-card-front-face {
+            transform: rotateY(180deg);
+            background: linear-gradient(160deg, #FFF9E6 0%, #FFE66D 100%);
+            border: 3px solid #FFD93D;
+            font-size: clamp(1.5rem, 5.5vw, 2.2rem);
+            text-align: center;
+            padding: 4px;
+        }
+        .memory-card-wrap.matched .memory-card-front-face {
+            background: linear-gradient(160deg, #90EE90 0%, #32CD32 100%);
+            border-color: #228B22;
+        }
+        .mem-word {
+            font-size: clamp(0.7rem, 2.8vw, 1rem);
+            font-weight: bold;
+            color: #4A4A4A;
+            line-height: 1.2;
+        }
+        .memory-card-wrap.matched .mem-word { color: white; }
+        .memory-pairs-badge {
+            background: rgba(255,255,255,0.85);
+            border-radius: 20px;
+            padding: 6px 20px;
+            font-size: clamp(0.9rem, 3vw, 1.1rem);
+            color: #666;
+            margin-bottom: 12px;
+        }
+        .memory-pairs-badge span { color: #FF6B6B; font-weight: bold; }
+        @keyframes memShake {
+            0%,100% { transform: rotateY(180deg) translateX(0); }
+            25% { transform: rotateY(180deg) translateX(-4px); }
+            75% { transform: rotateY(180deg) translateX(4px); }
+        }
+        .memory-card-wrap.shake .memory-card { animation: memShake 0.3s; }
+        .memory-win-banner {
+            text-align: center;
+            animation: modalPop 0.5s ease-out;
+            padding: 10px 0 20px;
+        }
+        .memory-win-banner h2 {
+            font-size: clamp(1.6rem, 6vw, 2.5rem);
+            color: #4ECDC4;
+            margin-bottom: 8px;
+        }
+        .memory-win-banner p {
+            font-size: clamp(0.95rem, 3.5vw, 1.2rem);
+            color: #666;
+            margin-bottom: 18px;
+        }
+
+        /* ── Responsive adjustments */
         @media (max-width: 400px) {
             .game-board {
                 gap: 8px;
@@ -733,6 +1034,11 @@
             </div>
         </div>
 
+        <div class="mode-selector">
+            <button class="mode-btn active" id="mode-letters" onclick="selectMode('letters')">🔤 Letters</button>
+            <button class="mode-btn" id="mode-vocab" onclick="selectMode('vocab')">📝 Words</button>
+        </div>
+
         <button class="play-btn" onclick="startGame()">Play!</button>
 
         <div class="level-info">
@@ -740,17 +1046,88 @@
         </div>
     </div>
 
+    <!-- Category Selection Screen -->
+    <div id="category-screen" class="screen">
+        <div class="learn-header">
+            <button class="back-btn" onclick="goToStart()">← Back</button>
+            <h2>Choose a Topic</h2>
+            <div class="spacer"></div>
+        </div>
+        <h2 class="learn-title">What do you want to learn? 🌟</h2>
+        <div class="category-grid">
+            <button class="category-card cat-animals" onclick="selectCategory(0)">
+                <div class="cat-emoji-row">🐱 🐶</div>
+                <div class="cat-emoji-row">🐟 🐦</div>
+                <div class="cat-name">Animals</div>
+                <div class="cat-count">6 words</div>
+            </button>
+            <button class="category-card cat-colors" onclick="selectCategory(1)">
+                <div class="cat-emoji-row">🔴 🔵</div>
+                <div class="cat-emoji-row">🟢 🟡</div>
+                <div class="cat-name">Colors</div>
+                <div class="cat-count">6 words</div>
+            </button>
+            <button class="category-card cat-food" onclick="selectCategory(2)">
+                <div class="cat-emoji-row">🍎 🎂</div>
+                <div class="cat-emoji-row">🥛 🥚</div>
+                <div class="cat-name">Food</div>
+                <div class="cat-count">6 words</div>
+            </button>
+            <button class="category-card cat-body" onclick="selectCategory(3)">
+                <div class="cat-emoji-row">👁️ 👂</div>
+                <div class="cat-emoji-row">✋ 🦶</div>
+                <div class="cat-name">Body</div>
+                <div class="cat-count">6 words</div>
+            </button>
+        </div>
+    </div>
+
+    <!-- Flashcard Learn Screen -->
+    <div id="flashcard-screen" class="screen">
+        <div class="learn-header">
+            <button class="back-btn" onclick="showCategorySelect()">← Back</button>
+            <h2 id="fc-category-name">Animals</h2>
+            <div class="spacer"></div>
+        </div>
+        <h2 class="learn-title">Learn the Words! 📖</h2>
+        <div class="learn-progress" id="fc-progress">Tap each card to see the word!</div>
+        <div class="flashcard-grid" id="flashcard-grid"></div>
+        <button class="btn btn-primary" id="fc-next-btn" onclick="goToMemoryMatch()" disabled>
+            Match the Words! →
+        </button>
+    </div>
+
+    <!-- Memory Match Screen -->
+    <div id="memory-screen" class="screen">
+        <div class="learn-header">
+            <button class="back-btn" onclick="showFlashcards(false)">← Back</button>
+            <h2 id="mem-category-name">Animals</h2>
+            <div class="spacer"></div>
+        </div>
+        <h2 class="learn-title">Match the Words! 🧠</h2>
+        <div class="memory-pairs-badge">Pairs found: <span id="pairs-found">0</span> / <span id="total-pairs">6</span></div>
+        <div class="memory-grid" id="memory-grid"></div>
+        <div class="memory-win-banner" id="memory-win" style="display:none;">
+            <div style="font-size:3rem;">🎉</div>
+            <h2>All Matched!</h2>
+            <p>You know all the words! Ready to play?</p>
+            <button class="btn btn-primary" onclick="beginMoleGame()">Play Mole Game! 🔨</button>
+        </div>
+    </div>
+
     <!-- Game Screen -->
     <div id="game-screen" class="screen">
         <div class="game-header">
+            <button class="back-btn" onclick="confirmBackToStart()">← Back</button>
             <div class="score-display">Score: <span id="score">0</span></div>
             <div class="level-display" id="level-indicator">Level 1</div>
             <div class="timer-display" id="timer">⏱️ 60</div>
         </div>
 
         <div class="target-letter-container">
-            <div class="target-label">Find the letter:</div>
+            <div class="target-label" id="target-label">Find the letter:</div>
             <div class="target-letter" id="target-letter">A</div>
+            <div class="target-word-hint" id="target-word-hint" style="display:none; font-size: clamp(0.8rem, 2.5vw, 1rem); color: #888; margin-top: 4px;"></div>
         </div>
 
         <div class="game-board" id="game-board">
@@ -767,8 +1144,8 @@
         <p class="encouragement" id="encouragement">You're a letter superstar!</p>
 
         <div class="btn-group">
-            <button class="btn btn-primary" onclick="startGame()">Play Again</button>
-            <button class="btn btn-secondary" onclick="goToStart()">Home</button>
+            <button class="btn btn-primary" id="play-again-btn" onclick="startGame()">Play Again</button>
+            <button class="btn btn-secondary" id="second-btn" onclick="goToStart()">Home</button>
         </div>
     </div>
 
@@ -776,7 +1153,7 @@
     <div id="level-modal" class="modal">
         <div class="modal-content">
             <h2 class="modal-title">🎉 Level Up! 🎉</h2>
-            <p>New letters unlocked:</p>
+            <p id="new-items-label">New letters unlocked:</p>
             <div class="modal-letters" id="new-letters">G H</div>
             <button class="btn btn-primary" onclick="closeLevelModal()">Keep Playing!</button>
         </div>
@@ -794,6 +1171,37 @@
             { letters: ['S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'], name: 'Level 4', minScore: 200 }
         ];
 
+        const VOCAB_LEVELS = [
+            {
+                items: [
+                    {word:'cat',emoji:'🐱'},{word:'dog',emoji:'🐶'},{word:'fish',emoji:'🐟'},
+                    {word:'bird',emoji:'🐦'},{word:'cow',emoji:'🐄'},{word:'pig',emoji:'🐷'}
+                ],
+                name: 'Level 1', category: 'Animals', minScore: 0
+            },
+            {
+                items: [
+                    {word:'red',emoji:'🔴'},{word:'blue',emoji:'🔵'},{word:'green',emoji:'🟢'},
+                    {word:'yellow',emoji:'🟡'},{word:'orange',emoji:'🟠'},{word:'purple',emoji:'🟣'}
+                ],
+                name: 'Level 2', category: 'Colors', minScore: 50
+            },
+            {
+                items: [
+                    {word:'apple',emoji:'🍎'},{word:'cake',emoji:'🎂'},{word:'milk',emoji:'🥛'},
+                    {word:'egg',emoji:'🥚'},{word:'rice',emoji:'🍚'},{word:'soup',emoji:'🍲'}
+                ],
+                name: 'Level 3', category: 'Food', minScore: 120
+            },
+            {
+                items: [
+                    {word:'eye',emoji:'👁️'},{word:'ear',emoji:'👂'},{word:'hand',emoji:'✋'},
+                    {word:'foot',emoji:'🦶'},{word:'nose',emoji:'👃'},{word:'mouth',emoji:'👄'}
+                ],
+                name: 'Level 4', category: 'Body', minScore: 200
+            }
+        ];
+
         const ENCOURAGEMENTS = {
             correct: ['Awesome!', 'Great!', 'Wow!', 'Super!', 'Yes!', 'Perfect!', '🌟', '🎉'],
             wrong: ['Try again!', 'Almost!', 'Keep going!', 'You can do it!', 'Next time!'],
@@ -804,16 +1212,25 @@
             }
         };
 
+        // Learning Flow State
+        const flashcardState = { seen: new Set(), levelData: null };
+        const memoryState = { cards: [], revealed: [], matched: 0, locked: false };
+
         // Game State
         let gameState = {
             score: 0,
             level: 0,
             targetLetter: '',
+            targetItem: null,
             timeLeft: 60,
             isPlaying: false,
             moleSpeed: 2000,
             unlockedLevels: 1,
+            vocabUnlockedLevels: 1,
+            selectedMode: 'letters',
+            selectedCategory: 0,
             currentLetters: [],
+            currentItems: [],
             timerInterval: null,
             moleInterval: null,
             activeMoles: new Set()
@@ -920,14 +1337,28 @@
             }
         }
 
+        function selectMode(mode) {
+            gameState.selectedMode = mode;
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`mode-${mode}`).classList.add('active');
+            updateLevelBadges();
+        }
+
         // Update level badges on start screen
         function updateLevelBadges() {
             const container = document.getElementById('level-badges');
-            container.innerHTML = LEVELS.map((level, i) => {
-                const isUnlocked = i < gameState.unlockedLevels;
-                const letters = level.letters.slice(0, 2).join('-') + '...' + level.letters.slice(-1);
-                return `<span class="level-badge ${isUnlocked ? '' : 'locked'}">${level.name}: ${letters}</span>`;
-            }).join('');
+            if (gameState.selectedMode === 'vocab') {
+                container.innerHTML = VOCAB_LEVELS.map(level => {
+                    const preview = level.items.slice(0, 3).map(it => it.emoji).join(' ');
+                    return `<span class="level-badge">${level.category}: ${preview}</span>`;
+                }).join('');
+            } else {
+                container.innerHTML = LEVELS.map((level, i) => {
+                    const isUnlocked = i < gameState.unlockedLevels;
+                    const letters = level.letters.slice(0, 2).join('-') + '...' + level.letters.slice(-1);
+                    return `<span class="level-badge ${isUnlocked ? '' : 'locked'}">${level.name}: ${letters}</span>`;
+                }).join('');
+            }
         }
 
         // Screen management
@@ -945,25 +1376,212 @@
         // Game functions
         function startGame() {
             initAudio();
-
             gameState = {
                 ...gameState,
                 score: 0,
                 level: 0,
                 timeLeft: 60,
-                isPlaying: true,
+                isPlaying: false,
                 moleSpeed: 2000,
-                activeMoles: new Set()
+                activeMoles: new Set(),
+                targetItem: null
             };
 
+            if (gameState.selectedMode === 'vocab') {
+                showCategorySelect();
+            } else {
+                beginMoleGame();
+            }
+        }
+
+        function beginMoleGame() {
+            gameState.isPlaying = true;
             updateCurrentLetters();
             createGameBoard();
             updateDisplay();
             showScreen('game-screen');
-
             pickNewTarget();
             startTimer();
             startMoleLoop();
+        }
+
+        // ── Category Selection ──
+        function showCategorySelect() {
+            showScreen('category-screen');
+        }
+
+        function selectCategory(index) {
+            gameState.selectedCategory = index;
+            showFlashcards(true);
+        }
+
+        // ── Flashcard Learning Screen ──
+        function showFlashcards(resetSeen = true) {
+            const levelData = VOCAB_LEVELS[gameState.selectedCategory];
+            flashcardState.levelData = levelData;
+            if (resetSeen) flashcardState.seen = new Set();
+
+            document.getElementById('fc-category-name').textContent = levelData.category;
+            document.getElementById('fc-progress').textContent = 'Tap each card to see the word!';
+            document.getElementById('fc-next-btn').disabled = true;
+
+            const grid = document.getElementById('flashcard-grid');
+            grid.innerHTML = '';
+            levelData.items.forEach((item, i) => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'flashcard-wrapper';
+                wrapper.id = `fcw-${i}`;
+                wrapper.innerHTML = `
+                    <div class="flashcard-inner">
+                        <div class="flashcard-face flashcard-front" id="fcfront-${i}">
+                            <div class="fc-emoji">${item.emoji}</div>
+                            <div class="fc-tap-hint">tap!</div>
+                        </div>
+                        <div class="flashcard-face flashcard-back">
+                            <div class="fc-emoji">${item.emoji}</div>
+                            <div class="fc-word">${item.word}</div>
+                        </div>
+                    </div>`;
+                // Restore visual state if returning from memory screen
+                if (flashcardState.seen.has(i)) {
+                    wrapper.classList.add('flipped');
+                    wrapper.querySelector('.flashcard-front').classList.add('seen');
+                }
+                wrapper.addEventListener('click', () => flipFlashcard(i));
+                grid.appendChild(wrapper);
+            });
+
+            // Restore progress label
+            const seen = flashcardState.seen.size;
+            const total = levelData.items.length;
+            if (seen >= total) {
+                document.getElementById('fc-progress').textContent = `All ${total} words seen! Great job! 🌟`;
+                document.getElementById('fc-next-btn').disabled = false;
+            } else if (seen > 0) {
+                document.getElementById('fc-progress').textContent = `${seen} of ${total} seen — keep going!`;
+                document.getElementById('fc-next-btn').disabled = false;
+            }
+
+            showScreen('flashcard-screen');
+        }
+
+        function flipFlashcard(index) {
+            const wrapper = document.getElementById(`fcw-${index}`);
+            const front = document.getElementById(`fcfront-${index}`);
+            const isFlipped = wrapper.classList.toggle('flipped');
+            if (isFlipped) {
+                flashcardState.seen.add(index);
+                front.classList.add('seen');
+            }
+            const total = flashcardState.levelData.items.length;
+            const seen = flashcardState.seen.size;
+            if (seen >= total) {
+                document.getElementById('fc-progress').textContent = `All ${total} words seen! Great job! 🌟`;
+                document.getElementById('fc-next-btn').disabled = false;
+            } else {
+                document.getElementById('fc-progress').textContent = `${seen} of ${total} seen — keep going!`;
+                if (seen > 0) document.getElementById('fc-next-btn').disabled = false;
+            }
+        }
+
+        // ── Memory Match Screen ──
+        function goToMemoryMatch() {
+            const levelData = flashcardState.levelData;
+            document.getElementById('mem-category-name').textContent = levelData.category;
+            document.getElementById('total-pairs').textContent = levelData.items.length;
+            document.getElementById('pairs-found').textContent = '0';
+            document.getElementById('memory-win').style.display = 'none';
+
+            // Build 12 cards: 6 emoji + 6 word, linked by pairId
+            const cards = [];
+            levelData.items.forEach((item, i) => {
+                cards.push({ type: 'emoji', display: item.emoji, pairId: i });
+                cards.push({ type: 'word',  display: item.word,  pairId: i });
+            });
+            // Fisher-Yates shuffle
+            for (let i = cards.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [cards[i], cards[j]] = [cards[j], cards[i]];
+            }
+
+            memoryState.cards = cards;
+            memoryState.revealed = [];
+            memoryState.matched = 0;
+            memoryState.locked = false;
+
+            const grid = document.getElementById('memory-grid');
+            grid.innerHTML = '';
+            cards.forEach((card, i) => {
+                const wrap = document.createElement('div');
+                wrap.className = 'memory-card-wrap';
+                wrap.id = `mcw-${i}`;
+                const inner = card.type === 'emoji'
+                    ? `<div class="fc-emoji">${card.display}</div>`
+                    : `<div class="mem-word">${card.display}</div>`;
+                wrap.innerHTML = `
+                    <div class="memory-card">
+                        <div class="memory-face memory-card-back-face">🌱</div>
+                        <div class="memory-face memory-card-front-face">${inner}</div>
+                    </div>`;
+                wrap.addEventListener('click', () => flipMemoryCard(i));
+                grid.appendChild(wrap);
+            });
+
+            showScreen('memory-screen');
+        }
+
+        function flipMemoryCard(index) {
+            if (memoryState.locked) return;
+            const wrap = document.getElementById(`mcw-${index}`);
+            if (wrap.classList.contains('revealed') || wrap.classList.contains('matched')) return;
+            wrap.classList.add('revealed');
+            memoryState.revealed.push(index);
+            if (memoryState.revealed.length === 2) {
+                memoryState.locked = true;
+                setTimeout(checkMemoryPair, 600);
+            }
+        }
+
+        function checkMemoryPair() {
+            const [a, b] = memoryState.revealed;
+            const ca = memoryState.cards[a];
+            const cb = memoryState.cards[b];
+            const isMatch = ca.pairId === cb.pairId && ca.type !== cb.type;
+
+            const wrapA = document.getElementById(`mcw-${a}`);
+            const wrapB = document.getElementById(`mcw-${b}`);
+
+            if (isMatch) {
+                wrapA.classList.replace('revealed', 'matched');
+                wrapB.classList.replace('revealed', 'matched');
+                memoryState.matched++;
+                document.getElementById('pairs-found').textContent = memoryState.matched;
+                playSound('correct');
+                if (memoryState.matched === memoryState.cards.length / 2) {
+                    setTimeout(() => {
+                        document.getElementById('memory-win').style.display = 'block';
+                        playSound('levelup');
+                        createConfetti();
+                    }, 400);
+                }
+            } else {
+                wrapA.classList.add('shake');
+                wrapB.classList.add('shake');
+                playSound('wrong');
+                setTimeout(() => {
+                    wrapA.classList.remove('revealed', 'shake');
+                    wrapB.classList.remove('revealed', 'shake');
+                }, 700);
+            }
+            memoryState.revealed = [];
+            memoryState.locked = false;
+        }
+
+        function confirmBackToStart() {
+            if (gameState.isPlaying) {
+                if (!confirm('Leave the game? Your progress will be lost.')) return;
+            }
+            goToStart();
         }
 
         function stopGame() {
@@ -978,16 +1596,36 @@
         }
 
         function updateCurrentLetters() {
-            gameState.currentLetters = [];
-            for (let i = 0; i <= gameState.level && i < LEVELS.length; i++) {
-                gameState.currentLetters = [...gameState.currentLetters, ...LEVELS[i].letters];
+            if (gameState.selectedMode === 'vocab') {
+                gameState.currentItems = [...VOCAB_LEVELS[gameState.selectedCategory].items];
+            } else {
+                gameState.currentLetters = [];
+                for (let i = 0; i <= gameState.level && i < LEVELS.length; i++) {
+                    gameState.currentLetters = [...gameState.currentLetters, ...LEVELS[i].letters];
+                }
             }
         }
 
         function pickNewTarget() {
-            const available = gameState.currentLetters;
-            gameState.targetLetter = available[Math.floor(Math.random() * available.length)];
-            document.getElementById('target-letter').textContent = gameState.targetLetter;
+            const labelEl = document.getElementById('target-label');
+            const letterEl = document.getElementById('target-letter');
+            const hintEl = document.getElementById('target-word-hint');
+
+            if (gameState.selectedMode === 'vocab') {
+                const available = gameState.currentItems;
+                gameState.targetItem = available[Math.floor(Math.random() * available.length)];
+                labelEl.textContent = 'Find the word for:';
+                letterEl.textContent = gameState.targetItem.emoji;
+                letterEl.style.fontSize = 'clamp(3rem, 12vw, 5rem)';
+                hintEl.style.display = 'none';
+            } else {
+                const available = gameState.currentLetters;
+                gameState.targetLetter = available[Math.floor(Math.random() * available.length)];
+                labelEl.textContent = 'Find the letter:';
+                letterEl.textContent = gameState.targetLetter;
+                letterEl.style.fontSize = '';
+                hintEl.style.display = 'none';
+            }
         }
 
         function startTimer() {
@@ -1028,17 +1666,35 @@
             const mole = document.getElementById(`mole-${holeIndex}`);
             const letterEl = document.getElementById(`letter-${holeIndex}`);
 
-            // Decide letter - 40% chance of showing correct letter
-            let letter;
-            if (Math.random() < 0.4) {
-                letter = gameState.targetLetter.toLowerCase();
+            // Decide what to show on mole
+            if (gameState.selectedMode === 'vocab') {
+                let item;
+                if (Math.random() < 0.4) {
+                    item = gameState.targetItem;
+                } else {
+                    const others = gameState.currentItems.filter(it => it.word !== gameState.targetItem.word);
+                    item = others[Math.floor(Math.random() * others.length)];
+                }
+                const wlen = item.word.length;
+                letterEl.style.fontSize = wlen <= 3 ? 'clamp(1.8rem, 6vw, 2.5rem)'
+                                        : wlen <= 5 ? 'clamp(1.3rem, 4.5vw, 2rem)'
+                                        : 'clamp(1rem, 3.5vw, 1.6rem)';
+                letterEl.textContent = item.word;
+                mole.dataset.word = item.word;
+                delete mole.dataset.letter;
             } else {
-                const otherLetters = gameState.currentLetters.filter(l => l !== gameState.targetLetter);
-                letter = otherLetters[Math.floor(Math.random() * otherLetters.length)].toLowerCase();
+                let letter;
+                if (Math.random() < 0.4) {
+                    letter = gameState.targetLetter.toLowerCase();
+                } else {
+                    const otherLetters = gameState.currentLetters.filter(l => l !== gameState.targetLetter);
+                    letter = otherLetters[Math.floor(Math.random() * otherLetters.length)].toLowerCase();
+                }
+                letterEl.style.fontSize = '';
+                letterEl.textContent = letter;
+                mole.dataset.letter = letter;
+                delete mole.dataset.word;
             }
-
-            letterEl.textContent = letter;
-            mole.dataset.letter = letter;
             mole.classList.add('active');
             mole.classList.remove('hit', 'wrong');
             gameState.activeMoles.add(holeIndex);
@@ -1060,8 +1716,9 @@
             const mole = document.getElementById(`mole-${index}`);
             if (!mole.classList.contains('active')) return;
 
-            const letter = mole.dataset.letter.toUpperCase();
-            const isCorrect = letter === gameState.targetLetter;
+            const isCorrect = gameState.selectedMode === 'vocab'
+                ? mole.dataset.word === gameState.targetItem.word
+                : mole.dataset.letter.toUpperCase() === gameState.targetLetter;
 
             if (isCorrect) {
                 // Correct hit!
@@ -1130,6 +1787,7 @@
         }
 
         function checkLevelUp() {
+            if (gameState.selectedMode === 'vocab') return; // vocab uses category selection, not levels
             const nextLevel = gameState.level + 1;
             if (nextLevel < LEVELS.length && gameState.score >= LEVELS[nextLevel].minScore) {
                 gameState.level = nextLevel;
@@ -1137,7 +1795,6 @@
                     gameState.unlockedLevels = nextLevel + 1;
                     localStorage.setItem('letterMoleUnlocked', gameState.unlockedLevels);
                 }
-
                 updateCurrentLetters();
                 showLevelUpModal(nextLevel);
             }
@@ -1146,7 +1803,7 @@
         function showLevelUpModal(level) {
             gameState.isPlaying = false;
             clearInterval(gameState.moleInterval);
-
+            document.getElementById('new-items-label').textContent = 'New letters unlocked:';
             document.getElementById('new-letters').textContent = LEVELS[level].letters.join(' ');
             document.getElementById('level-modal').classList.add('active');
 
@@ -1180,7 +1837,12 @@
 
         function updateDisplay() {
             document.getElementById('score').textContent = gameState.score;
-            document.getElementById('level-indicator').textContent = LEVELS[gameState.level].name;
+            if (gameState.selectedMode === 'vocab') {
+                document.getElementById('level-indicator').textContent =
+                    VOCAB_LEVELS[gameState.selectedCategory].category;
+            } else {
+                document.getElementById('level-indicator').textContent = LEVELS[gameState.level].name;
+            }
         }
 
         function endGame() {
@@ -1217,6 +1879,20 @@
             document.getElementById('end-title').textContent = title;
             document.getElementById('encouragement').textContent = encouragement;
 
+            if (gameState.selectedMode === 'vocab') {
+                const playAgain = document.getElementById('play-again-btn');
+                const second = document.getElementById('second-btn');
+                playAgain.textContent = 'Play Again';
+                playAgain.onclick = () => showFlashcards(true);
+                second.textContent = 'Choose Topic';
+                second.onclick = showCategorySelect;
+            } else {
+                document.getElementById('play-again-btn').textContent = 'Play Again';
+                document.getElementById('play-again-btn').onclick = startGame;
+                document.getElementById('second-btn').textContent = 'Home';
+                document.getElementById('second-btn').onclick = goToStart;
+            }
+
             showScreen('end-screen');
             createConfetti();
         }
@@ -1228,7 +1904,6 @@
             if (savedLevel) {
                 gameState.unlockedLevels = parseInt(savedLevel);
             }
-
             updateLevelBadges();
             createGameBoard();
         });
