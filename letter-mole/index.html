@@ -724,6 +724,7 @@
         #category-screen {
             justify-content: flex-start;
             padding-top: 10px;
+            overflow-y: auto;
         }
         .category-grid {
             display: grid;
@@ -731,7 +732,7 @@
             gap: clamp(14px, 4vw, 22px);
             max-width: 460px;
             width: 100%;
-            padding: 0 20px;
+            padding: 0 20px 20px;
             margin-top: 8px;
         }
         .category-card {
@@ -777,6 +778,10 @@
         .cat-colors  { background: linear-gradient(150deg, #A29BFE 0%, #6C5CE7 100%); }
         .cat-food    { background: linear-gradient(150deg, #FD79A8 0%, #D63031 100%); }
         .cat-body    { background: linear-gradient(150deg, #55EFC4 0%, #00B894 100%); }
+        .cat-fruits  { background: linear-gradient(150deg, #FFEAA7 0%, #FDCB6E 100%); }
+        .cat-clothes { background: linear-gradient(150deg, #74B9FF 0%, #0984E3 100%); }
+        .cat-weather { background: linear-gradient(150deg, #81ECEC 0%, #00CEC9 100%); }
+        .cat-sports  { background: linear-gradient(150deg, #E17055 0%, #D63031 100%); }
 
         /* ── Back Button ── */
         .back-btn {
@@ -1079,6 +1084,30 @@
                 <div class="cat-name">Body</div>
                 <div class="cat-count">6 words</div>
             </button>
+            <button class="category-card cat-fruits" onclick="selectCategory(4)">
+                <div class="cat-emoji-row">🍇 🍊</div>
+                <div class="cat-emoji-row">🍓 🍌</div>
+                <div class="cat-name">Fruits</div>
+                <div class="cat-count">6 words</div>
+            </button>
+            <button class="category-card cat-clothes" onclick="selectCategory(5)">
+                <div class="cat-emoji-row">👕 👗</div>
+                <div class="cat-emoji-row">🧢 👟</div>
+                <div class="cat-name">Clothes</div>
+                <div class="cat-count">6 words</div>
+            </button>
+            <button class="category-card cat-weather" onclick="selectCategory(6)">
+                <div class="cat-emoji-row">☀️ 🌧️</div>
+                <div class="cat-emoji-row">❄️ 🌈</div>
+                <div class="cat-name">Weather</div>
+                <div class="cat-count">6 words</div>
+            </button>
+            <button class="category-card cat-sports" onclick="selectCategory(7)">
+                <div class="cat-emoji-row">⚽ 🏀</div>
+                <div class="cat-emoji-row">🎾 🏊</div>
+                <div class="cat-name">Sports</div>
+                <div class="cat-count">6 words</div>
+            </button>
         </div>
     </div>
 
@@ -1199,6 +1228,34 @@
                     {word:'foot',emoji:'🦶'},{word:'nose',emoji:'👃'},{word:'mouth',emoji:'👄'}
                 ],
                 name: 'Level 4', category: 'Body', minScore: 200
+            },
+            {
+                items: [
+                    {word:'grape',emoji:'🍇'},{word:'orange',emoji:'🍊'},{word:'strawberry',emoji:'🍓'},
+                    {word:'banana',emoji:'🍌'},{word:'peach',emoji:'🍑'},{word:'lemon',emoji:'🍋'}
+                ],
+                name: 'Level 5', category: 'Fruits', minScore: 0
+            },
+            {
+                items: [
+                    {word:'shirt',emoji:'👕'},{word:'dress',emoji:'👗'},{word:'hat',emoji:'🧢'},
+                    {word:'shoe',emoji:'👟'},{word:'coat',emoji:'🧥'},{word:'sock',emoji:'🧦'}
+                ],
+                name: 'Level 6', category: 'Clothes', minScore: 0
+            },
+            {
+                items: [
+                    {word:'sun',emoji:'☀️'},{word:'rain',emoji:'🌧️'},{word:'snow',emoji:'❄️'},
+                    {word:'rainbow',emoji:'🌈'},{word:'wind',emoji:'🌬️'},{word:'cloud',emoji:'☁️'}
+                ],
+                name: 'Level 7', category: 'Weather', minScore: 0
+            },
+            {
+                items: [
+                    {word:'soccer',emoji:'⚽'},{word:'basketball',emoji:'🏀'},{word:'tennis',emoji:'🎾'},
+                    {word:'swimming',emoji:'🏊'},{word:'baseball',emoji:'⚾'},{word:'golf',emoji:'⛳'}
+                ],
+                name: 'Level 8', category: 'Sports', minScore: 0
             }
         ];
 
