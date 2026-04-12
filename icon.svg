@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background -->
+  <rect x="0" y="0" width="512" height="512" rx="92" fill="#667eea"/>
+  <!-- Bottom overlay -->
+  <rect x="0" y="205" width="512" height="307" rx="0" fill="#764ba2" opacity="0.5"/>
+  <!-- Clip the overlay to rounded rect -->
+  <defs>
+    <clipPath id="bg-clip">
+      <rect x="0" y="0" width="512" height="512" rx="92"/>
+    </clipPath>
+  </defs>
+  <rect x="0" y="205" width="512" height="307" fill="#764ba2" opacity="0.5" clip-path="url(#bg-clip)"/>
+
+  <!-- Floating decorative elements -->
+  <polygon points="113,82 118,98 134,98 121,107 125,122 113,113 101,122 105,107 92,98 108,98" fill="#FFE66D" opacity="0.8"/>
+  <polygon points="400,77 404,88 416,88 407,96 410,107 400,100 390,107 393,96 384,88 396,88" fill="#FFE66D" opacity="0.6"/>
+  <circle cx="410" cy="410" r="15" fill="#95E1D3" opacity="0.25"/>
+  <circle cx="97" cy="390" r="12" fill="#FFE66D" opacity="0.25"/>
+
+  <!-- Big chunky book -->
+  <g transform="translate(256, 230)">
+    <!-- Book shadow -->
+    <path d="M-5,8 Q-5,-138 -143,-148 L-143,48 Q-5,36 -5,8Z" fill="#000" opacity="0.1" transform="translate(5,5)"/>
+    <path d="M5,8 Q5,-138 143,-148 L143,48 Q5,36 5,8Z" fill="#000" opacity="0.1" transform="translate(5,5)"/>
+    <!-- Left page - teal -->
+    <path d="M-5,5 Q-5,-138 -143,-148 L-143,48 Q-5,36 -5,5Z" fill="#4ECDC4"/>
+    <!-- Right page - coral -->
+    <path d="M5,5 Q5,-138 143,-148 L143,48 Q5,36 5,5Z" fill="#FF6B6B"/>
+    <!-- Spine highlight -->
+    <rect x="-5" y="-148" width="10" height="200" rx="5" fill="#fff" opacity="0.3"/>
+
+    <!-- Left page: "A" big letter -->
+    <text x="-77" y="-25" text-anchor="middle" font-family="Comic Sans MS, Arial Rounded MT Bold, sans-serif" font-size="80" font-weight="700" fill="#fff" opacity="0.9">A</text>
+
+    <!-- Right page: game button cluster -->
+    <circle cx="72" cy="-82" r="15" fill="#FFE66D" stroke="#fff" stroke-width="2.5"/>
+    <circle cx="103" cy="-56" r="15" fill="#95E1D3" stroke="#fff" stroke-width="2.5"/>
+    <circle cx="72" cy="-30" r="15" fill="#f093fb" stroke="#fff" stroke-width="2.5"/>
+    <!-- Tiny symbols in buttons -->
+    <text x="72" y="-76" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#764ba2">?</text>
+    <text x="103" y="-50" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#2D8A82">!</text>
+    <text x="72" y="-24" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#764ba2">~</text>
+  </g>
+
+  <!-- Bottom text -->
+  <text x="256" y="395" text-anchor="middle" font-family="Comic Sans MS, Arial Rounded MT Bold, sans-serif" font-size="32" font-weight="700" fill="#fff" letter-spacing="3" opacity="0.95">LEARN</text>
+  <text x="256" y="435" text-anchor="middle" font-family="Comic Sans MS, Arial Rounded MT Bold, sans-serif" font-size="22" font-weight="500" fill="#FFE66D" letter-spacing="5" opacity="0.9">&amp; PLAY</text>
+</svg>
