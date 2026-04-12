@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Ordinal Numbers Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', 'Chalkboard', 'Arial Rounded MT Bold', sans-serif;
+            background: linear-gradient(180deg, #FFF0F5 0%, #FFD6E8 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            touch-action: manipulation;
+        }
+
+        .screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        /* Start Screen */
+        .game-title {
+            font-size: clamp(2rem, 7vw, 3.5rem);
+            color: #E91E63;
+            text-shadow: 4px 4px 0 #FFE66D, 6px 6px 0 #9B59B6;
+            margin-bottom: 10px;
+            text-align: center;
+            animation: bounce 2s infinite;
+        }
+
+        .game-subtitle {
+            font-size: clamp(1rem, 4vw, 1.5rem);
+            color: #666;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .mascot {
+            font-size: clamp(5rem, 20vw, 8rem);
+            margin-bottom: 20px;
+            animation: wiggle 1.5s infinite;
+        }
+
+        @keyframes wiggle {
+            0%, 100% { transform: rotate(-5deg); }
+            50% { transform: rotate(5deg); }
+        }
+
+        .rules-card {
+            background: white;
+            border-radius: 25px;
+            padding: 25px;
+            max-width: 450px;
+            width: 100%;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 0 rgba(0,0,0,0.05), 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .rules-title {
+            font-size: clamp(1.1rem, 4vw, 1.4rem);
+            color: #E91E63;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .rule-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            font-size: clamp(0.85rem, 3vw, 1rem);
+            color: #555;
+        }
+
+        .rule-icon {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .rule-example {
+            color: #E91E63;
+            font-weight: bold;
+        }
+
+        .play-btn {
+            font-size: clamp(1.5rem, 5vw, 2rem);
+            padding: 20px 50px;
+            background: linear-gradient(180deg, #E91E63 0%, #C2185B 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #AD1457, 0 10px 20px rgba(0,0,0,0.2);
+            transition: all 0.1s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .play-btn:hover { transform: translateY(2px); box-shadow: 0 4px 0 #AD1457; }
+        .play-btn:active { transform: translateY(5px); box-shadow: 0 1px 0 #AD1457; }
+
+        .back-link {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            background: white;
+            border-radius: 20px;
+            color: #666;
+            text-decoration: none;
+            font-size: 1rem;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+        }
+
+        .back-link:hover { transform: translateY(-2px); }
+
+        /* Game Screen */
+        #game-screen {
+            justify-content: flex-start;
+            padding-top: 20px;
+        }
+
+        .game-header {
+            width: 100%;
+            max-width: 550px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+            background: white;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .score-display { font-size: clamp(1rem, 4vw, 1.4rem); color: #E91E63; font-weight: bold; }
+        .progress-display { font-size: clamp(0.9rem, 3vw, 1.1rem); color: #666; background: #FFF0F5; padding: 5px 15px; border-radius: 15px; }
+        .streak-display { font-size: clamp(0.9rem, 3vw, 1.1rem); color: #FFB347; }
+
+        /* Question Card */
+        .question-card {
+            background: white;
+            border-radius: 30px;
+            padding: 30px;
+            text-align: center;
+            max-width: 550px;
+            width: 100%;
+            box-shadow: 0 10px 0 rgba(0,0,0,0.05), 0 15px 40px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+        }
+
+        .question-type {
+            display: inline-block;
+            padding: 6px 18px;
+            border-radius: 20px;
+            font-size: clamp(0.8rem, 2.5vw, 0.95rem);
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .question-type.convert { background: #E8F6FF; color: #3498DB; }
+        .question-type.reverse { background: #F3E8FF; color: #9B59B6; }
+        .question-type.sentence { background: #FCE4EC; color: #E91E63; }
+
+        .question-label {
+            font-size: clamp(0.9rem, 3vw, 1.1rem);
+            color: #999;
+            margin-bottom: 12px;
+        }
+
+        .number-display {
+            font-size: clamp(2.5rem, 8vw, 4rem);
+            color: #E91E63;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+        }
+
+        .word-display {
+            font-size: clamp(1.5rem, 5vw, 2.2rem);
+            color: #9B59B6;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .sentence {
+            font-size: clamp(1.2rem, 4vw, 1.6rem);
+            color: #333;
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+
+        .blank {
+            display: inline-block;
+            min-width: 100px;
+            border-bottom: 4px dashed #FFE66D;
+            margin: 0 5px;
+            color: #E91E63;
+            font-weight: bold;
+        }
+
+        .hint {
+            font-size: clamp(0.85rem, 2.5vw, 1rem);
+            color: #999;
+            margin-top: 12px;
+            font-style: italic;
+        }
+
+        .clue-badge {
+            display: inline-block;
+            background: #FFF0F5;
+            color: #E91E63;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: clamp(0.85rem, 2.5vw, 1rem);
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        /* Answer Buttons */
+        .answers {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            max-width: 550px;
+            width: 100%;
+        }
+
+        .answer-btn {
+            padding: 18px 15px;
+            font-size: clamp(1rem, 3.5vw, 1.3rem);
+            font-weight: bold;
+            background: linear-gradient(180deg, #E91E63 0%, #C2185B 100%);
+            color: white;
+            border: none;
+            border-radius: 18px;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #AD1457, 0 8px 20px rgba(0,0,0,0.15);
+            transition: all 0.1s;
+            font-family: inherit;
+            word-wrap: break-word;
+        }
+
+        .answer-btn:hover { transform: translateY(2px); box-shadow: 0 3px 0 #AD1457; }
+        .answer-btn:active { transform: translateY(4px); box-shadow: 0 1px 0 #AD1457; }
+
+        .answer-btn.correct {
+            background: linear-gradient(180deg, #90EE90 0%, #32CD32 100%);
+            box-shadow: 0 5px 0 #228B22;
+            animation: pulse 0.3s;
+        }
+
+        .answer-btn.wrong {
+            background: linear-gradient(180deg, #FF6B6B 0%, #EE5A5A 100%);
+            box-shadow: 0 5px 0 #CC4444;
+            animation: shake 0.3s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* Feedback */
+        .feedback {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            font-size: clamp(2rem, 8vw, 4rem);
+            font-weight: bold;
+            z-index: 100;
+            pointer-events: none;
+            text-shadow: 3px 3px 0 rgba(0,0,0,0.2);
+            animation: popFeedback 0.8s ease-out forwards;
+        }
+
+        .feedback.correct { color: #4CAF50; }
+        .feedback.wrong { color: #FF6B6B; font-size: clamp(1.2rem, 5vw, 2rem); }
+
+        @keyframes popFeedback {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+            100% { transform: translate(-50%, -80%) scale(1); opacity: 0; }
+        }
+
+        .stars-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 99;
+        }
+
+        .star {
+            position: absolute;
+            font-size: 2rem;
+            animation: starFall 1s ease-out forwards;
+        }
+
+        @keyframes starFall {
+            0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100px) rotate(360deg); opacity: 0; }
+        }
+
+        /* End Screen */
+        .trophy { font-size: clamp(5rem, 20vw, 8rem); margin-bottom: 20px; animation: wiggle 1s infinite; }
+        .end-title { font-size: clamp(2rem, 7vw, 3rem); color: #E91E63; margin-bottom: 15px; }
+        .final-score { font-size: clamp(1.3rem, 5vw, 2rem); color: #9B59B6; margin-bottom: 10px; }
+        .stars-earned { font-size: clamp(2rem, 8vw, 3.5rem); margin-bottom: 20px; }
+        .encouragement { font-size: clamp(1rem, 3.5vw, 1.3rem); color: #666; margin-bottom: 30px; text-align: center; max-width: 400px; line-height: 1.5; }
+
+        .btn-group { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; }
+
+        .btn {
+            font-size: clamp(1rem, 4vw, 1.3rem);
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.1s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: inherit;
+        }
+
+        .btn-primary { background: linear-gradient(180deg, #E91E63 0%, #C2185B 100%); color: white; box-shadow: 0 5px 0 #AD1457; }
+        .btn-secondary { background: linear-gradient(180deg, #FFE66D 0%, #E6C235 100%); color: #666; box-shadow: 0 5px 0 #C9A82E; }
+
+        .btn:hover { transform: translateY(2px); }
+        .btn:active { transform: translateY(4px); }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            z-index: 101;
+            animation: confettiFall 3s ease-out forwards;
+        }
+
+        @keyframes confettiFall {
+            0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+
+        @media (max-width: 400px) {
+            .question-card { padding: 20px; }
+            .answer-btn { padding: 15px 10px; font-size: clamp(0.9rem, 3vw, 1.1rem); }
+            .answers { gap: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Start Screen -->
+    <div id="start-screen" class="screen active">
+        <a href="../../index.html" class="back-link">← Back</a>
+        <div class="mascot">🏅</div>
+        <h1 class="game-title">Ordinal Numbers!</h1>
+        <p class="game-subtitle">1st, 2nd, 3rd... How well do you know them?</p>
+
+        <div class="rules-card">
+            <h3 class="rules-title">Quick Reminders!</h3>
+            <div class="rule-item">
+                <span class="rule-icon">⚡</span>
+                <span>The Big Three: <span class="rule-example">1st, 2nd, 3rd</span> are irregular!</span>
+            </div>
+            <div class="rule-item">
+                <span class="rule-icon">📏</span>
+                <span>Most numbers: add <span class="rule-example">-th</span><br>four → four<span class="rule-example">th</span></span>
+            </div>
+            <div class="rule-item">
+                <span class="rule-icon">✨</span>
+                <span>Tens ending in -y: change to <span class="rule-example">-ieth</span><br>twenty → twent<span class="rule-example">ieth</span></span>
+            </div>
+            <div class="rule-item">
+                <span class="rule-icon">🔗</span>
+                <span>Compounds: only last word changes<br>twenty-<span class="rule-example">first</span> (21st)</span>
+            </div>
+        </div>
+
+        <button class="play-btn" onclick="startGame()">Play!</button>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="game-screen" class="screen">
+        <div class="game-header">
+            <div class="score-display">Score: <span id="score">0</span></div>
+            <div class="progress-display"><span id="current">1</span> / <span id="total">12</span></div>
+            <div class="streak-display" id="streak"></div>
+        </div>
+
+        <div class="question-card">
+            <div class="question-type" id="question-type">Number → Word</div>
+            <div class="question-label" id="question-label">What is the ordinal form?</div>
+            <div class="clue-badge" id="clue-badge" style="display:none;"></div>
+            <div class="number-display" id="number-display" style="display:none;"></div>
+            <div class="word-display" id="word-display" style="display:none;"></div>
+            <div class="sentence" id="sentence" style="display:none;"></div>
+            <div class="hint" id="hint"></div>
+        </div>
+
+        <div class="answers" id="answers"></div>
+    </div>
+
+    <!-- End Screen -->
+    <div id="end-screen" class="screen">
+        <div class="trophy" id="trophy">🏆</div>
+        <h2 class="end-title" id="end-title">Great Job!</h2>
+        <div class="final-score">Score: <span id="final-score">0</span></div>
+        <div class="stars-earned" id="stars-earned">⭐⭐⭐</div>
+        <p class="encouragement" id="encouragement"></p>
+
+        <div class="btn-group">
+            <button class="btn btn-primary" onclick="startGame()">Play Again</button>
+            <button class="btn btn-secondary" onclick="goBack()">Back</button>
+        </div>
+    </div>
+
+    <div class="stars-container" id="stars-container"></div>
+
+    <script>
+        // ===== ORDINAL DATA =====
+        const ORDINALS = {
+            1:'first',2:'second',3:'third',4:'fourth',5:'fifth',6:'sixth',7:'seventh',8:'eighth',9:'ninth',10:'tenth',
+            11:'eleventh',12:'twelfth',13:'thirteenth',14:'fourteenth',15:'fifteenth',16:'sixteenth',17:'seventeenth',18:'eighteenth',19:'nineteenth',
+            20:'twentieth',21:'twenty-first',22:'twenty-second',23:'twenty-third',24:'twenty-fourth',25:'twenty-fifth',
+            26:'twenty-sixth',27:'twenty-seventh',28:'twenty-eighth',29:'twenty-ninth',30:'thirtieth',
+            31:'thirty-first',32:'thirty-second',33:'thirty-third',35:'thirty-fifth',
+            40:'fortieth',41:'forty-first',42:'forty-second',43:'forty-third',45:'forty-fifth',
+            50:'fiftieth',51:'fifty-first',52:'fifty-second',53:'fifty-third',55:'fifty-fifth',
+            60:'sixtieth',61:'sixty-first',62:'sixty-second',68:'sixty-eighth',
+            70:'seventieth',71:'seventy-first',75:'seventy-fifth',
+            80:'eightieth',81:'eighty-first',86:'eighty-sixth',
+            90:'ninetieth',91:'ninety-first',99:'ninety-ninth',
+            100:'hundredth'
+        };
+
+        function getSuffix(n) {
+            if (n % 100 >= 11 && n % 100 <= 13) return 'th';
+            switch (n % 10) {
+                case 1: return 'st';
+                case 2: return 'nd';
+                case 3: return 'rd';
+                default: return 'th';
+            }
+        }
+
+        // Generate wrong options that look plausible
+        function generateWrongWord(num, correct) {
+            const wrongs = [];
+            const base = correct;
+
+            // Common mistakes
+            if (num === 1) wrongs.push('oneth', 'firth');
+            if (num === 2) wrongs.push('twoth', 'secound');
+            if (num === 3) wrongs.push('threeth', 'thrid');
+            if (num === 5) wrongs.push('fiveth', 'fivth');
+            if (num === 8) wrongs.push('eightth', 'eigth');
+            if (num === 9) wrongs.push('nineth', 'ninthe');
+            if (num === 12) wrongs.push('twelveth', 'twelvth');
+            if (num === 20) wrongs.push('twentyth', 'twentyeth');
+            if (num === 30) wrongs.push('thirtyth', 'thirtyeth');
+            if (num === 40) wrongs.push('fourtyeth', 'fortyth');
+            if (num === 50) wrongs.push('fiftyth', 'fiftyeth');
+            if (num === 100) wrongs.push('one hundredth', 'hundreth');
+
+            // For compound numbers, mess up the last part
+            if (num > 20 && num % 10 !== 0) {
+                const tens = Math.floor(num / 10) * 10;
+                const ones = num % 10;
+                const tensWord = ORDINALS[tens] ? ORDINALS[tens].replace('ieth','y').replace('th','') : '';
+                if (ones === 1) wrongs.push(tensWord + '-oneth');
+                if (ones === 2) wrongs.push(tensWord + '-twoth');
+                if (ones === 3) wrongs.push(tensWord + '-threeth');
+                if (ones === 5) wrongs.push(tensWord + '-fiveth');
+                // Also try making the tens part ordinal too
+                const tensOrd = ORDINALS[tens] || '';
+                if (tensOrd && ones <= 3) {
+                    wrongs.push(tensOrd.replace('ieth','ieth-') + ['first','second','third'][ones-1]);
+                }
+            }
+
+            // For tens, try keeping the y
+            if (num % 10 === 0 && num >= 20 && num < 100) {
+                const cardinal = ['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'][num/10];
+                if (cardinal) wrongs.push(cardinal + 'th');
+            }
+
+            // Nearby ordinals as distractors
+            const nearby = [num - 1, num + 1, num - 2, num + 2, num + 10, num - 10].filter(n => n > 0 && n <= 100 && ORDINALS[n] && ORDINALS[n] !== correct);
+            nearby.forEach(n => wrongs.push(ORDINALS[n]));
+
+            // Filter out duplicates and the correct answer
+            return [...new Set(wrongs.filter(w => w && w !== correct))];
+        }
+
+        function generateWrongNumber(num) {
+            const wrongs = [];
+            // nearby numbers
+            [num-1, num+1, num-10, num+10, num+2, num-2].forEach(n => {
+                if (n > 0 && n <= 100 && n !== num) wrongs.push(n);
+            });
+            // swap digits for compound
+            if (num > 20 && num < 100 && num % 10 !== 0) {
+                const swapped = (num % 10) * 10 + Math.floor(num / 10);
+                if (swapped > 0 && swapped <= 100 && swapped !== num) wrongs.push(swapped);
+            }
+            return [...new Set(wrongs)];
+        }
+
+        // ===== QUESTION POOLS =====
+
+        // Type A: Number → Word
+        const TYPE_A_NUMBERS = [1,2,3,5,8,9,12,13,15,19,20,21,22,23,25,30,31,33,40,42,50,55,60,68,70,75,80,86,90,99,100];
+
+        // Type B: Word → Number
+        const TYPE_B_NUMBERS = [1,2,3,4,5,8,9,11,12,14,17,20,21,23,25,30,32,40,42,43,50,53,60,70,75,80,90,91,99,100];
+
+        // Type C: Student life sentences
+        const TYPE_C = [
+            // Positive
+            { sentence: 'Today is the ___ day of school.', num: 1, hint: '今天是上學的第一天', clue: 'Day 1' },
+            { sentence: 'My classroom is on the ___ floor.', num: 3, hint: '我的教室在三樓', clue: 'Floor 3' },
+            { sentence: 'Please open your book to the ___ page.', num: 25, hint: '請翻到第二十五頁', clue: 'Page 25' },
+            { sentence: 'She finished ___ in the spelling bee.', num: 2, hint: '她在拼字比賽中得到第二名', clue: 'Place 2' },
+            { sentence: 'Our school is celebrating its ___ anniversary.', num: 50, hint: '我們學校正在慶祝五十週年', clue: '50 years' },
+            { sentence: 'He sits in the ___ row of the classroom.', num: 5, hint: '他坐在教室的第五排', clue: 'Row 5' },
+            { sentence: 'I am the ___ student on the class list.', num: 12, hint: '我是班級名單上的第十二個學生', clue: 'Number 12' },
+            { sentence: 'We have a test on the ___ of May.', num: 15, hint: '我們五月十五日有考試', clue: 'May 15' },
+            { sentence: 'Her birthday is on the ___ of October.', num: 21, hint: '她的生日在十月二十一日', clue: 'Oct 21' },
+            { sentence: 'This is the ___ question on the test.', num: 8, hint: '這是考試的第八題', clue: 'Question 8' },
+            { sentence: 'Our team came in ___ place at the sports day.', num: 1, hint: '我們隊在運動會得到第一名', clue: 'Place 1' },
+            { sentence: 'We are reading the ___ chapter of the book.', num: 9, hint: '我們正在讀這本書的第九章', clue: 'Chapter 9' },
+            { sentence: 'The school trip is on the ___ of November.', num: 30, hint: '校外教學在十一月三十日', clue: 'Nov 30' },
+            { sentence: 'She was the ___ person to finish the exam.', num: 3, hint: '她是第三個完成考試的人', clue: 'Person 3' },
+            { sentence: 'I live on the ___ floor of my building.', num: 11, hint: '我住在我家大樓的第十一層', clue: 'Floor 11' },
+            { sentence: 'Today is my ___ English class this semester.', num: 20, hint: '今天是這學期的第二十堂英文課', clue: 'Class 20' },
+
+            // Negative
+            { sentence: 'This is not the ___ time I forgot my homework.', num: 1, hint: '這不是我第一次忘記帶作業', clue: 'Time 1' },
+            { sentence: 'He did not finish in ___ place.', num: 1, hint: '他沒有得到第一名', clue: 'Not place 1' },
+            { sentence: 'The library is not on the ___ floor.', num: 4, hint: '圖書館不在四樓', clue: 'Not floor 4' },
+            { sentence: 'This is not the ___ time we have practiced this song.', num: 2, hint: '這不是我們第二次練這首歌', clue: 'Not time 2' },
+
+            // Questions
+            { sentence: 'Is this your ___ year at this school?', num: 3, hint: '這是你在這間學校的第三年嗎？', clue: 'Year 3' },
+            { sentence: 'Is your birthday on the ___ of June?', num: 22, hint: '你的生日是六月二十二日嗎？', clue: 'June 22' },
+            { sentence: 'Did you come in ___ place in the contest?', num: 5, hint: '你在比賽中得到第五名嗎？', clue: 'Place 5' },
+            { sentence: 'Is the science lab on the ___ floor?', num: 6, hint: '科學實驗室在六樓嗎？', clue: 'Floor 6' },
+        ];
+
+        // ===== BUILD QUESTIONS =====
+        function buildTypeA(num) {
+            const correct = ORDINALS[num];
+            let wrongs = generateWrongWord(num, correct).slice(0, 5);
+            // pick 3 wrongs
+            wrongs = shuffleArray(wrongs).slice(0, 3);
+            while (wrongs.length < 3) {
+                // fallback: grab a nearby ordinal
+                const fallback = Object.entries(ORDINALS).find(([k,v]) => v !== correct && !wrongs.includes(v) && Math.abs(k - num) < 15);
+                if (fallback) wrongs.push(fallback[1]);
+                else break;
+            }
+            return {
+                type: 'convert',
+                typeLabel: 'Number → Word',
+                label: 'What is the ordinal form of this number?',
+                display: 'number',
+                displayValue: num.toString(),
+                correct: correct,
+                options: shuffleArray([correct, ...wrongs.slice(0,3)]),
+                hint: num + getSuffix(num)
+            };
+        }
+
+        function buildTypeB(num) {
+            const correct = num + getSuffix(num);
+            const word = ORDINALS[num];
+            let wrongs = generateWrongNumber(num).slice(0, 5).map(n => n + getSuffix(n));
+            wrongs = shuffleArray(wrongs).slice(0, 3);
+            while (wrongs.length < 3) {
+                const r = Math.floor(Math.random() * 99) + 1;
+                const rs = r + getSuffix(r);
+                if (rs !== correct && !wrongs.includes(rs)) wrongs.push(rs);
+            }
+            return {
+                type: 'reverse',
+                typeLabel: 'Word → Number',
+                label: 'Which number is this?',
+                display: 'word',
+                displayValue: word,
+                correct: correct,
+                options: shuffleArray([correct, ...wrongs.slice(0,3)]),
+                hint: ''
+            };
+        }
+
+        function buildTypeC(item) {
+            const correct = ORDINALS[item.num];
+            let wrongs = generateWrongWord(item.num, correct).slice(0, 5);
+            wrongs = shuffleArray(wrongs).slice(0, 3);
+            while (wrongs.length < 3) {
+                const fallback = Object.entries(ORDINALS).find(([k,v]) => v !== correct && !wrongs.includes(v));
+                if (fallback) wrongs.push(fallback[1]);
+                else break;
+            }
+            return {
+                type: 'sentence',
+                typeLabel: 'Fill in the Blank',
+                label: 'Choose the correct ordinal number:',
+                display: 'sentence',
+                sentence: item.sentence,
+                clue: item.clue,
+                correct: correct,
+                options: shuffleArray([correct, ...wrongs.slice(0,3)]),
+                hint: item.hint
+            };
+        }
+
+        // ===== GAME ENGINE =====
+        const ENCOURAGEMENTS = {
+            correct: ['Awesome!', 'Great!', 'Perfect!', 'Super!', 'Yes!', 'Excellent!', 'Amazing!', 'Wonderful!'],
+            wrong: ['Try again!', 'Almost!', 'Keep going!', 'You can do it!'],
+            end: {
+                high: ['Amazing! You are the ordinal champion!', 'Perfect! You really know your numbers!', 'Excellent work!'],
+                medium: ['Good job! Keep practicing ordinal numbers!', 'Nice work! You are getting better!', 'Well done!'],
+                low: ['Good try! Review the learn page and try again!', 'Keep learning! You will master ordinals soon!']
+            }
+        };
+
+        let gameState = {
+            score: 0,
+            currentQuestion: 0,
+            totalQuestions: 12,
+            streak: 0,
+            questions: [],
+            answered: false
+        };
+
+        let audioContext = null;
+
+        function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSound(type) {
+            if (!audioContext) return;
+            const osc = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+            osc.connect(gain);
+            gain.connect(audioContext.destination);
+            if (type === 'correct') {
+                osc.frequency.setValueAtTime(523.25, audioContext.currentTime);
+                osc.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1);
+                osc.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.2);
+                gain.gain.setValueAtTime(0.3, audioContext.currentTime);
+                osc.start(audioContext.currentTime);
+                osc.stop(audioContext.currentTime + 0.4);
+            } else if (type === 'wrong') {
+                osc.frequency.setValueAtTime(200, audioContext.currentTime);
+                gain.gain.setValueAtTime(0.2, audioContext.currentTime);
+                osc.start(audioContext.currentTime);
+                osc.stop(audioContext.currentTime + 0.2);
+            }
+        }
+
+        function shuffleArray(arr) {
+            const shuffled = [...arr];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        function startGame() {
+            initAudio();
+
+            // Build a balanced set: 4 Type A, 4 Type B, 4 Type C
+            const aNumbers = shuffleArray(TYPE_A_NUMBERS).slice(0, 4);
+            const bNumbers = shuffleArray(TYPE_B_NUMBERS).slice(0, 4);
+            const cItems = shuffleArray(TYPE_C).slice(0, 4);
+
+            const questions = [
+                ...aNumbers.map(n => buildTypeA(n)),
+                ...bNumbers.map(n => buildTypeB(n)),
+                ...cItems.map(item => buildTypeC(item))
+            ];
+
+            gameState = {
+                score: 0,
+                currentQuestion: 0,
+                totalQuestions: 12,
+                streak: 0,
+                questions: shuffleArray(questions),
+                answered: false
+            };
+
+            document.getElementById('score').textContent = '0';
+            document.getElementById('total').textContent = gameState.totalQuestions;
+            updateStreak();
+
+            showScreen('game-screen');
+            showQuestion();
+        }
+
+        function showQuestion() {
+            if (gameState.currentQuestion >= gameState.totalQuestions) {
+                endGame();
+                return;
+            }
+
+            gameState.answered = false;
+            const q = gameState.questions[gameState.currentQuestion];
+
+            document.getElementById('current').textContent = gameState.currentQuestion + 1;
+
+            // Question type badge
+            const typeEl = document.getElementById('question-type');
+            typeEl.textContent = q.typeLabel;
+            typeEl.className = 'question-type ' + q.type;
+
+            document.getElementById('question-label').textContent = q.label;
+
+            // Hide all display elements first
+            document.getElementById('number-display').style.display = 'none';
+            document.getElementById('word-display').style.display = 'none';
+            document.getElementById('sentence').style.display = 'none';
+            document.getElementById('clue-badge').style.display = 'none';
+
+            if (q.display === 'number') {
+                document.getElementById('number-display').style.display = 'block';
+                document.getElementById('number-display').textContent = q.displayValue;
+            } else if (q.display === 'word') {
+                document.getElementById('word-display').style.display = 'block';
+                document.getElementById('word-display').textContent = q.displayValue;
+            } else if (q.display === 'sentence') {
+                document.getElementById('sentence').style.display = 'block';
+                document.getElementById('sentence').innerHTML = q.sentence.replace('___', '<span class="blank">___</span>');
+                if (q.clue) {
+                    document.getElementById('clue-badge').style.display = 'inline-block';
+                    document.getElementById('clue-badge').textContent = q.clue;
+                }
+            }
+
+            document.getElementById('hint').textContent = q.hint;
+
+            // Answer buttons
+            const answersDiv = document.getElementById('answers');
+            answersDiv.innerHTML = '';
+            q.options.forEach(option => {
+                const btn = document.createElement('button');
+                btn.className = 'answer-btn';
+                btn.textContent = option;
+                btn.onclick = () => checkAnswer(option, btn, q);
+                answersDiv.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(answer, btn, q) {
+            if (gameState.answered) return;
+            gameState.answered = true;
+
+            const isCorrect = answer === q.correct;
+
+            document.querySelectorAll('.answer-btn').forEach(b => {
+                b.style.pointerEvents = 'none';
+                if (b.textContent === q.correct) {
+                    b.classList.add('correct');
+                }
+            });
+
+            if (isCorrect) {
+                gameState.score += 10 + (gameState.streak * 2);
+                gameState.streak++;
+                playSound('correct');
+                showFeedback(true);
+                createStars();
+            } else {
+                btn.classList.add('wrong');
+                gameState.streak = 0;
+                playSound('wrong');
+                showFeedback(false);
+            }
+
+            document.getElementById('score').textContent = gameState.score;
+            updateStreak();
+
+            // Update blank if sentence type
+            setTimeout(() => {
+                const blankEl = document.querySelector('.blank');
+                if (blankEl) {
+                    blankEl.textContent = q.correct;
+                    blankEl.style.borderBottom = 'none';
+                    blankEl.style.color = isCorrect ? '#4CAF50' : '#FF6B6B';
+                }
+            }, 300);
+
+            setTimeout(() => {
+                gameState.currentQuestion++;
+                showQuestion();
+            }, 1800);
+        }
+
+        function updateStreak() {
+            const streakEl = document.getElementById('streak');
+            if (gameState.streak >= 2) {
+                streakEl.textContent = '🔥 ' + gameState.streak;
+            } else {
+                streakEl.textContent = '';
+            }
+        }
+
+        function showFeedback(isCorrect) {
+            const feedback = document.createElement('div');
+            feedback.className = `feedback ${isCorrect ? 'correct' : 'wrong'}`;
+            const messages = isCorrect ? ENCOURAGEMENTS.correct : ENCOURAGEMENTS.wrong;
+            feedback.textContent = messages[Math.floor(Math.random() * messages.length)];
+            document.body.appendChild(feedback);
+            setTimeout(() => feedback.remove(), 800);
+        }
+
+        function createStars() {
+            const container = document.getElementById('stars-container');
+            const stars = ['⭐', '🌟', '✨', '💫'];
+            for (let i = 0; i < 5; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.textContent = stars[Math.floor(Math.random() * stars.length)];
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 30 + 20}%`;
+                container.appendChild(star);
+                setTimeout(() => star.remove(), 1000);
+            }
+        }
+
+        function createConfetti() {
+            const colors = ['#E91E63', '#9B59B6', '#FFE66D', '#3498DB', '#4CAF50'];
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = `${Math.random() * 100}%`;
+                confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animationDelay = `${Math.random() * 2}s`;
+                confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                document.body.appendChild(confetti);
+                setTimeout(() => confetti.remove(), 3000);
+            }
+        }
+
+        function endGame() {
+            const maxScore = gameState.totalQuestions * 10;
+            const percentage = gameState.score / maxScore;
+
+            let stars, trophy, title, encouragement;
+
+            if (percentage >= 0.9) {
+                stars = '⭐⭐⭐'; trophy = '🏆'; title = 'Number Champion!';
+                encouragement = ENCOURAGEMENTS.end.high[Math.floor(Math.random() * ENCOURAGEMENTS.end.high.length)];
+            } else if (percentage >= 0.6) {
+                stars = '⭐⭐'; trophy = '🥈'; title = 'Great Job!';
+                encouragement = ENCOURAGEMENTS.end.medium[Math.floor(Math.random() * ENCOURAGEMENTS.end.medium.length)];
+            } else {
+                stars = '⭐'; trophy = '🏅'; title = 'Good Try!';
+                encouragement = ENCOURAGEMENTS.end.low[Math.floor(Math.random() * ENCOURAGEMENTS.end.low.length)];
+            }
+
+            document.getElementById('final-score').textContent = gameState.score;
+            document.getElementById('stars-earned').textContent = stars;
+            document.getElementById('trophy').textContent = trophy;
+            document.getElementById('end-title').textContent = title;
+            document.getElementById('encouragement').textContent = encouragement;
+
+            showScreen('end-screen');
+            createConfetti();
+        }
+
+        function goBack() {
+            window.location.href = '../../index.html';
+        }
+
+        // Prevent double-tap zoom
+        document.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            e.target.click();
+        }, { passive: false });
+    </script>
+</body>
+</html>

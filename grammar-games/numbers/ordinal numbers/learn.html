@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Learn Ordinal Numbers</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', 'Chalkboard', 'Arial Rounded MT Bold', sans-serif;
+            background: linear-gradient(180deg, #FFF0F5 0%, #FFD6E8 100%);
+            min-height: 100vh;
+            padding: 20px;
+            padding-bottom: 100px;
+        }
+
+        .back-link {
+            display: inline-block;
+            padding: 10px 20px;
+            background: white;
+            border-radius: 20px;
+            color: #666;
+            text-decoration: none;
+            font-size: 1rem;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+            margin-bottom: 20px;
+        }
+
+        .back-link:hover {
+            transform: translateY(-2px);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .mascot {
+            font-size: clamp(4rem, 15vw, 6rem);
+            animation: wiggle 2s infinite;
+        }
+
+        @keyframes wiggle {
+            0%, 100% { transform: rotate(-5deg); }
+            50% { transform: rotate(5deg); }
+        }
+
+        .title {
+            font-size: clamp(1.8rem, 6vw, 2.8rem);
+            color: #E91E63;
+            text-shadow: 3px 3px 0 #FFE66D;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: clamp(1rem, 3vw, 1.3rem);
+            color: #666;
+        }
+
+        /* Section Cards */
+        .section-card {
+            background: white;
+            border-radius: 25px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 0 rgba(0,0,0,0.05), 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .section-title {
+            font-size: clamp(1.3rem, 4vw, 1.6rem);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title.what { color: #E91E63; }
+        .section-title.irregular { color: #9B59B6; }
+        .section-title.regular { color: #3498DB; }
+        .section-title.teens { color: #E67E22; }
+        .section-title.tens { color: #27AE60; }
+        .section-title.compound { color: #2980B9; }
+        .section-title.hundred { color: #8E44AD; }
+        .section-title.usage { color: #E74C3C; }
+        .section-title.reference { color: #1ABC9C; }
+
+        .section-icon {
+            font-size: 1.5em;
+        }
+
+        .explanation {
+            font-size: clamp(1rem, 3vw, 1.15rem);
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .explanation-zh {
+            font-size: clamp(0.9rem, 2.5vw, 1rem);
+            color: #888;
+            font-style: italic;
+            margin-bottom: 15px;
+        }
+
+        /* Rule Box */
+        .rule-box {
+            background: linear-gradient(135deg, #FCE4EC 0%, #FFF0F5 100%);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            border-left: 5px solid #E91E63;
+        }
+
+        .rule-box.purple {
+            background: linear-gradient(135deg, #F3E8FF 0%, #FAF0FF 100%);
+            border-left-color: #9B59B6;
+        }
+
+        .rule-box.blue {
+            background: linear-gradient(135deg, #E8F6FF 0%, #F0F8FF 100%);
+            border-left-color: #3498DB;
+        }
+
+        .rule-box.orange {
+            background: linear-gradient(135deg, #FFF3E0 0%, #FFF8F0 100%);
+            border-left-color: #E67E22;
+        }
+
+        .rule-box.green {
+            background: linear-gradient(135deg, #E8FFF0 0%, #F0FFF5 100%);
+            border-left-color: #27AE60;
+        }
+
+        .rule-label {
+            font-size: clamp(0.85rem, 2.5vw, 0.95rem);
+            color: #666;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .rule-formula {
+            font-size: clamp(1.2rem, 4vw, 1.5rem);
+            color: #333;
+            font-weight: bold;
+        }
+
+        .highlight {
+            color: #E91E63;
+            background: #FFE66D;
+            padding: 2px 8px;
+            border-radius: 5px;
+        }
+
+        /* Examples Table */
+        .examples-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: clamp(0.9rem, 3vw, 1.1rem);
+        }
+
+        .examples-table th {
+            background: #E91E63;
+            color: white;
+            padding: 12px 10px;
+            text-align: center;
+        }
+
+        .examples-table th:first-child {
+            border-radius: 10px 0 0 0;
+        }
+
+        .examples-table th:last-child {
+            border-radius: 0 10px 0 0;
+        }
+
+        .examples-table td {
+            padding: 12px 10px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+        }
+
+        .examples-table tr:nth-child(even) {
+            background: #F8F9FA;
+        }
+
+        .examples-table tr:last-child td:first-child {
+            border-radius: 0 0 0 10px;
+        }
+
+        .examples-table tr:last-child td:last-child {
+            border-radius: 0 0 10px 0;
+        }
+
+        .examples-table.green th { background: #27AE60; }
+        .examples-table.blue th { background: #3498DB; }
+        .examples-table.orange th { background: #E67E22; }
+        .examples-table.purple th { background: #9B59B6; }
+        .examples-table.teal th { background: #1ABC9C; }
+
+        .arrow {
+            color: #E91E63;
+            font-weight: bold;
+        }
+
+        /* Visual Example */
+        .visual-example {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 20px;
+            padding: 20px;
+            background: #F8F9FA;
+            border-radius: 15px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+
+        .visual-item {
+            text-align: center;
+        }
+
+        .visual-icon {
+            font-size: clamp(2.5rem, 10vw, 4rem);
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .visual-label {
+            font-size: clamp(0.9rem, 3vw, 1.1rem);
+            color: #333;
+            font-weight: bold;
+        }
+
+        .visual-label span {
+            color: #E91E63;
+        }
+
+        .visual-sublabel {
+            font-size: clamp(0.75rem, 2vw, 0.85rem);
+            color: #999;
+        }
+
+        /* Spelling Note */
+        .spelling-note {
+            background: #FFFDE7;
+            border: 2px dashed #FFD54F;
+            border-radius: 12px;
+            padding: 12px 18px;
+            margin: 10px 0;
+            font-size: clamp(0.9rem, 2.5vw, 1rem);
+            color: #555;
+        }
+
+        .spelling-note strong {
+            color: #E91E63;
+        }
+
+        /* Usage Examples */
+        .usage-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .usage-list li {
+            padding: 12px 15px;
+            margin: 10px 0;
+            background: #FCE4EC;
+            border-radius: 10px;
+            font-size: clamp(0.95rem, 3vw, 1.1rem);
+            color: #333;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .usage-icon {
+            font-size: 1.3em;
+            flex-shrink: 0;
+        }
+
+        .usage-example {
+            color: #E91E63;
+            font-weight: bold;
+        }
+
+        .usage-zh {
+            color: #888;
+            font-size: 0.9em;
+        }
+
+        /* Reference Table - Collapsible */
+        .ref-toggle {
+            width: 100%;
+            padding: 15px 20px;
+            background: linear-gradient(180deg, #1ABC9C 0%, #16A085 100%);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: clamp(1rem, 3.5vw, 1.3rem);
+            font-weight: bold;
+            cursor: pointer;
+            font-family: inherit;
+            box-shadow: 0 4px 0 #117A65;
+            transition: all 0.1s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .ref-toggle:hover { transform: translateY(2px); box-shadow: 0 2px 0 #117A65; }
+
+        .ref-toggle .arrow-icon {
+            transition: transform 0.3s;
+            font-size: 1.2em;
+        }
+
+        .ref-toggle.open .arrow-icon {
+            transform: rotate(180deg);
+        }
+
+        .ref-content {
+            display: none;
+            margin-top: 15px;
+        }
+
+        .ref-content.show {
+            display: block;
+        }
+
+        .ref-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .ref-item {
+            background: #E8FFF3;
+            padding: 8px 12px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: clamp(0.8rem, 2.5vw, 0.95rem);
+        }
+
+        .ref-item .num {
+            color: #1ABC9C;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .ref-item .word {
+            color: #555;
+        }
+
+        .ref-item.irregular {
+            background: #F3E8FF;
+        }
+
+        .ref-item.irregular .num {
+            color: #9B59B6;
+        }
+
+        /* Play Button */
+        .play-section {
+            text-align: center;
+            margin-top: 40px;
+            padding: 30px;
+            background: white;
+            border-radius: 25px;
+            box-shadow: 0 8px 0 rgba(0,0,0,0.05), 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .ready-text {
+            font-size: clamp(1.3rem, 4vw, 1.8rem);
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .play-btn {
+            display: inline-block;
+            font-size: clamp(1.5rem, 5vw, 2rem);
+            padding: 20px 50px;
+            background: linear-gradient(180deg, #E91E63 0%, #C2185B 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #AD1457, 0 10px 20px rgba(0,0,0,0.2);
+            transition: all 0.1s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-decoration: none;
+        }
+
+        .play-btn:hover {
+            transform: translateY(2px);
+            box-shadow: 0 4px 0 #AD1457;
+        }
+
+        .play-btn:active {
+            transform: translateY(5px);
+            box-shadow: 0 1px 0 #AD1457;
+        }
+
+        @media (max-width: 500px) {
+            .section-card { padding: 18px; }
+            .visual-example { gap: 10px; }
+            .ref-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="../../index.html" class="back-link">← Back to Games</a>
+
+        <header class="header">
+            <div class="mascot">🏅</div>
+            <h1 class="title">Ordinal Numbers</h1>
+            <p class="subtitle">Learn the order of things in English!</p>
+        </header>
+
+        <!-- What are ordinal numbers? -->
+        <div class="section-card">
+            <h2 class="section-title what">
+                <span class="section-icon">🤔</span>
+                What are Ordinal Numbers?
+            </h2>
+            <p class="explanation">
+                <strong>Cardinal numbers</strong> tell us <strong>how many</strong> (1, 2, 3...).<br>
+                <strong>Ordinal numbers</strong> tell us the <strong>order</strong> or <strong>position</strong> (1st, 2nd, 3rd...).
+            </p>
+            <p class="explanation-zh">
+                基數告訴我們「多少」，序數告訴我們「第幾」！
+            </p>
+
+            <div class="visual-example">
+                <div class="visual-item">
+                    <span class="visual-icon">🥇</span>
+                    <div class="visual-label"><span>1st</span></div>
+                    <div class="visual-sublabel">first</div>
+                </div>
+                <div class="visual-item">
+                    <span class="visual-icon">🥈</span>
+                    <div class="visual-label"><span>2nd</span></div>
+                    <div class="visual-sublabel">second</div>
+                </div>
+                <div class="visual-item">
+                    <span class="visual-icon">🥉</span>
+                    <div class="visual-label"><span>3rd</span></div>
+                    <div class="visual-sublabel">third</div>
+                </div>
+                <div class="visual-item">
+                    <span class="visual-icon">🏅</span>
+                    <div class="visual-label"><span>4th</span></div>
+                    <div class="visual-sublabel">fourth</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- The Big Three -->
+        <div class="section-card">
+            <h2 class="section-title irregular">
+                <span class="section-icon">⚡</span>
+                The Big Three — Irregular! (不規則)
+            </h2>
+            <p class="explanation">
+                The first three ordinal numbers are <strong>special</strong>. They don't follow any rule — you need to memorize them!
+            </p>
+            <p class="explanation-zh">
+                前三個序數是特別的，需要直接記住！
+            </p>
+
+            <div class="rule-box purple">
+                <div class="rule-label">Memorize these!</div>
+                <div class="rule-formula">1 → <span class="highlight">first</span> (1st) &nbsp; 2 → <span class="highlight">second</span> (2nd) &nbsp; 3 → <span class="highlight">third</span> (3rd)</div>
+            </div>
+        </div>
+
+        <!-- Regular Rule: 4th–10th -->
+        <div class="section-card">
+            <h2 class="section-title regular">
+                <span class="section-icon">📏</span>
+                Regular Rule: Add -th (4th–10th)
+            </h2>
+            <p class="explanation">
+                Most numbers just add <strong>-th</strong> to become ordinal. But watch out for special spelling changes!
+            </p>
+            <p class="explanation-zh">
+                大部分的數字只要加上 -th 就變成序數，但有些拼字會改變！
+            </p>
+
+            <div class="rule-box blue">
+                <div class="rule-label">Basic Rule</div>
+                <div class="rule-formula">number + <span class="highlight">-th</span></div>
+            </div>
+
+            <table class="examples-table blue">
+                <tr>
+                    <th>Number</th>
+                    <th></th>
+                    <th>Ordinal</th>
+                    <th>Note</th>
+                </tr>
+                <tr><td>4 (four)</td><td class="arrow">→</td><td><strong>fourth</strong> (4th)</td><td>regular</td></tr>
+                <tr><td>5 (five)</td><td class="arrow">→</td><td><strong>fifth</strong> (5th)</td><td>ve → <strong>f</strong>th ⚠️</td></tr>
+                <tr><td>6 (six)</td><td class="arrow">→</td><td><strong>sixth</strong> (6th)</td><td>regular</td></tr>
+                <tr><td>7 (seven)</td><td class="arrow">→</td><td><strong>seventh</strong> (7th)</td><td>regular</td></tr>
+                <tr><td>8 (eight)</td><td class="arrow">→</td><td><strong>eighth</strong> (8th)</td><td>no double t ⚠️</td></tr>
+                <tr><td>9 (nine)</td><td class="arrow">→</td><td><strong>ninth</strong> (9th)</td><td>drop the e ⚠️</td></tr>
+                <tr><td>10 (ten)</td><td class="arrow">→</td><td><strong>tenth</strong> (10th)</td><td>regular</td></tr>
+            </table>
+
+            <div class="spelling-note">
+                ⚠️ <strong>Watch the spelling!</strong><br>
+                • fi<strong>ve</strong> → fi<strong>f</strong>th (not fiveth)<br>
+                • eigh<strong>t</strong> → eigh<strong>th</strong> (not eightth)<br>
+                • nin<strong>e</strong> → nin<strong>th</strong> (not nineth)
+            </div>
+        </div>
+
+        <!-- Teens: 11th–19th -->
+        <div class="section-card">
+            <h2 class="section-title teens">
+                <span class="section-icon">🔟</span>
+                The Teens: 11th–19th
+            </h2>
+            <p class="explanation">
+                All teen numbers add <strong>-th</strong>. Remember the special spelling for <strong>twelfth</strong>!
+            </p>
+            <p class="explanation-zh">
+                所有十幾的數字都加 -th。注意 twelfth 的特殊拼法！
+            </p>
+
+            <table class="examples-table orange">
+                <tr>
+                    <th>Number</th>
+                    <th></th>
+                    <th>Ordinal</th>
+                    <th>Note</th>
+                </tr>
+                <tr><td>11 (eleven)</td><td class="arrow">→</td><td><strong>eleventh</strong> (11th)</td><td>regular</td></tr>
+                <tr><td>12 (twelve)</td><td class="arrow">→</td><td><strong>twelfth</strong> (12th)</td><td>ve → <strong>f</strong>th ⚠️</td></tr>
+                <tr><td>13 (thirteen)</td><td class="arrow">→</td><td><strong>thirteenth</strong> (13th)</td><td>regular</td></tr>
+                <tr><td>14 (fourteen)</td><td class="arrow">→</td><td><strong>fourteenth</strong> (14th)</td><td>regular</td></tr>
+                <tr><td>15 (fifteen)</td><td class="arrow">→</td><td><strong>fifteenth</strong> (15th)</td><td>regular</td></tr>
+                <tr><td>16–19</td><td class="arrow">→</td><td><strong>+ th</strong></td><td>regular</td></tr>
+            </table>
+        </div>
+
+        <!-- Tens: 20th–90th -->
+        <div class="section-card">
+            <h2 class="section-title tens">
+                <span class="section-icon">✨</span>
+                The Tens: 20th–90th
+            </h2>
+            <p class="explanation">
+                For numbers ending in <strong>-y</strong>, change the <strong>y</strong> to <strong>ie</strong> and add <strong>-th</strong>.
+            </p>
+            <p class="explanation-zh">
+                以 -y 結尾的數字，把 y 改成 ie 再加 -th！
+            </p>
+
+            <div class="rule-box green">
+                <div class="rule-label">Tens Rule</div>
+                <div class="rule-formula">-y → <span class="highlight">-ieth</span></div>
+            </div>
+
+            <table class="examples-table green">
+                <tr>
+                    <th>Number</th>
+                    <th></th>
+                    <th>Ordinal</th>
+                </tr>
+                <tr><td>20 (twent<strong>y</strong>)</td><td class="arrow">→</td><td><strong>twent<span style="color:#E91E63">ieth</span></strong> (20th)</td></tr>
+                <tr><td>30 (thirt<strong>y</strong>)</td><td class="arrow">→</td><td><strong>thirt<span style="color:#E91E63">ieth</span></strong> (30th)</td></tr>
+                <tr><td>40 (fort<strong>y</strong>)</td><td class="arrow">→</td><td><strong>fort<span style="color:#E91E63">ieth</span></strong> (40th)</td></tr>
+                <tr><td>50 (fift<strong>y</strong>)</td><td class="arrow">→</td><td><strong>fift<span style="color:#E91E63">ieth</span></strong> (50th)</td></tr>
+                <tr><td>60–90</td><td class="arrow">→</td><td>same pattern: <strong>-ieth</strong></td></tr>
+            </table>
+        </div>
+
+        <!-- Compound Numbers: 21st–99th -->
+        <div class="section-card">
+            <h2 class="section-title compound">
+                <span class="section-icon">🔗</span>
+                Compound Numbers: 21st–99th
+            </h2>
+            <p class="explanation">
+                For compound numbers, <strong>only the last word changes</strong>. The tens part stays the same!
+            </p>
+            <p class="explanation-zh">
+                複合數字中，只有最後一個字變成序數，前面的十位數不變！
+            </p>
+
+            <div class="rule-box blue">
+                <div class="rule-label">Compound Rule</div>
+                <div class="rule-formula">tens (stay the same) + <span class="highlight">ordinal of ones</span></div>
+            </div>
+
+            <table class="examples-table blue">
+                <tr>
+                    <th>Number</th>
+                    <th></th>
+                    <th>Ordinal</th>
+                </tr>
+                <tr><td>21</td><td class="arrow">→</td><td>twenty-<strong>first</strong> (21st)</td></tr>
+                <tr><td>32</td><td class="arrow">→</td><td>thirty-<strong>second</strong> (32nd)</td></tr>
+                <tr><td>43</td><td class="arrow">→</td><td>forty-<strong>third</strong> (43rd)</td></tr>
+                <tr><td>55</td><td class="arrow">→</td><td>fifty-<strong>fifth</strong> (55th)</td></tr>
+                <tr><td>68</td><td class="arrow">→</td><td>sixty-<strong>eighth</strong> (68th)</td></tr>
+                <tr><td>99</td><td class="arrow">→</td><td>ninety-<strong>ninth</strong> (99th)</td></tr>
+            </table>
+        </div>
+
+        <!-- 100th -->
+        <div class="section-card">
+            <h2 class="section-title hundred">
+                <span class="section-icon">💯</span>
+                One Hundredth (100th)
+            </h2>
+            <p class="explanation">
+                100 = one hundred → 100th = one <strong>hundredth</strong>
+            </p>
+            <p class="explanation-zh">
+                一百 → 第一百
+            </p>
+
+            <div class="rule-box purple">
+                <div class="rule-label">Just add -th!</div>
+                <div class="rule-formula">hundred → <span class="highlight">hundredth</span> (100th)</div>
+            </div>
+        </div>
+
+        <!-- When Do We Use Them? -->
+        <div class="section-card">
+            <h2 class="section-title usage">
+                <span class="section-icon">🎒</span>
+                When Do We Use Ordinal Numbers? (Student Life!)
+            </h2>
+            <p class="explanation">
+                Ordinal numbers are everywhere in school! Here are common ways to use them:
+            </p>
+
+            <ul class="usage-list">
+                <li>
+                    <span class="usage-icon">📅</span>
+                    <div>
+                        <strong>Dates:</strong><br>
+                        <span class="usage-example">My birthday is on March 3rd.</span><br>
+                        <span class="usage-zh">我的生日在三月三日。</span>
+                    </div>
+                </li>
+                <li>
+                    <span class="usage-icon">🏢</span>
+                    <div>
+                        <strong>Floors & Classrooms:</strong><br>
+                        <span class="usage-example">Our classroom is on the 4th floor.</span><br>
+                        <span class="usage-zh">我們的教室在四樓。</span>
+                    </div>
+                </li>
+                <li>
+                    <span class="usage-icon">🏆</span>
+                    <div>
+                        <strong>Rankings & Competitions:</strong><br>
+                        <span class="usage-example">She got 2nd place in the race.</span><br>
+                        <span class="usage-zh">她在賽跑中得到第二名。</span>
+                    </div>
+                </li>
+                <li>
+                    <span class="usage-icon">📖</span>
+                    <div>
+                        <strong>Order & Sequence:</strong><br>
+                        <span class="usage-example">Open your book to the 5th page.</span><br>
+                        <span class="usage-zh">翻開課本到第五頁。</span>
+                    </div>
+                </li>
+                <li>
+                    <span class="usage-icon">🎂</span>
+                    <div>
+                        <strong>Celebrations:</strong><br>
+                        <span class="usage-example">This is our school's 50th anniversary.</span><br>
+                        <span class="usage-zh">這是我們學校的五十週年。</span>
+                    </div>
+                </li>
+                <li>
+                    <span class="usage-icon">❓</span>
+                    <div>
+                        <strong>Questions:</strong><br>
+                        <span class="usage-example">Is this your first time here?</span><br>
+                        <span class="usage-zh">這是你第一次來嗎？</span>
+                    </div>
+                </li>
+                <li>
+                    <span class="usage-icon">🚫</span>
+                    <div>
+                        <strong>Negative Sentences:</strong><br>
+                        <span class="usage-example">It is not the first time I've been late.</span><br>
+                        <span class="usage-zh">這不是我第一次遲到。</span>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Full Reference Table -->
+        <div class="section-card">
+            <h2 class="section-title reference">
+                <span class="section-icon">📋</span>
+                Full Reference: 1st–100th
+            </h2>
+
+            <button class="ref-toggle" id="ref-toggle" onclick="toggleRef()">
+                <span>Show Full Table (1st–100th)</span>
+                <span class="arrow-icon">▼</span>
+            </button>
+
+            <div class="ref-content" id="ref-content">
+                <h4 style="color:#9B59B6; margin: 15px 0 5px;">1st–10th</h4>
+                <div class="ref-grid">
+                    <div class="ref-item irregular"><span class="num">1st</span> <span class="word">first</span></div>
+                    <div class="ref-item irregular"><span class="num">2nd</span> <span class="word">second</span></div>
+                    <div class="ref-item irregular"><span class="num">3rd</span> <span class="word">third</span></div>
+                    <div class="ref-item"><span class="num">4th</span> <span class="word">fourth</span></div>
+                    <div class="ref-item irregular"><span class="num">5th</span> <span class="word">fifth</span></div>
+                    <div class="ref-item"><span class="num">6th</span> <span class="word">sixth</span></div>
+                    <div class="ref-item"><span class="num">7th</span> <span class="word">seventh</span></div>
+                    <div class="ref-item irregular"><span class="num">8th</span> <span class="word">eighth</span></div>
+                    <div class="ref-item irregular"><span class="num">9th</span> <span class="word">ninth</span></div>
+                    <div class="ref-item"><span class="num">10th</span> <span class="word">tenth</span></div>
+                </div>
+
+                <h4 style="color:#E67E22; margin: 15px 0 5px;">11th–19th</h4>
+                <div class="ref-grid">
+                    <div class="ref-item"><span class="num">11th</span> <span class="word">eleventh</span></div>
+                    <div class="ref-item irregular"><span class="num">12th</span> <span class="word">twelfth</span></div>
+                    <div class="ref-item"><span class="num">13th</span> <span class="word">thirteenth</span></div>
+                    <div class="ref-item"><span class="num">14th</span> <span class="word">fourteenth</span></div>
+                    <div class="ref-item"><span class="num">15th</span> <span class="word">fifteenth</span></div>
+                    <div class="ref-item"><span class="num">16th</span> <span class="word">sixteenth</span></div>
+                    <div class="ref-item"><span class="num">17th</span> <span class="word">seventeenth</span></div>
+                    <div class="ref-item"><span class="num">18th</span> <span class="word">eighteenth</span></div>
+                    <div class="ref-item"><span class="num">19th</span> <span class="word">nineteenth</span></div>
+                </div>
+
+                <h4 style="color:#27AE60; margin: 15px 0 5px;">20th–100th (tens)</h4>
+                <div class="ref-grid">
+                    <div class="ref-item"><span class="num">20th</span> <span class="word">twentieth</span></div>
+                    <div class="ref-item"><span class="num">30th</span> <span class="word">thirtieth</span></div>
+                    <div class="ref-item"><span class="num">40th</span> <span class="word">fortieth</span></div>
+                    <div class="ref-item"><span class="num">50th</span> <span class="word">fiftieth</span></div>
+                    <div class="ref-item"><span class="num">60th</span> <span class="word">sixtieth</span></div>
+                    <div class="ref-item"><span class="num">70th</span> <span class="word">seventieth</span></div>
+                    <div class="ref-item"><span class="num">80th</span> <span class="word">eightieth</span></div>
+                    <div class="ref-item"><span class="num">90th</span> <span class="word">ninetieth</span></div>
+                    <div class="ref-item"><span class="num">100th</span> <span class="word">hundredth</span></div>
+                </div>
+
+                <h4 style="color:#2980B9; margin: 15px 0 5px;">Compound examples</h4>
+                <div class="ref-grid">
+                    <div class="ref-item"><span class="num">21st</span> <span class="word">twenty-first</span></div>
+                    <div class="ref-item"><span class="num">22nd</span> <span class="word">twenty-second</span></div>
+                    <div class="ref-item"><span class="num">23rd</span> <span class="word">twenty-third</span></div>
+                    <div class="ref-item"><span class="num">24th</span> <span class="word">twenty-fourth</span></div>
+                    <div class="ref-item"><span class="num">25th</span> <span class="word">twenty-fifth</span></div>
+                    <div class="ref-item"><span class="num">31st</span> <span class="word">thirty-first</span></div>
+                    <div class="ref-item"><span class="num">42nd</span> <span class="word">forty-second</span></div>
+                    <div class="ref-item"><span class="num">53rd</span> <span class="word">fifty-third</span></div>
+                    <div class="ref-item"><span class="num">64th</span> <span class="word">sixty-fourth</span></div>
+                    <div class="ref-item"><span class="num">75th</span> <span class="word">seventy-fifth</span></div>
+                    <div class="ref-item"><span class="num">86th</span> <span class="word">eighty-sixth</span></div>
+                    <div class="ref-item"><span class="num">99th</span> <span class="word">ninety-ninth</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Play Button -->
+        <div class="play-section">
+            <div class="ready-text">Ready to practice? Let's play! 🎮</div>
+            <a href="index.html" class="play-btn">Play Game!</a>
+        </div>
+    </div>
+
+    <script>
+        function toggleRef() {
+            const content = document.getElementById('ref-content');
+            const toggle = document.getElementById('ref-toggle');
+            content.classList.toggle('show');
+            toggle.classList.toggle('open');
+            const label = toggle.querySelector('span:first-child');
+            label.textContent = content.classList.contains('show') ? 'Hide Full Table' : 'Show Full Table (1st–100th)';
+        }
+    </script>
+</body>
+</html>
