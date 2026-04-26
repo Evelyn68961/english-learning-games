@@ -16,7 +16,8 @@
             font-family: 'Comic Sans MS', 'Chalkboard', 'Arial Rounded MT Bold', sans-serif;
             background: linear-gradient(180deg, #87CEEB 0%, #98FB98 100%);
             min-height: 100vh;
-            overflow: hidden;
+            overflow-x: hidden;
+            overflow-y: auto;
             touch-action: manipulation;
         }
 
@@ -138,7 +139,15 @@
         /* Start Screen */
         #start-screen {
             text-align: center;
+            justify-content: flex-start;
+            padding-top: 30px;
+            padding-bottom: 30px;
+            gap: 18px;
         }
+        #start-screen .game-title { margin-bottom: 0; }
+        #start-screen .game-subtitle { margin-bottom: 0; }
+        #start-screen .mole-mascot { margin-bottom: 0; }
+        #start-screen .mode-selector { margin-bottom: 0; }
 
         .game-title {
             font-size: clamp(2.5rem, 8vw, 5rem);
@@ -281,13 +290,16 @@
         /* Mode Selector */
         .mode-selector {
             display: flex;
-            gap: 15px;
+            flex-direction: row;
+            flex-wrap: nowrap;
+            gap: 12px;
             margin-bottom: 25px;
+            justify-content: center;
         }
 
         .mode-btn {
-            font-size: clamp(1rem, 3.5vw, 1.3rem);
-            padding: 12px 28px;
+            font-size: clamp(0.95rem, 3.5vw, 1.3rem);
+            padding: 12px 22px;
             background: rgba(255,255,255,0.6);
             color: #666;
             border: 3px solid #CCC;
@@ -295,6 +307,8 @@
             cursor: pointer;
             transition: all 0.2s;
             font-family: inherit;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
 
         .mode-btn.active {
@@ -311,19 +325,36 @@
 
         /* Level Select */
         .level-info {
-            margin-top: 30px;
-            text-align: center;
+            margin-top: 10px;
+            width: 100%;
+            max-width: 100vw;
         }
+
+        #level-badges {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
+            gap: 10px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 8px 16px 14px;
+            scrollbar-width: thin;
+            -webkit-overflow-scrolling: touch;
+            justify-content: flex-start;
+        }
+        #level-badges::-webkit-scrollbar { height: 6px; }
+        #level-badges::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius: 3px; }
 
         .level-badge {
             display: inline-block;
-            padding: 10px 25px;
+            padding: 10px 20px;
             background: #4ECDC4;
             color: white;
             border-radius: 25px;
-            font-size: clamp(0.9rem, 3vw, 1.2rem);
-            margin: 5px;
+            font-size: clamp(0.85rem, 3vw, 1.1rem);
             box-shadow: 0 4px 0 #3BA99C;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
 
         .level-badge.locked {
