@@ -209,22 +209,23 @@ function getCanvasCoords(e) {
 
 function handleCanvasTap(e) {
     if (!gameState.isPlaying) return;
-    if (gameState.questionActive) return;
     const { x, y } = getCanvasCoords(e);
 
-    // 1. Check sun token collection (any time)
+    // 1. Sun token collection — works even while a question is up
     for (let i = gameState.sunTokens.length - 1; i >= 0; i--) {
         const s = gameState.sunTokens[i];
         if (Math.hypot(x - s.x, y - s.y) < 28) {
             gameState.sun += s.value;
             gameState.sunTokens.splice(i, 1);
             updateHUD();
+            updatePlantCards();
             playSound('plant');
             return;
         }
     }
 
-    // 2. Plant placement (only if a card is selected)
+    // 2. Plant placement (only if a card is selected and no question is active)
+    if (gameState.questionActive) return;
     if (!gameState.selectedPlant) return;
     if (y < GROUND_Y) return;
     const lane = Math.floor((y - GROUND_Y) / LANE_H);
@@ -538,8 +539,6 @@ function startGame() {
     updateHUD();
     resizeCanvas();
     gameLoop();
-
-    setTimeout(() => { if (gameState.isPlaying) showQuestion(); }, 1500);
 }
 
 function stopGame() {
@@ -611,7 +610,7 @@ function update() {
         // Trigger question (earlier line, even while eating)
         if (z.x < W * 0.65 && !z.triggered && !gs.questionActive && gs.questionCooldown <= 0) {
             z.triggered = true;
-            gs.questionCooldown = 30;
+            gs.questionCooldown = 180; // ≥3s between questions so they don't pile up
             gs.triggerZombie = z;
             showQuestion();
         }
