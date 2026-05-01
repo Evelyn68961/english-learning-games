@@ -187,6 +187,7 @@ let gameState = {
     triggerZombie: null,
     selectedPlant: null,
     sunTokenTimer: 0,
+    damageCooldown: 0,
 };
 
 // ==================== CANVAS SETUP ====================
@@ -538,6 +539,7 @@ function startGame() {
         triggerZombie: null,
         selectedPlant: null,
         sunTokenTimer: 0,
+        damageCooldown: 0,
     };
 
     document.getElementById('hud').classList.add('active');
@@ -590,6 +592,8 @@ function update() {
         }
     }
 
+    if (gs.damageCooldown > 0) gs.damageCooldown--;
+
     // Periodic sky sun (every ~10s while playing)
     gs.sunTokenTimer++;
     if (gs.sunTokenTimer > 600) {
@@ -620,13 +624,17 @@ function update() {
             z.x -= gs.zombieSpeed;
         }
 
-        // Zombie reached the left edge
+        // Zombie reached the left edge. Cooldown prevents a clump of zombies
+        // from draining every heart in a single frame — at most one heart per ~1.5s.
         if (z.x < 30) {
             z.dead = true;
-            gs.lives--;
-            updateHUD();
-            playSound('wrong');
-            if (gs.lives <= 0) endGame(false);
+            if (gs.damageCooldown <= 0) {
+                gs.lives--;
+                gs.damageCooldown = 90;
+                updateHUD();
+                playSound('wrong');
+                if (gs.lives <= 0) endGame(false);
+            }
         }
     });
 
