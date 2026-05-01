@@ -19,6 +19,9 @@ const MIN_QUESTIONS_PER_SESSION = 15;
 
 // ==================== GAME STATE ====================
 let currentTheme = null;
+// Learner level — 'elementary' shows only easy/medium grammar (Grades 3-6 syllabus),
+// 'junior' shows all difficulties (Grades 7-9). Default to junior to preserve prior behavior.
+let selectedLevel = 'junior';
 let gameState = {
     sun: 100,
     score: 0,
@@ -388,9 +391,20 @@ function updateHUD() {
 }
 
 // ==================== GAME LOOP ====================
+function setLevel(level) {
+    if (level !== 'elementary' && level !== 'junior') return;
+    selectedLevel = level;
+    document.querySelectorAll('.level-btn').forEach(btn => {
+        btn.classList.toggle('selected', btn.dataset.level === level);
+    });
+}
+
 function selectTheme(id) {
     initAudio();
-    currentTheme = THEMES.find(t => t.id === id);
+    // Filter the chosen theme's grammar by selected learner level so elementary
+    // sessions never see junior-high sentences (past tense, comparatives, etc.).
+    const themesForLevel = window.QUESTION_BANK.forLevel(selectedLevel);
+    currentTheme = themesForLevel.find(t => t.id === id);
     startGame();
 }
 
