@@ -275,8 +275,13 @@ function generateQuestion(theme, wave) {
 
     if (type === 'grammar' && t.grammar.length === 0) type = 'vocab';
 
+    // Cap word difficulty at the same tier as grammar so a tier-0 wave never pulls
+    // a B1 word like 'submarine' or 'photographer' out of the bank.
+    const wordsForTier = t.words.filter(w => (w.difficulty || 1) <= maxDifficulty);
+    const wordPool = wordsForTier.length > 0 ? wordsForTier : t.words;
+
     if (type === 'vocab') {
-        const w = t.words[Math.floor(Math.random() * t.words.length)];
+        const w = wordPool[Math.floor(Math.random() * wordPool.length)];
         const wrongs = t.words.filter(x => x.word !== w.word)
             .sort(() => Math.random() - 0.5).slice(0, 2).map(x => x.word);
         const options = shuffle([w.word, ...wrongs]);
@@ -284,10 +289,7 @@ function generateQuestion(theme, wave) {
     }
 
     if (type === 'spelling') {
-        const minLen = tier === 0 ? 0 : tier === 1 ? 4 : 5;
-        const longEnough = t.words.filter(w => w.word.length >= minLen);
-        const pool = longEnough.length > 0 ? longEnough : t.words;
-        const w = pool[Math.floor(Math.random() * pool.length)];
+        const w = wordPool[Math.floor(Math.random() * wordPool.length)];
         const idx = Math.floor(Math.random() * w.word.length);
         const blanked = w.word.slice(0, idx) + '_' + w.word.slice(idx + 1);
         const correctLetter = w.word[idx];
