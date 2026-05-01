@@ -1,4 +1,6 @@
 // ==================== THEME DATA ====================
+// Each grammar question has a `difficulty` (1=easy, 2=medium, 3=hard); generateQuestion
+// caps difficulty by wave tier so harder grammar only unlocks in later waves.
 const THEMES = [
     {
         id: 'animals', name: 'Animals', emoji: '🐾', color: '#8B4513',
@@ -14,15 +16,29 @@ const THEMES = [
             { word: 'pig', emoji: '🐷', hint: '豬' },
             { word: 'cow', emoji: '🐮', hint: '牛' },
             { word: 'rabbit', emoji: '🐰', hint: '兔子' },
+            { word: 'tiger', emoji: '🐯', hint: '老虎' },
+            { word: 'horse', emoji: '🐴', hint: '馬' },
+            { word: 'sheep', emoji: '🐑', hint: '羊' },
+            { word: 'mouse', emoji: '🐭', hint: '老鼠' },
+            { word: 'snake', emoji: '🐍', hint: '蛇' },
+            { word: 'lion', emoji: '🦁', hint: '獅子' },
+            { word: 'monkey', emoji: '🐵', hint: '猴子' },
+            { word: 'panda', emoji: '🐼', hint: '熊貓' },
         ],
         grammar: [
-            { sentence: 'A cat ___ small.', answer: 'is', options: ['is', 'are', 'am'], hint: '貓很小' },
-            { sentence: 'Dogs ___ friendly.', answer: 'are', options: ['is', 'are', 'am'], hint: '狗很友善' },
-            { sentence: 'I ___ a bird.', answer: 'see', options: ['see', 'sees', 'saw'], hint: '我看到一隻鳥' },
-            { sentence: 'The fish ___ in water.', answer: 'swims', options: ['swim', 'swims', 'swimming'], hint: '魚在水裡游' },
-            { sentence: 'The frog ___ jump.', answer: 'can', options: ['can', 'is', 'are'], hint: '青蛙會跳' },
+            { difficulty: 1, sentence: 'A cat ___ small.', answer: 'is', options: ['is', 'are', 'am'], hint: '貓很小' },
+            { difficulty: 1, sentence: 'Dogs ___ friendly.', answer: 'are', options: ['is', 'are', 'am'], hint: '狗很友善' },
+            { difficulty: 1, sentence: 'I ___ a bird.', answer: 'see', options: ['see', 'sees', 'saw'], hint: '我看到一隻鳥' },
+            { difficulty: 1, sentence: 'The fish ___ in water.', answer: 'swims', options: ['swim', 'swims', 'swimming'], hint: '魚在水裡游' },
+            { difficulty: 1, sentence: 'The frog ___ jump.', answer: 'can', options: ['can', 'is', 'are'], hint: '青蛙會跳' },
+            { difficulty: 2, sentence: 'The dog is ___.', answer: 'running', options: ['run', 'runs', 'running'], hint: '狗在跑' },
+            { difficulty: 2, sentence: 'There ___ many cows.', answer: 'are', options: ['is', 'are', 'am'], hint: '有很多牛' },
+            { difficulty: 2, sentence: 'I have ___ pet rabbit.', answer: 'a', options: ['a', 'an', 'the'], hint: '我有一隻寵物兔' },
+            { difficulty: 2, sentence: 'Look at ___ tiger!', answer: 'that', options: ['this', 'those', 'that'], hint: '看那隻老虎' },
+            { difficulty: 3, sentence: 'A lion is ___ than a cat.', answer: 'bigger', options: ['big', 'bigger', 'biggest'], hint: '獅子比貓大' },
+            { difficulty: 3, sentence: 'Yesterday I ___ a panda.', answer: 'saw', options: ['see', 'saw', 'seen'], hint: '昨天我看到熊貓' },
+            { difficulty: 3, sentence: 'Monkeys ___ in trees.', answer: 'live', options: ['live', 'lives', 'living'], hint: '猴子住在樹上' },
         ],
-        scrambles: ['c-a-t', 'd-o-g', 'f-i-s-h', 'b-i-r-d', 'b-e-a-r', 'd-u-c-k']
     },
     {
         id: 'food', name: 'Food', emoji: '🍎', color: '#E74C3C',
@@ -38,15 +54,29 @@ const THEMES = [
             { word: 'water', emoji: '💧', hint: '水' },
             { word: 'juice', emoji: '🧃', hint: '果汁' },
             { word: 'pizza', emoji: '🍕', hint: '披薩' },
+            { word: 'banana', emoji: '🍌', hint: '香蕉' },
+            { word: 'orange', emoji: '🍊', hint: '橘子' },
+            { word: 'cookie', emoji: '🍪', hint: '餅乾' },
+            { word: 'soup', emoji: '🍲', hint: '湯' },
+            { word: 'meat', emoji: '🍖', hint: '肉' },
+            { word: 'cheese', emoji: '🧀', hint: '起司' },
+            { word: 'noodle', emoji: '🍜', hint: '麵' },
+            { word: 'salad', emoji: '🥗', hint: '沙拉' },
         ],
         grammar: [
-            { sentence: 'I like ___.', answer: 'apples', options: ['apple', 'apples', 'an apple'], hint: '我喜歡蘋果' },
-            { sentence: 'She ___ rice.', answer: 'eats', options: ['eat', 'eats', 'eating'], hint: '她吃飯' },
-            { sentence: 'I want ___ milk.', answer: 'some', options: ['a', 'some', 'many'], hint: '我想要一些牛奶' },
-            { sentence: 'The cake ___ sweet.', answer: 'is', options: ['is', 'are', 'am'], hint: '蛋糕很甜' },
-            { sentence: 'Do you like ___?', answer: 'pizza', options: ['pizza', 'pizzas', 'a pizza'], hint: '你喜歡披薩嗎？' },
+            { difficulty: 1, sentence: 'I like ___.', answer: 'apples', options: ['apple', 'apples', 'an apple'], hint: '我喜歡蘋果' },
+            { difficulty: 1, sentence: 'She ___ rice.', answer: 'eats', options: ['eat', 'eats', 'eating'], hint: '她吃飯' },
+            { difficulty: 1, sentence: 'I want ___ milk.', answer: 'some', options: ['a', 'some', 'many'], hint: '我想要一些牛奶' },
+            { difficulty: 1, sentence: 'The cake ___ sweet.', answer: 'is', options: ['is', 'are', 'am'], hint: '蛋糕很甜' },
+            { difficulty: 1, sentence: 'Do you like ___?', answer: 'pizza', options: ['pizza', 'pizzas', 'a pizza'], hint: '你喜歡披薩嗎？' },
+            { difficulty: 2, sentence: 'There ___ apples on the table.', answer: 'are', options: ['is', 'are', 'am'], hint: '桌上有蘋果' },
+            { difficulty: 2, sentence: 'She has ___ orange.', answer: 'an', options: ['a', 'an', 'the'], hint: '她有一顆橘子' },
+            { difficulty: 2, sentence: 'We are ___ pizza now.', answer: 'eating', options: ['eat', 'eating', 'ate'], hint: '我們正在吃披薩' },
+            { difficulty: 2, sentence: 'I drink ___ juice.', answer: 'some', options: ['a', 'some', 'many'], hint: '我喝一些果汁' },
+            { difficulty: 3, sentence: 'This cake is ___ than that one.', answer: 'sweeter', options: ['sweet', 'sweeter', 'sweetest'], hint: '這蛋糕比那個甜' },
+            { difficulty: 3, sentence: 'I ___ many cookies yesterday.', answer: 'ate', options: ['eat', 'eats', 'ate'], hint: '我昨天吃很多餅乾' },
+            { difficulty: 3, sentence: 'How ___ apples do you have?', answer: 'many', options: ['much', 'many', 'lots'], hint: '你有多少蘋果？' },
         ],
-        scrambles: ['a-p-p-l-e', 'r-i-c-e', 'b-r-e-a-d', 'c-a-k-e', 'w-a-t-e-r', 'j-u-i-c-e']
     },
     {
         id: 'colors', name: 'Colors', emoji: '🌈', color: '#9B59B6',
@@ -62,15 +92,25 @@ const THEMES = [
             { word: 'orange', emoji: '🟠', hint: '橘色' },
             { word: 'purple', emoji: '🟣', hint: '紫色' },
             { word: 'brown', emoji: '🟤', hint: '棕色' },
+            { word: 'gold', emoji: '🥇', hint: '金色' },
+            { word: 'silver', emoji: '🥈', hint: '銀色' },
+            { word: 'rainbow', emoji: '🌈', hint: '彩虹' },
+            { word: 'gray', emoji: '🌫️', hint: '灰色' },
         ],
         grammar: [
-            { sentence: 'The sky ___ blue.', answer: 'is', options: ['is', 'are', 'am'], hint: '天空是藍色的' },
-            { sentence: 'Apples ___ red.', answer: 'are', options: ['is', 'are', 'am'], hint: '蘋果是紅色的' },
-            { sentence: 'I like ___ color.', answer: 'this', options: ['this', 'these', 'those'], hint: '我喜歡這個顏色' },
-            { sentence: 'What color ___ it?', answer: 'is', options: ['is', 'are', 'do'], hint: '它是什麼顏色？' },
-            { sentence: 'My bag is ___.', answer: 'black', options: ['a black', 'black', 'blacks'], hint: '我的包是黑色的' },
+            { difficulty: 1, sentence: 'The sky ___ blue.', answer: 'is', options: ['is', 'are', 'am'], hint: '天空是藍色的' },
+            { difficulty: 1, sentence: 'Apples ___ red.', answer: 'are', options: ['is', 'are', 'am'], hint: '蘋果是紅色的' },
+            { difficulty: 1, sentence: 'I like ___ color.', answer: 'this', options: ['this', 'these', 'those'], hint: '我喜歡這個顏色' },
+            { difficulty: 1, sentence: 'What color ___ it?', answer: 'is', options: ['is', 'are', 'do'], hint: '它是什麼顏色？' },
+            { difficulty: 1, sentence: 'My bag is ___.', answer: 'black', options: ['a black', 'black', 'blacks'], hint: '我的包是黑色的' },
+            { difficulty: 2, sentence: 'The grass is ___.', answer: 'green', options: ['red', 'green', 'yellow'], hint: '草是綠色的' },
+            { difficulty: 2, sentence: 'Bananas ___ yellow.', answer: 'are', options: ['is', 'are', 'am'], hint: '香蕉是黃色的' },
+            { difficulty: 2, sentence: 'I have ___ orange shirt.', answer: 'an', options: ['a', 'an', 'the'], hint: '我有一件橘色襯衫' },
+            { difficulty: 2, sentence: 'Snow is ___.', answer: 'white', options: ['white', 'whites', 'a white'], hint: '雪是白色的' },
+            { difficulty: 3, sentence: 'Red is ___ than pink.', answer: 'darker', options: ['dark', 'darker', 'darkest'], hint: '紅色比粉紅色深' },
+            { difficulty: 3, sentence: 'The rainbow ___ many colors.', answer: 'has', options: ['have', 'has', 'having'], hint: '彩虹有很多顏色' },
+            { difficulty: 3, sentence: 'I ___ a purple flower.', answer: 'saw', options: ['see', 'saw', 'seen'], hint: '我看到一朵紫色的花' },
         ],
-        scrambles: ['r-e-d', 'b-l-u-e', 'g-r-e-e-n', 'p-i-n-k', 'w-h-i-t-e', 'b-r-o-w-n']
     },
     {
         id: 'family', name: 'Family', emoji: '👨‍👩‍👦', color: '#3498DB',
@@ -86,15 +126,29 @@ const THEMES = [
             { word: 'family', emoji: '👨‍👩‍👧‍👦', hint: '家人' },
             { word: 'friend', emoji: '🤝', hint: '朋友' },
             { word: 'teacher', emoji: '👩‍🏫', hint: '老師' },
+            { word: 'son', emoji: '🧒', hint: '兒子' },
+            { word: 'daughter', emoji: '👧', hint: '女兒' },
+            { word: 'uncle', emoji: '🧔', hint: '叔叔' },
+            { word: 'aunt', emoji: '👩‍🦱', hint: '阿姨' },
+            { word: 'cousin', emoji: '🧑', hint: '表親' },
+            { word: 'doctor', emoji: '👨‍⚕️', hint: '醫生' },
+            { word: 'student', emoji: '🧑‍🎓', hint: '學生' },
+            { word: 'parent', emoji: '👫', hint: '父母' },
         ],
         grammar: [
-            { sentence: 'She ___ my mom.', answer: 'is', options: ['is', 'are', 'am'], hint: '她是我媽媽' },
-            { sentence: 'I love ___ dad.', answer: 'my', options: ['my', 'me', 'I'], hint: '我愛我爸爸' },
-            { sentence: 'My brother ___ tall.', answer: 'is', options: ['is', 'are', 'am'], hint: '我弟弟很高' },
-            { sentence: '___ is your friend?', answer: 'Who', options: ['Who', 'What', 'Where'], hint: '誰是你的朋友？' },
-            { sentence: 'They ___ my family.', answer: 'are', options: ['is', 'are', 'am'], hint: '他們是我的家人' },
+            { difficulty: 1, sentence: 'She ___ my mom.', answer: 'is', options: ['is', 'are', 'am'], hint: '她是我媽媽' },
+            { difficulty: 1, sentence: 'I love ___ dad.', answer: 'my', options: ['my', 'me', 'I'], hint: '我愛我爸爸' },
+            { difficulty: 1, sentence: 'My brother ___ tall.', answer: 'is', options: ['is', 'are', 'am'], hint: '我弟弟很高' },
+            { difficulty: 1, sentence: '___ is your friend?', answer: 'Who', options: ['Who', 'What', 'Where'], hint: '誰是你的朋友？' },
+            { difficulty: 1, sentence: 'They ___ my family.', answer: 'are', options: ['is', 'are', 'am'], hint: '他們是我的家人' },
+            { difficulty: 2, sentence: 'My sister and I ___ students.', answer: 'are', options: ['is', 'are', 'am'], hint: '我和姊姊是學生' },
+            { difficulty: 2, sentence: 'My uncle ___ a doctor.', answer: 'is', options: ['is', 'are', 'am'], hint: '我叔叔是醫生' },
+            { difficulty: 2, sentence: '___ are my parents.', answer: 'These', options: ['This', 'These', 'That'], hint: '這些是我的父母' },
+            { difficulty: 2, sentence: 'My baby brother ___ crying.', answer: 'is', options: ['is', 'are', 'am'], hint: '我的小弟在哭' },
+            { difficulty: 3, sentence: 'Grandma is ___ than mom.', answer: 'older', options: ['old', 'older', 'oldest'], hint: '奶奶比媽媽老' },
+            { difficulty: 3, sentence: 'I ___ my cousin yesterday.', answer: 'met', options: ['meet', 'met', 'meets'], hint: '我昨天遇到表親' },
+            { difficulty: 3, sentence: 'My family ___ in Taipei.', answer: 'lives', options: ['live', 'lives', 'living'], hint: '我家住在台北' },
         ],
-        scrambles: ['m-o-m', 'd-a-d', 's-i-s-t-e-r', 'b-a-b-y', 'f-r-i-e-n-d']
     },
     {
         id: 'school', name: 'School', emoji: '🏫', color: '#2ECC71',
@@ -110,15 +164,29 @@ const THEMES = [
             { word: 'pencil', emoji: '✏️', hint: '鉛筆' },
             { word: 'clock', emoji: '🕐', hint: '時鐘' },
             { word: 'map', emoji: '🗺️', hint: '地圖' },
+            { word: 'chair', emoji: '💺', hint: '椅子' },
+            { word: 'crayon', emoji: '🖍️', hint: '蠟筆' },
+            { word: 'notebook', emoji: '📓', hint: '筆記本' },
+            { word: 'scissors', emoji: '✂️', hint: '剪刀' },
+            { word: 'school', emoji: '🏫', hint: '學校' },
+            { word: 'globe', emoji: '🌍', hint: '地球儀' },
+            { word: 'art', emoji: '🎨', hint: '美術' },
+            { word: 'music', emoji: '🎵', hint: '音樂' },
         ],
         grammar: [
-            { sentence: 'This ___ a book.', answer: 'is', options: ['is', 'are', 'am'], hint: '這是一本書' },
-            { sentence: 'I have ___ pen.', answer: 'a', options: ['a', 'an', 'the'], hint: '我有一支筆' },
-            { sentence: '___ is my bag.', answer: 'That', options: ['That', 'Those', 'These'], hint: '那是我的書包' },
-            { sentence: 'There ___ two desks.', answer: 'are', options: ['is', 'are', 'am'], hint: '有兩張桌子' },
-            { sentence: 'I ___ a student.', answer: 'am', options: ['is', 'are', 'am'], hint: '我是學生' },
+            { difficulty: 1, sentence: 'This ___ a book.', answer: 'is', options: ['is', 'are', 'am'], hint: '這是一本書' },
+            { difficulty: 1, sentence: 'I have ___ pen.', answer: 'a', options: ['a', 'an', 'the'], hint: '我有一支筆' },
+            { difficulty: 1, sentence: '___ is my bag.', answer: 'That', options: ['That', 'Those', 'These'], hint: '那是我的書包' },
+            { difficulty: 1, sentence: 'There ___ two desks.', answer: 'are', options: ['is', 'are', 'am'], hint: '有兩張桌子' },
+            { difficulty: 1, sentence: 'I ___ a student.', answer: 'am', options: ['is', 'are', 'am'], hint: '我是學生' },
+            { difficulty: 2, sentence: 'The clock ___ on the wall.', answer: 'is', options: ['is', 'are', 'am'], hint: '時鐘在牆上' },
+            { difficulty: 2, sentence: 'I need ___ eraser.', answer: 'an', options: ['a', 'an', 'the'], hint: '我需要一個橡皮擦' },
+            { difficulty: 2, sentence: 'There ___ many books.', answer: 'are', options: ['is', 'are', 'am'], hint: '有很多書' },
+            { difficulty: 2, sentence: 'We are ___ in class.', answer: 'reading', options: ['read', 'reads', 'reading'], hint: '我們在課堂上閱讀' },
+            { difficulty: 3, sentence: 'The map is ___ than the book.', answer: 'bigger', options: ['big', 'bigger', 'biggest'], hint: '地圖比書大' },
+            { difficulty: 3, sentence: 'I ___ my pencil yesterday.', answer: 'lost', options: ['lose', 'lost', 'losing'], hint: '我昨天弄丟鉛筆' },
+            { difficulty: 3, sentence: '___ books are on the desk.', answer: 'Those', options: ['That', 'This', 'Those'], hint: '那些書在桌上' },
         ],
-        scrambles: ['b-o-o-k', 'p-e-n', 'd-e-s-k', 'b-a-g', 'p-a-p-e-r', 'c-l-o-c-k']
     },
     {
         id: 'feelings', name: 'Feelings', emoji: '😊', color: '#F39C12',
@@ -134,15 +202,29 @@ const THEMES = [
             { word: 'hot', emoji: '🥵', hint: '熱' },
             { word: 'cold', emoji: '🥶', hint: '冷' },
             { word: 'sleepy', emoji: '😪', hint: '想睡' },
+            { word: 'excited', emoji: '🤩', hint: '興奮' },
+            { word: 'bored', emoji: '😑', hint: '無聊' },
+            { word: 'sick', emoji: '🤒', hint: '生病' },
+            { word: 'worried', emoji: '😟', hint: '擔心' },
+            { word: 'sorry', emoji: '🙏', hint: '抱歉' },
+            { word: 'proud', emoji: '😎', hint: '驕傲' },
+            { word: 'surprised', emoji: '😲', hint: '驚訝' },
+            { word: 'calm', emoji: '😌', hint: '平靜' },
         ],
         grammar: [
-            { sentence: 'I ___ happy.', answer: 'am', options: ['is', 'are', 'am'], hint: '我很開心' },
-            { sentence: 'She ___ tired.', answer: 'is', options: ['is', 'are', 'am'], hint: '她很累' },
-            { sentence: 'Are you ___?', answer: 'hungry', options: ['hunger', 'hungry', 'hungries'], hint: '你餓了嗎？' },
-            { sentence: 'We ___ not scared.', answer: 'are', options: ['is', 'are', 'am'], hint: '我們不害怕' },
-            { sentence: 'He feels ___.', answer: 'cold', options: ['cold', 'colds', 'coldy'], hint: '他覺得冷' },
+            { difficulty: 1, sentence: 'I ___ happy.', answer: 'am', options: ['is', 'are', 'am'], hint: '我很開心' },
+            { difficulty: 1, sentence: 'She ___ tired.', answer: 'is', options: ['is', 'are', 'am'], hint: '她很累' },
+            { difficulty: 1, sentence: 'Are you ___?', answer: 'hungry', options: ['hunger', 'hungry', 'hungries'], hint: '你餓了嗎？' },
+            { difficulty: 1, sentence: 'We ___ not scared.', answer: 'are', options: ['is', 'are', 'am'], hint: '我們不害怕' },
+            { difficulty: 1, sentence: 'He feels ___.', answer: 'cold', options: ['cold', 'colds', 'coldy'], hint: '他覺得冷' },
+            { difficulty: 2, sentence: 'The kids ___ excited.', answer: 'are', options: ['is', 'are', 'am'], hint: '孩子們很興奮' },
+            { difficulty: 2, sentence: 'I am very ___ today.', answer: 'happy', options: ['happy', 'happily', 'happiness'], hint: '我今天很開心' },
+            { difficulty: 2, sentence: 'He ___ feeling sick.', answer: 'is', options: ['is', 'are', 'am'], hint: '他覺得不舒服' },
+            { difficulty: 2, sentence: 'They look ___.', answer: 'bored', options: ['bore', 'bored', 'boring'], hint: '他們看起來很無聊' },
+            { difficulty: 3, sentence: 'I am ___ than yesterday.', answer: 'happier', options: ['happy', 'happier', 'happiest'], hint: '我比昨天更開心' },
+            { difficulty: 3, sentence: 'She ___ sad last night.', answer: 'was', options: ['is', 'was', 'were'], hint: '她昨晚很傷心' },
+            { difficulty: 3, sentence: 'Why ___ you worried?', answer: 'are', options: ['is', 'are', 'am'], hint: '你為什麼擔心？' },
         ],
-        scrambles: ['h-a-p-p-y', 's-a-d', 'a-n-g-r-y', 'h-o-t', 'c-o-l-d', 'b-r-a-v-e']
     }
 ];
 
@@ -398,11 +480,25 @@ function renderThemes() {
 }
 
 // ==================== QUESTION GENERATION ====================
+// Difficulty rises with wave tier (every 3 waves):
+//   - Question-type mix shifts from vocab-heavy → spelling/grammar-heavy.
+//   - Spelling pulls from longer words at higher tiers.
+//   - Grammar pool is capped at difficulty <= tier+1, so hard sentences only
+//     unlock at tier 2 (waves 7+).
 function generateQuestion(theme, wave) {
-    const rand = Math.random();
     const t = theme;
+    const tier = Math.floor((wave - 1) / 3);
+    const maxDifficulty = Math.min(3, tier + 1);
 
-    if (wave <= 2 || rand < 0.35) {
+    const r = Math.random();
+    let type;
+    if (tier === 0)      type = r < 0.55 ? 'vocab' : r < 0.85 ? 'spelling' : 'grammar';
+    else if (tier === 1) type = r < 0.30 ? 'vocab' : r < 0.65 ? 'spelling' : 'grammar';
+    else                 type = r < 0.20 ? 'vocab' : r < 0.45 ? 'spelling' : 'grammar';
+
+    if (type === 'grammar' && t.grammar.length === 0) type = 'vocab';
+
+    if (type === 'vocab') {
         const w = t.words[Math.floor(Math.random() * t.words.length)];
         const wrongs = t.words.filter(x => x.word !== w.word)
             .sort(() => Math.random() - 0.5).slice(0, 2).map(x => x.word);
@@ -410,13 +506,16 @@ function generateQuestion(theme, wave) {
         return { type: 'vocab', image: w.emoji, prompt: 'What is this?', hint: w.hint, answer: w.word, options, speakText: w.word };
     }
 
-    if (wave <= 4 || rand < 0.6) {
-        const w = t.words[Math.floor(Math.random() * t.words.length)];
+    if (type === 'spelling') {
+        const minLen = tier === 0 ? 0 : tier === 1 ? 4 : 5;
+        const longEnough = t.words.filter(w => w.word.length >= minLen);
+        const pool = longEnough.length > 0 ? longEnough : t.words;
+        const w = pool[Math.floor(Math.random() * pool.length)];
         const idx = Math.floor(Math.random() * w.word.length);
         const blanked = w.word.slice(0, idx) + '_' + w.word.slice(idx + 1);
         const correctLetter = w.word[idx];
         const allLetters = 'abcdefghijklmnopqrstuvwxyz';
-        let wrongs = [];
+        const wrongs = [];
         while (wrongs.length < 2) {
             const l = allLetters[Math.floor(Math.random() * 26)];
             if (l !== correctLetter && !wrongs.includes(l)) wrongs.push(l);
@@ -425,14 +524,10 @@ function generateQuestion(theme, wave) {
         return { type: 'spelling', image: w.emoji, prompt: blanked, hint: w.hint, answer: correctLetter, options, speakText: w.word };
     }
 
-    if (t.grammar.length > 0) {
-        const g = t.grammar[Math.floor(Math.random() * t.grammar.length)];
-        return { type: 'grammar', image: '', prompt: g.sentence, hint: g.hint, answer: g.answer, options: shuffle([...g.options]), speakText: g.sentence.replace('___', g.answer) };
-    }
-
-    const w = t.words[Math.floor(Math.random() * t.words.length)];
-    const wrongs = t.words.filter(x => x.word !== w.word).sort(() => Math.random() - 0.5).slice(0, 2).map(x => x.word);
-    return { type: 'vocab', image: w.emoji, prompt: 'What is this?', hint: w.hint, answer: w.word, options: shuffle([w.word, ...wrongs]), speakText: w.word };
+    const eligible = t.grammar.filter(g => (g.difficulty || 1) <= maxDifficulty);
+    const pool = eligible.length > 0 ? eligible : t.grammar;
+    const g = pool[Math.floor(Math.random() * pool.length)];
+    return { type: 'grammar', image: '', prompt: g.sentence, hint: g.hint, answer: g.answer, options: shuffle([...g.options]), speakText: g.sentence.replace('___', g.answer) };
 }
 
 function shuffle(arr) {
