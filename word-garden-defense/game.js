@@ -155,9 +155,10 @@ const PLANT_TYPES = {
 const PLANT_ORDER = ['sunflower', 'peashooter', 'wallnut'];
 
 // ==================== QUESTION PACING ====================
-// Strict 15-second gap between questions (timer counts frames at ~60fps).
-// Reset on dismissal so two questions can never appear closer than 15s apart.
-const QUESTION_INTERVAL_FRAMES = 900;
+// Strict 15-second gap between questions, measured in wall-clock ms (NOT frames),
+// so the cadence is identical on 60 Hz and 144 Hz displays. Reset on dismissal
+// so two questions can never appear closer than 15s apart.
+const QUESTION_INTERVAL_MS = 15000;
 const MIN_QUESTIONS_PER_SESSION = 15;
 
 // ==================== GAME STATE ====================
@@ -183,7 +184,7 @@ let gameState = {
     spawnInterval: 90,
     waveZombiesSpawned: 0,
     animFrame: null,
-    questionTimer: 0,
+    nextQuestionAt: 0,
     triggerZombie: null,
     selectedPlant: null,
     sunTokenTimer: 0,
@@ -493,7 +494,7 @@ function answerQuestion(selected) {
     setTimeout(() => {
         document.getElementById('question-panel').classList.remove('active');
         gameState.questionActive = false;
-        gameState.questionTimer = 0;
+        gameState.nextQuestionAt = performance.now() + QUESTION_INTERVAL_MS;
         gameState.triggerZombie = null;
     }, 1000);
 }
@@ -535,7 +536,7 @@ function startGame() {
         questionsAnswered: 0, correctAnswers: 0,
         zombiesPerWave: 6, zombieSpeed: 0.6,
         spawnTimer: 0, spawnInterval: 90, waveZombiesSpawned: 0,
-        animFrame: null, questionTimer: 0,
+        animFrame: null, nextQuestionAt: performance.now() + QUESTION_INTERVAL_MS,
         triggerZombie: null,
         selectedPlant: null,
         sunTokenTimer: 0,
@@ -583,13 +584,12 @@ function update() {
         gs.spawnTimer = 0;
     }
 
-    // Question pacing: strict 15s gap, only ticks while no question is on screen.
-    if (!gs.questionActive) {
-        gs.questionTimer++;
-        if (gs.questionTimer >= QUESTION_INTERVAL_FRAMES) {
-            gs.questionTimer = 0;
-            showQuestion();
-        }
+    // Question pacing: strict 15s gap, gated by wall-clock time. Schedule the
+    // NEXT question only once dismissal completes (see answerQuestion), so two
+    // questions can never appear within 15s of each other regardless of fps.
+    if (!gs.questionActive && performance.now() >= gs.nextQuestionAt) {
+        gs.nextQuestionAt = Infinity; // disarm until dismissal reschedules
+        showQuestion();
     }
 
     if (gs.damageCooldown > 0) gs.damageCooldown--;
