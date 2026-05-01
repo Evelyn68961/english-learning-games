@@ -735,15 +735,22 @@ function spawnSunflowerSun(plant) {
 
 function spawnZombie() {
     const lane = Math.floor(Math.random() * 3);
+    // Difficulty tiers up every 3 waves: waves 1-3 = tier 0, 4-6 = tier 1, 7-9 = tier 2...
+    // Normal zombie: 3 shots at tier 0, +2 shots per tier. Cone (hat) zombie: 2x HP.
+    const tier = Math.floor((gameState.wave - 1) / 3);
+    const baseHp = 3 + tier * 2;
+    const isCone = Math.random() > 0.7;
+    const hp = isCone ? baseHp * 2 : baseHp;
     gameState.zombies.push({
         x: W + 20,
         lane: lane,
         y: GROUND_Y + lane * LANE_H + LANE_H / 2,
-        hp: 2 + Math.floor(gameState.wave / 2),
+        hp,
+        maxHp: hp,
         dead: false,
         triggered: false,
         walkFrame: Math.random() * Math.PI * 2,
-        type: Math.random() > 0.7 ? 'cone' : 'normal',
+        type: isCone ? 'cone' : 'normal',
     });
 }
 
@@ -1038,12 +1045,11 @@ function drawZombie(z) {
     ctx.lineTo(x + 6, y - 17 + wobble);
     ctx.stroke();
 
-    const maxHp = 2 + Math.floor(gameState.wave / 2);
     const hpW = 30;
     ctx.fillStyle = 'rgba(0,0,0,0.3)';
     ctx.fillRect(x - hpW/2, y - 38 + wobble, hpW, 4);
-    ctx.fillStyle = z.hp > maxHp * 0.5 ? '#2ECC71' : '#E74C3C';
-    ctx.fillRect(x - hpW/2, y - 38 + wobble, hpW * (z.hp / maxHp), 4);
+    ctx.fillStyle = z.hp > z.maxHp * 0.5 ? '#2ECC71' : '#E74C3C';
+    ctx.fillRect(x - hpW/2, y - 38 + wobble, hpW * (z.hp / z.maxHp), 4);
 }
 
 // ==================== INIT ====================
