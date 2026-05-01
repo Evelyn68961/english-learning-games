@@ -6,64 +6,14 @@ const LEVELS = [
     { letters: ['S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'], name: 'Level 4', minScore: 200 }
 ];
 
-const VOCAB_LEVELS = [
-    {
-        items: [
-            {word:'cat',emoji:'🐱'},{word:'dog',emoji:'🐶'},{word:'fish',emoji:'🐟'},
-            {word:'bird',emoji:'🐦'},{word:'cow',emoji:'🐄'},{word:'pig',emoji:'🐷'}
-        ],
-        name: 'Level 1', category: 'Animals', minScore: 0
-    },
-    {
-        items: [
-            {word:'red',emoji:'🔴'},{word:'blue',emoji:'🔵'},{word:'green',emoji:'🟢'},
-            {word:'yellow',emoji:'🟡'},{word:'orange',emoji:'🟠'},{word:'purple',emoji:'🟣'}
-        ],
-        name: 'Level 2', category: 'Colors', minScore: 50
-    },
-    {
-        items: [
-            {word:'apple',emoji:'🍎'},{word:'cake',emoji:'🎂'},{word:'milk',emoji:'🥛'},
-            {word:'egg',emoji:'🥚'},{word:'rice',emoji:'🍚'},{word:'soup',emoji:'🍲'}
-        ],
-        name: 'Level 3', category: 'Food', minScore: 120
-    },
-    {
-        items: [
-            {word:'eye',emoji:'👁️'},{word:'ear',emoji:'👂'},{word:'hand',emoji:'✋'},
-            {word:'foot',emoji:'🦶'},{word:'nose',emoji:'👃'},{word:'mouth',emoji:'👄'}
-        ],
-        name: 'Level 4', category: 'Body', minScore: 200
-    },
-    {
-        items: [
-            {word:'grape',emoji:'🍇'},{word:'orange',emoji:'🍊'},{word:'strawberry',emoji:'🍓'},
-            {word:'banana',emoji:'🍌'},{word:'peach',emoji:'🍑'},{word:'lemon',emoji:'🍋'}
-        ],
-        name: 'Level 5', category: 'Fruits', minScore: 0
-    },
-    {
-        items: [
-            {word:'shirt',emoji:'👕'},{word:'dress',emoji:'👗'},{word:'hat',emoji:'🧢'},
-            {word:'shoe',emoji:'👟'},{word:'coat',emoji:'🧥'},{word:'sock',emoji:'🧦'}
-        ],
-        name: 'Level 6', category: 'Clothes', minScore: 0
-    },
-    {
-        items: [
-            {word:'sun',emoji:'☀️'},{word:'rain',emoji:'🌧️'},{word:'snow',emoji:'❄️'},
-            {word:'rainbow',emoji:'🌈'},{word:'wind',emoji:'🌬️'},{word:'cloud',emoji:'☁️'}
-        ],
-        name: 'Level 7', category: 'Weather', minScore: 0
-    },
-    {
-        items: [
-            {word:'soccer',emoji:'⚽'},{word:'basketball',emoji:'🏀'},{word:'tennis',emoji:'🎾'},
-            {word:'swimming',emoji:'🏊'},{word:'baseball',emoji:'⚾'},{word:'golf',emoji:'⛳'}
-        ],
-        name: 'Level 8', category: 'Sports', minScore: 0
-    }
-];
+// Vocab levels derived from the shared question bank (shared/question-bank.js).
+// Letter-mole only needs word+emoji, so we strip the hint/grammar fields and
+// take the first 6 words from each shared theme as that level's mole pool.
+const VOCAB_LEVELS = window.QUESTION_BANK.themes.map(theme => ({
+    category: theme.name,
+    items: theme.words.slice(0, 6).map(w => ({ word: w.word, emoji: w.emoji })),
+    minScore: 0,
+}));
 
 const ENCOURAGEMENTS = {
     correct: ['Awesome!', 'Great!', 'Wow!', 'Super!', 'Yes!', 'Perfect!', '🌟', '🎉'],

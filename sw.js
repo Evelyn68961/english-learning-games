@@ -13,7 +13,8 @@ const ASSETS_TO_CACHE = [
   '/grammar-games/adverbs/frequency-adverbs/index.html',
   '/grammar-games/numbers/ordinal-numbers/learn.html',
   '/grammar-games/numbers/ordinal-numbers/index.html',
-  '/letter-mole/index.html'
+  '/letter-mole/index.html',
+  '/shared/question-bank.js'
 ];
 
 // Install: cache all assets
