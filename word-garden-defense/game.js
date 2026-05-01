@@ -27,7 +27,7 @@ let gameState = {
     score: 0,
     lives: 3,
     wave: 1,
-    totalWaves: 9,
+    totalWaves: 12,
     zombies: [],
     plants: [],
     projectiles: [],
@@ -259,13 +259,13 @@ function renderThemes() {
 // ==================== QUESTION GENERATION ====================
 // Difficulty rises with wave tier (every 3 waves):
 //   - Question-type mix shifts from vocab-heavy → spelling/grammar-heavy.
-//   - Spelling pulls from longer words at higher tiers.
-//   - Grammar pool is capped at difficulty <= tier+1, so hard sentences only
-//     unlock at tier 2 (waves 7+).
+//   - Word + grammar pools cap at difficulty <= tier+1:
+//       tier 0 (waves 1-3) -> diff 1, tier 1 (waves 4-6) -> diff 2,
+//       tier 2 (waves 7-9) -> diff 3, tier 3 (waves 10-12) -> diff 4.
 function generateQuestion(theme, wave) {
     const t = theme;
     const tier = Math.floor((wave - 1) / 3);
-    const maxDifficulty = Math.min(3, tier + 1);
+    const maxDifficulty = Math.min(4, tier + 1);
 
     const r = Math.random();
     let type;
@@ -415,7 +415,7 @@ function startGame() {
     canvas.style.display = 'block';
 
     gameState = {
-        sun: 100, score: 0, lives: 3, wave: 1, totalWaves: 9,
+        sun: 100, score: 0, lives: 3, wave: 1, totalWaves: 12,
         zombies: [], plants: [], projectiles: [], sunTokens: [],
         isPlaying: true, questionActive: false, currentQuestion: null,
         questionsAnswered: 0, correctAnswers: 0,
