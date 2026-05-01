@@ -154,6 +154,12 @@ const PLANT_TYPES = {
 };
 const PLANT_ORDER = ['sunflower', 'peashooter', 'wallnut'];
 
+// ==================== QUESTION PACING ====================
+// Strict 15-second gap between questions (timer counts frames at ~60fps).
+// Reset on dismissal so two questions can never appear closer than 15s apart.
+const QUESTION_INTERVAL_FRAMES = 900;
+const MIN_QUESTIONS_PER_SESSION = 15;
+
 // ==================== GAME STATE ====================
 let currentTheme = null;
 let gameState = {
@@ -177,7 +183,7 @@ let gameState = {
     spawnInterval: 90,
     waveZombiesSpawned: 0,
     animFrame: null,
-    questionCooldown: 0,
+    questionTimer: 0,
     triggerZombie: null,
     selectedPlant: null,
     sunTokenTimer: 0,
@@ -486,6 +492,7 @@ function answerQuestion(selected) {
     setTimeout(() => {
         document.getElementById('question-panel').classList.remove('active');
         gameState.questionActive = false;
+        gameState.questionTimer = 0;
         gameState.triggerZombie = null;
     }, 1000);
 }
@@ -527,7 +534,7 @@ function startGame() {
         questionsAnswered: 0, correctAnswers: 0,
         zombiesPerWave: 6, zombieSpeed: 0.6,
         spawnTimer: 0, spawnInterval: 90, waveZombiesSpawned: 0,
-        animFrame: null, questionCooldown: 0,
+        animFrame: null, questionTimer: 0,
         triggerZombie: null,
         selectedPlant: null,
         sunTokenTimer: 0,
@@ -574,8 +581,14 @@ function update() {
         gs.spawnTimer = 0;
     }
 
-    // Question cooldown
-    if (gs.questionCooldown > 0) gs.questionCooldown--;
+    // Question pacing: strict 15s gap, only ticks while no question is on screen.
+    if (!gs.questionActive) {
+        gs.questionTimer++;
+        if (gs.questionTimer >= QUESTION_INTERVAL_FRAMES) {
+            gs.questionTimer = 0;
+            showQuestion();
+        }
+    }
 
     // Periodic sky sun (every ~10s while playing)
     gs.sunTokenTimer++;
@@ -605,14 +618,6 @@ function update() {
             z.eating = false;
             z.eatTimer = 0;
             z.x -= gs.zombieSpeed;
-        }
-
-        // Trigger question (earlier line, even while eating)
-        if (z.x < W * 0.65 && !z.triggered && !gs.questionActive && gs.questionCooldown <= 0) {
-            z.triggered = true;
-            gs.questionCooldown = 180; // ≥3s between questions so they don't pile up
-            gs.triggerZombie = z;
-            showQuestion();
         }
 
         // Zombie reached the left edge
@@ -687,6 +692,11 @@ function update() {
             gs.spawnInterval = Math.max(50, gs.spawnInterval - 10);
             updateHUD();
             showFeedback(`🌊 Wave ${gs.wave}!`);
+        } else if (gs.questionsAnswered < MIN_QUESTIONS_PER_SESSION) {
+            // Final wave done but session needs more questions — extend with a bonus wave at stable difficulty.
+            gs.waveZombiesSpawned = 0;
+            gs.zombiesPerWave = 6;
+            showFeedback(`🎯 Bonus Round! (${gs.questionsAnswered}/${MIN_QUESTIONS_PER_SESSION})`);
         } else {
             endGame(true);
         }
