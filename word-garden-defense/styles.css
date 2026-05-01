@@ -217,6 +217,12 @@ body {
 /* ===== THEME SELECT ===== */
 #theme-screen {
     background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+    /* Allow scrolling when the grid + back button exceed viewport height
+       (8+ categories on short screens). justify-content shifts to flex-start
+       so content grows downward instead of clipping at the centered overflow. */
+    overflow-y: auto;
+    justify-content: flex-start;
+    padding: 40px 20px;
 }
 
 .theme-title {
@@ -232,13 +238,21 @@ body {
     font-size: clamp(0.85rem, 2.5vw, 1.1rem);
 }
 
+/* Desktop: 4x2 grid. Narrow screens collapse to 2 columns (see media query). */
 .theme-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 15px;
-    max-width: 500px;
-    width: 90%;
+    max-width: 980px;
+    width: 95%;
     padding: 0 10px;
+}
+
+@media (max-width: 768px) {
+    .theme-grid {
+        grid-template-columns: repeat(2, 1fr);
+        max-width: 500px;
+    }
 }
 
 .theme-card {
