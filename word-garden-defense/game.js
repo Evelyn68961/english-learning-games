@@ -250,7 +250,7 @@ let gameState = {
     score: 0,
     lives: 3,
     wave: 1,
-    totalWaves: 5,
+    totalWaves: 9,
     zombies: [],
     plants: [],
     projectiles: [],
@@ -625,7 +625,7 @@ function startGame() {
     canvas.style.display = 'block';
 
     gameState = {
-        sun: 100, score: 0, lives: 3, wave: 1, totalWaves: 5,
+        sun: 100, score: 0, lives: 3, wave: 1, totalWaves: 9,
         zombies: [], plants: [], projectiles: [], sunTokens: [],
         isPlaying: true, questionActive: false, currentQuestion: null,
         questionsAnswered: 0, correctAnswers: 0,
