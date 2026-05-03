@@ -15,6 +15,7 @@ const PLANT_ORDER = ['sunflower', 'peashooter', 'wallnut', 'cherry'];
 
 const CHERRY_FUSE_FRAMES = 60;   // ~1s windup before detonation
 const CHERRY_BLAST_RADIUS = 130; // covers a 3x3 patch of cells
+const PEASHOOTER_SHOTS = 15;     // peas the plant fires before wilting away
 
 // ==================== QUESTION PACING ====================
 // Strict 15-second gap between questions, measured in wall-clock ms (NOT frames),
@@ -136,6 +137,7 @@ function placePlant(type, col, lane) {
         shootTimer: 0,
         plantAnim: 0,
         fuse: type === 'cherry' ? CHERRY_FUSE_FRAMES : 0,
+        shotsLeft: type === 'peashooter' ? PEASHOOTER_SHOTS : 0,
     });
     gameState.sun -= info.cost;
     gameState.selectedPlant = null;
@@ -560,7 +562,9 @@ function update() {
             if (hasTarget) {
                 gs.projectiles.push({ x: p.x + 30, y: p.y, lane: p.lane, speed: 8 });
                 p.shootTimer = 0;
+                p.shotsLeft--;
                 playSound('shoot');
+                if (p.shotsLeft <= 0) p.spent = true;
             }
         }
         // Sunflower drops a collectible sun token every ~5s
@@ -577,7 +581,7 @@ function update() {
             }
         }
     });
-    gs.plants = gs.plants.filter(p => !p.exploded);
+    gs.plants = gs.plants.filter(p => !p.exploded && !p.spent);
 
     // Tick explosion animations
     gs.explosions.forEach(e => e.age++);
@@ -868,6 +872,17 @@ function drawPlant(p) {
         const ratio = p.hp / p.maxHp;
         ctx.fillStyle = ratio > 0.5 ? '#2ECC71' : '#E74C3C';
         ctx.fillRect(x - barW/2, y - 32, barW * ratio, 4);
+    }
+
+    // Ammo bar for peashooter (gold → red as shots run out). Rendered just
+    // below the HP slot so both can show at once if damaged + low ammo.
+    if (p.type === 'peashooter') {
+        const barW = 28;
+        const ratio = Math.max(0, p.shotsLeft) / PEASHOOTER_SHOTS;
+        ctx.fillStyle = 'rgba(0,0,0,0.3)';
+        ctx.fillRect(x - barW/2, y - 26, barW, 3);
+        ctx.fillStyle = ratio > 0.4 ? '#FFD700' : '#E74C3C';
+        ctx.fillRect(x - barW/2, y - 26, barW * ratio, 3);
     }
 
     if (p.type === 'cherry') {
