@@ -214,19 +214,21 @@ body {
     75% { transform: translateX(3px) rotate(2deg); }
 }
 
-/* ===== THEME SELECT ===== */
-#theme-screen {
+/* ===== THEME SELECT =====
+   iOS Safari has a long-standing bug where `display: flex` + `overflow-y: auto`
+   refuses to scroll with finger touch even when content overflows. Switch to
+   a plain block scroll container; child elements are centered with
+   text-align + margin: auto instead of flex alignment. */
+#theme-screen { display: none; }
+#theme-screen.active {
+    display: block;
     background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
-    /* 16 themes overflow the viewport on phones. justify-content shifts
-       to flex-start so content grows downward, and we explicitly enable
-       vertical pan: body sets touch-action: manipulation, which on iOS
-       Safari can disable momentum scrolling on nested fixed scrollers. */
-    overflow-y: auto;
+    overflow-y: scroll;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
     touch-action: pan-y;
-    justify-content: flex-start;
     padding: 40px 20px 60px;
+    text-align: center;
 }
 
 .theme-title {
@@ -243,7 +245,7 @@ body {
 }
 
 .level-toggle {
-    display: flex;
+    display: inline-flex;
     gap: 8px;
     margin-bottom: 20px;
     background: rgba(0,0,0,0.25);
@@ -277,7 +279,9 @@ body {
     gap: 15px;
     max-width: 980px;
     width: 95%;
+    margin: 0 auto;
     padding: 0 10px;
+    text-align: left;
 }
 
 @media (max-width: 768px) {
