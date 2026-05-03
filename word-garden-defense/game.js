@@ -6,16 +6,20 @@ const THEMES = window.QUESTION_BANK.themes;
 // Cherry is a single-use bomb: a fuse counts down on placement, then it
 // explodes in a 3x3 radius and is removed. Cost matches the classic PvZ.
 const PLANT_TYPES = {
-    sunflower:  { cost: 50,  icon: '🌻', hp: 4,  name: 'Sunflower',  produces: 'sun'  },
-    peashooter: { cost: 100, icon: '🟢', hp: 4,  name: 'Peashooter', produces: 'peas' },
-    wallnut:    { cost: 50,  icon: '🌰', hp: 18, name: 'Wallnut',    produces: null   },
+    sunflower:  { cost: 50,  icon: '🌻', hp: 4,  name: 'Sunflower',  produces: 'sun'   },
+    peashooter: { cost: 100, icon: '🟢', hp: 4,  name: 'Peashooter', produces: 'peas'  },
+    wallnut:    { cost: 50,  icon: '🌰', hp: 18, name: 'Wallnut',    produces: null    },
     cherry:     { cost: 150, icon: '🍒', hp: 1,  name: 'Cherry Bomb', produces: 'bomb' },
+    pumpkin:    { cost: 50,  icon: '🎃', hp: 1,  name: 'Squash',     produces: 'leap'  },
 };
-const PLANT_ORDER = ['sunflower', 'peashooter', 'wallnut', 'cherry'];
+const PLANT_ORDER = ['sunflower', 'peashooter', 'wallnut', 'cherry', 'pumpkin'];
 
-const CHERRY_FUSE_FRAMES = 60;   // ~1s windup before detonation
-const CHERRY_BLAST_RADIUS = 130; // covers a 3x3 patch of cells
-const PEASHOOTER_SHOTS = 80;     // peas the plant fires before wilting away
+const CHERRY_FUSE_FRAMES = 60;    // ~1s windup before detonation
+const CHERRY_BLAST_RADIUS = 130;  // covers a 3x3 patch of cells
+const PEASHOOTER_SHOTS = 120;     // peas the plant fires before wilting away
+const PUMPKIN_LEAP_FRAMES = 30;   // ~0.5s leap animation
+const PUMPKIN_TRIGGER_CELLS = 2;  // trigger when a zombie is within N cell-widths (either direction)
+const PUMPKIN_SQUASH_RADIUS = 38; // landing kill zone (px)
 
 // ==================== QUESTION PACING ====================
 // Strict 15-second gap between questions, measured in wall-clock ms (NOT frames),
@@ -138,6 +142,8 @@ function placePlant(type, col, lane) {
         plantAnim: 0,
         fuse: type === 'cherry' ? CHERRY_FUSE_FRAMES : 0,
         shotsLeft: type === 'peashooter' ? PEASHOOTER_SHOTS : 0,
+        squashState: type === 'pumpkin' ? 'idle' : null,
+        leapAge: 0,
     });
     gameState.sun -= info.cost;
     gameState.selectedPlant = null;
@@ -578,6 +584,10 @@ function update() {
                 p.exploded = true;
             }
         }
+        // Squash — leap onto nearest zombie in same lane (either direction).
+        // Final-defense plant: idle until a zombie comes close, then jumps,
+        // squashes on land, single-use.
+        if (p.type === 'pumpkin') updatePumpkin(p, gs);
     });
     gs.plants = gs.plants.filter(p => !p.exploded && !p.spent);
 
@@ -635,6 +645,46 @@ function update() {
             showFeedback(`🎯 Bonus Round! (${gs.questionsAnswered}/${MIN_QUESTIONS_PER_SESSION})`);
         } else {
             endGame(true);
+        }
+    }
+}
+
+function updatePumpkin(p, gs) {
+    if (p.squashState === 'idle') {
+        // Pick the closest zombie in the same lane within trigger range,
+        // searching both directions so the squash works as a final defense
+        // even after a zombie has already passed it on the left.
+        const range = CELL_W * PUMPKIN_TRIGGER_CELLS;
+        let target = null;
+        let best = Infinity;
+        for (const z of gs.zombies) {
+            if (z.dead || z.lane !== p.lane) continue;
+            const d = Math.abs(z.x - p.x);
+            if (d <= range && d < best) {
+                best = d;
+                target = z;
+            }
+        }
+        if (target) {
+            p.squashState = 'leap';
+            p.leapAge = 0;
+            p.leapStartX = p.x;
+            p.leapTargetX = target.x;
+        }
+    } else if (p.squashState === 'leap') {
+        p.leapAge++;
+        if (p.leapAge >= PUMPKIN_LEAP_FRAMES) {
+            // Land — squash zombies inside the kill zone at the landing spot
+            for (const z of gs.zombies) {
+                if (z.dead || z.lane !== p.lane) continue;
+                if (Math.abs(z.x - p.leapTargetX) <= PUMPKIN_SQUASH_RADIUS) {
+                    z.dead = true;
+                    gs.score += 5;
+                }
+            }
+            playSound('zombieDie');
+            updateHUD();
+            p.spent = true;
         }
     }
 }
@@ -881,6 +931,66 @@ function drawPlant(p) {
         ctx.fillRect(x - barW/2, y - 26, barW, 3);
         ctx.fillStyle = ratio > 0.4 ? '#FFD700' : '#E74C3C';
         ctx.fillRect(x - barW/2, y - 26, barW * ratio, 3);
+    }
+
+    if (p.type === 'pumpkin') {
+        // During leap, the pumpkin slides from its cell to the target zombie's
+        // x along a parabolic arc and tumbles. Otherwise it crouches in place
+        // with a subtle bob, ready to pounce.
+        let cx = x, cy = y - 8 + bob * 0.5, rot = 0;
+        if (p.squashState === 'leap') {
+            const t = Math.min(1, p.leapAge / PUMPKIN_LEAP_FRAMES);
+            cx = p.leapStartX + (p.leapTargetX - p.leapStartX) * t;
+            cy = y - 8 - Math.sin(t * Math.PI) * 70; // arc peak ~70px high
+            const dir = p.leapTargetX >= p.leapStartX ? 1 : -1;
+            rot = t * Math.PI * 2 * dir; // one full tumble during the leap
+        }
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(rot);
+        // Body — green pumpkin with vertical ridges
+        const grad = ctx.createRadialGradient(-4, -4, 2, 0, 0, 22);
+        grad.addColorStop(0, '#A8D86B');
+        grad.addColorStop(1, '#3D7A28');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 20, 17, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(45, 90, 39, 0.55)';
+        ctx.lineWidth = 1.5;
+        for (const off of [-12, -4, 4, 12]) {
+            ctx.beginPath();
+            ctx.ellipse(off, 0, 3, 16, 0, 0, Math.PI * 2);
+            ctx.stroke();
+        }
+        // Stem
+        ctx.fillStyle = '#5C3D2E';
+        ctx.fillRect(-2, -19, 4, 6);
+        ctx.fillStyle = '#2D5A27';
+        ctx.beginPath();
+        ctx.ellipse(4, -18, 4, 2, -0.4, 0, Math.PI * 2);
+        ctx.fill();
+        // Eyes — angry brow when leaping, normal when idle
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.arc(-5, -2, 3, 0, Math.PI * 2);
+        ctx.arc(5, -2, 3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#222';
+        ctx.beginPath();
+        ctx.arc(-5, -2, 1.5, 0, Math.PI * 2);
+        ctx.arc(5, -2, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+        if (p.squashState === 'leap') {
+            ctx.strokeStyle = '#222';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(-9, -7); ctx.lineTo(-2, -5);
+            ctx.moveTo(9, -7);  ctx.lineTo(2, -5);
+            ctx.stroke();
+        }
+        ctx.restore();
+        return;
     }
 
     if (p.type === 'cherry') {
