@@ -15,7 +15,7 @@ const PLANT_ORDER = ['sunflower', 'peashooter', 'wallnut', 'cherry'];
 
 const CHERRY_FUSE_FRAMES = 60;   // ~1s windup before detonation
 const CHERRY_BLAST_RADIUS = 130; // covers a 3x3 patch of cells
-const PEASHOOTER_SHOTS = 15;     // peas the plant fires before wilting away
+const PEASHOOTER_SHOTS = 45;     // peas the plant fires before wilting away
 
 // ==================== QUESTION PACING ====================
 // Strict 15-second gap between questions, measured in wall-clock ms (NOT frames),
