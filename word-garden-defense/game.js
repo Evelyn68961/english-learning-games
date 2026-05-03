@@ -334,8 +334,24 @@ function showQuestion() {
     optDiv.innerHTML = q.options.map(o => `<button class="q-btn" onclick="answerQuestion('${o}')">${o}</button>`).join('');
 
     document.getElementById('question-panel').classList.add('active');
+    updateAskBtn();
 
     if (q.type === 'vocab') speakWord(q.answer);
+}
+
+// Manual question request — lets the player earn extra sun on demand.
+// No-op while a question is already up; resets the auto-question timer
+// so the next automatic question is paced from this one.
+function requestManualQuestion() {
+    if (!gameState.isPlaying) return;
+    if (gameState.questionActive) return;
+    showQuestion();
+}
+
+function updateAskBtn() {
+    const btn = document.getElementById('ask-btn');
+    if (!btn) return;
+    btn.classList.toggle('disabled', !gameState.isPlaying || gameState.questionActive);
 }
 
 function answerQuestion(selected) {
@@ -370,6 +386,7 @@ function answerQuestion(selected) {
         gameState.questionActive = false;
         gameState.nextQuestionAt = performance.now() + QUESTION_INTERVAL_MS;
         gameState.triggerZombie = null;
+        updateAskBtn();
     }, 1000);
 }
 
@@ -430,7 +447,9 @@ function startGame() {
 
     document.getElementById('hud').classList.add('active');
     document.getElementById('plant-cards').classList.add('active');
+    document.getElementById('ask-btn').classList.add('active');
     renderPlantCards();
+    updateAskBtn();
     updateHUD();
     resizeCanvas();
     gameLoop();
@@ -441,6 +460,7 @@ function stopGame() {
     if (gameState.animFrame) cancelAnimationFrame(gameState.animFrame);
     document.getElementById('hud').classList.remove('active');
     document.getElementById('plant-cards').classList.remove('active');
+    document.getElementById('ask-btn').classList.remove('active');
     document.getElementById('question-panel').classList.remove('active');
     canvas.classList.remove('plant-mode');
     canvas.style.display = 'none';
