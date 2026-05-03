@@ -3,12 +3,18 @@
 const THEMES = window.QUESTION_BANK.themes;
 
 // ==================== PLANT TYPES ====================
+// Cherry is a single-use bomb: a fuse counts down on placement, then it
+// explodes in a 3x3 radius and is removed. Cost matches the classic PvZ.
 const PLANT_TYPES = {
-    sunflower:  { cost: 50,  icon: '🌻', hp: 4,  name: 'Sunflower',  produces: 'sun' },
+    sunflower:  { cost: 50,  icon: '🌻', hp: 4,  name: 'Sunflower',  produces: 'sun'  },
     peashooter: { cost: 100, icon: '🟢', hp: 4,  name: 'Peashooter', produces: 'peas' },
-    wallnut:    { cost: 50,  icon: '🌰', hp: 18, name: 'Wallnut',    produces: null  },
+    wallnut:    { cost: 50,  icon: '🌰', hp: 18, name: 'Wallnut',    produces: null   },
+    cherry:     { cost: 150, icon: '🍒', hp: 1,  name: 'Cherry Bomb', produces: 'bomb' },
 };
-const PLANT_ORDER = ['sunflower', 'peashooter', 'wallnut'];
+const PLANT_ORDER = ['sunflower', 'peashooter', 'wallnut', 'cherry'];
+
+const CHERRY_FUSE_FRAMES = 60;   // ~1s windup before detonation
+const CHERRY_BLAST_RADIUS = 130; // covers a 3x3 patch of cells
 
 // ==================== QUESTION PACING ====================
 // Strict 15-second gap between questions, measured in wall-clock ms (NOT frames),
@@ -32,6 +38,7 @@ let gameState = {
     plants: [],
     projectiles: [],
     sunTokens: [],
+    explosions: [],
     isPlaying: false,
     questionActive: false,
     currentQuestion: null,
@@ -128,6 +135,7 @@ function placePlant(type, col, lane) {
         maxHp: info.hp,
         shootTimer: 0,
         plantAnim: 0,
+        fuse: type === 'cherry' ? CHERRY_FUSE_FRAMES : 0,
     });
     gameState.sun -= info.cost;
     gameState.selectedPlant = null;
@@ -433,7 +441,7 @@ function startGame() {
 
     gameState = {
         sun: 100, score: 0, lives: 3, wave: 1, totalWaves: 12,
-        zombies: [], plants: [], projectiles: [], sunTokens: [],
+        zombies: [], plants: [], projectiles: [], sunTokens: [], explosions: [],
         isPlaying: true, questionActive: false, currentQuestion: null,
         questionsAnswered: 0, correctAnswers: 0,
         zombiesPerWave: 6, zombieSpeed: 0.6,
@@ -560,7 +568,20 @@ function update() {
             spawnSunflowerSun(p);
             p.shootTimer = 0;
         }
+        // Cherry fuse — explode when timer hits zero, then mark for removal
+        if (p.type === 'cherry' && !p.exploded) {
+            p.fuse--;
+            if (p.fuse <= 0) {
+                explodeCherry(p);
+                p.exploded = true;
+            }
+        }
     });
+    gs.plants = gs.plants.filter(p => !p.exploded);
+
+    // Tick explosion animations
+    gs.explosions.forEach(e => e.age++);
+    gs.explosions = gs.explosions.filter(e => e.age < 25);
 
     // Update falling sun tokens
     gs.sunTokens.forEach(s => {
@@ -614,6 +635,22 @@ function update() {
             endGame(true);
         }
     }
+}
+
+function explodeCherry(plant) {
+    const r = CHERRY_BLAST_RADIUS;
+    gameState.explosions.push({ x: plant.x, y: plant.y, age: 0, radius: r });
+    gameState.zombies.forEach(z => {
+        if (z.dead) return;
+        const dx = z.x - plant.x;
+        const dy = z.y - plant.y;
+        if (dx * dx + dy * dy <= r * r) {
+            z.dead = true;
+            gameState.score += 5;
+        }
+    });
+    playSound('zombieDie');
+    updateHUD();
 }
 
 function spawnSkySun() {
@@ -754,6 +791,34 @@ function draw() {
 
     // Sun tokens (collectible)
     gameState.sunTokens.forEach(s => drawSunToken(s));
+
+    // Cherry-bomb explosions
+    gameState.explosions.forEach(e => drawExplosion(e));
+}
+
+function drawExplosion(e) {
+    const t = e.age / 25;            // 0 → 1 over the explosion's life
+    const r = e.radius * (0.4 + t * 1.0);
+    const alpha = 1 - t;
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    // Outer shockwave
+    const grad = ctx.createRadialGradient(e.x, e.y, r * 0.2, e.x, e.y, r);
+    grad.addColorStop(0, 'rgba(255,240,150,0.9)');
+    grad.addColorStop(0.5, 'rgba(255,120,40,0.7)');
+    grad.addColorStop(1, 'rgba(180,30,30,0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(e.x, e.y, r, 0, Math.PI * 2);
+    ctx.fill();
+    // Bright core (only early in the animation)
+    if (t < 0.5) {
+        ctx.fillStyle = 'rgba(255,255,255,' + (1 - t * 2) + ')';
+        ctx.beginPath();
+        ctx.arc(e.x, e.y, r * 0.35, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    ctx.restore();
 }
 
 function drawSunToken(s) {
@@ -803,6 +868,49 @@ function drawPlant(p) {
         const ratio = p.hp / p.maxHp;
         ctx.fillStyle = ratio > 0.5 ? '#2ECC71' : '#E74C3C';
         ctx.fillRect(x - barW/2, y - 32, barW * ratio, 4);
+    }
+
+    if (p.type === 'cherry') {
+        // Pulse faster + bigger as the fuse runs out, hinting at imminent boom
+        const fuseRatio = Math.max(0, p.fuse) / CHERRY_FUSE_FRAMES;
+        const pulse = Math.sin(p.plantAnim * (4 + (1 - fuseRatio) * 8)) * (2 + (1 - fuseRatio) * 4);
+        const cy = y - 10 + bob * 0.4;
+        // Stem
+        ctx.strokeStyle = '#3D7A28';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(x - 4, cy - 14);
+        ctx.quadraticCurveTo(x, cy - 22, x + 6, cy - 18);
+        ctx.stroke();
+        // Two cherries
+        const drawBerry = (cx, cb) => {
+            const grad = ctx.createRadialGradient(cx - 3, cb - 3, 1, cx, cb, 11 + pulse);
+            grad.addColorStop(0, '#FF6B6B');
+            grad.addColorStop(1, '#B22222');
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(cx, cb, 11 + pulse, 0, Math.PI * 2);
+            ctx.fill();
+            // Highlight
+            ctx.fillStyle = 'rgba(255,255,255,0.55)';
+            ctx.beginPath();
+            ctx.arc(cx - 3, cb - 4, 3, 0, Math.PI * 2);
+            ctx.fill();
+        };
+        drawBerry(x - 6, cy - 2);
+        drawBerry(x + 6, cy + 2);
+        // Eyes (just on the front cherry)
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.arc(x + 3, cy, 2.5, 0, Math.PI * 2);
+        ctx.arc(x + 9, cy, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#222';
+        ctx.beginPath();
+        ctx.arc(x + 3, cy, 1.3, 0, Math.PI * 2);
+        ctx.arc(x + 9, cy, 1.3, 0, Math.PI * 2);
+        ctx.fill();
+        return;
     }
 
     if (p.type === 'wallnut') {
