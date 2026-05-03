@@ -164,6 +164,22 @@
             font-size: 0.85rem;
         }
 
+        .install-btn {
+            display: none;
+            margin: 18px auto 0;
+            padding: 12px 28px;
+            background: linear-gradient(180deg, #FFD93D, #F0C419);
+            color: #2D5A27;
+            border: none;
+            border-radius: 30px;
+            font-family: 'Lilita One', cursive;
+            font-size: 1.1rem;
+            cursor: pointer;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+            letter-spacing: 1px;
+        }
+        .install-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0,0,0,0.2); }
+
         @media (max-width: 500px) {
             .games-grid { grid-template-columns: 1fr; }
         }
@@ -182,6 +198,7 @@
         <header class="header">
             <h1 class="title">🎮 Learning Games</h1>
             <p class="subtitle">Fun ways to learn English!</p>
+            <button id="install-btn" class="install-btn">📲 Install App</button>
         </header>
 
         <div class="games-grid">
@@ -236,11 +253,39 @@
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').catch(err => {
-                    console.warn('SW registration failed:', err);
-                });
+                navigator.serviceWorker.register('sw.js').then(reg => {
+                    // Reload once when a new SW takes control so users
+                    // immediately see the latest CSS/JS instead of stale cache.
+                    let refreshing = false;
+                    navigator.serviceWorker.addEventListener('controllerchange', () => {
+                        if (refreshing) return;
+                        refreshing = true;
+                        window.location.reload();
+                    });
+                }).catch(err => console.warn('SW registration failed:', err));
             });
         }
+
+        // Custom install prompt: Chrome fires beforeinstallprompt when the PWA
+        // is installable. We capture it and show a button so users don't have
+        // to dig through the browser menu.
+        let deferredPrompt = null;
+        const installBtn = document.getElementById('install-btn');
+        window.addEventListener('beforeinstallprompt', e => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installBtn.style.display = 'inline-block';
+        });
+        installBtn.addEventListener('click', async () => {
+            if (!deferredPrompt) return;
+            deferredPrompt.prompt();
+            await deferredPrompt.userChoice;
+            deferredPrompt = null;
+            installBtn.style.display = 'none';
+        });
+        window.addEventListener('appinstalled', () => {
+            installBtn.style.display = 'none';
+        });
     </script>
 </body>
 </html>

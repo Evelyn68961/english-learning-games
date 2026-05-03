@@ -1,4 +1,4 @@
-const CACHE_NAME = 'elg-cache-v2';
+const CACHE_NAME = 'elg-cache-v3';
 // Relative URLs resolve against the SW's scope, so this works on any
 // hosting path (e.g. GitHub Pages subpath /english-learning-games/).
 const ASSETS_TO_CACHE = [
@@ -48,23 +48,37 @@ self.addEventListener('activate', event => {
   self.clients.claim();
 });
 
-// Fetch: serve from cache, fall back to network
+// Fetch strategy:
+//  - HTML/CSS/JS/JSON + navigations: network-first so fixes land immediately;
+//    fall back to cache only when offline.
+//  - Everything else (images, fonts, audio): cache-first for fast loads.
 self.addEventListener('fetch', event => {
+  if (event.request.method !== 'GET') return;
+
+  const url = new URL(event.request.url);
+  const isCodeOrPage =
+    event.request.mode === 'navigate' ||
+    /\.(html?|css|js|mjs|json)$/.test(url.pathname) ||
+    url.pathname.endsWith('/');
+
+  if (isCodeOrPage) {
+    event.respondWith(
+      fetch(event.request).then(response => {
+        if (response && response.status === 200 && response.type !== 'opaque') {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+        }
+        return response;
+      }).catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request).then(cached => {
-      if (cached) {
-        // Return cache but also update in background
-        const fetchPromise = fetch(event.request).then(response => {
-          if (response && response.status === 200) {
-            const clone = response.clone();
-            caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
-          }
-          return response;
-        }).catch(() => {});
-        return cached;
-      }
+      if (cached) return cached;
       return fetch(event.request).then(response => {
-        if (response && response.status === 200) {
+        if (response && response.status === 200 && response.type !== 'opaque') {
           const clone = response.clone();
           caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
         }
