@@ -1,28 +1,37 @@
-const CACHE_NAME = 'elg-cache-v1';
+const CACHE_NAME = 'elg-cache-v2';
+// Relative URLs resolve against the SW's scope, so this works on any
+// hosting path (e.g. GitHub Pages subpath /english-learning-games/).
 const ASSETS_TO_CACHE = [
-  '/',
-  '/index.html',
-  '/icon-192x192.png',
-  '/icon-512x512.png',
-  '/grammar-games/index.html',
-  '/grammar-games/present-tense/verb-match/index.html',
-  '/grammar-games/present-tense/fill-gap/index.html',
-  '/grammar-games/present-tense/sentence-builder/index.html',
-  '/grammar-games/adjectives/comparative-superlative/learn.html',
-  '/grammar-games/adjectives/comparative-superlative/index.html',
-  '/grammar-games/adverbs/frequency-adverbs/index.html',
-  '/grammar-games/numbers/ordinal-numbers/learn.html',
-  '/grammar-games/numbers/ordinal-numbers/index.html',
-  '/letter-mole/index.html',
-  '/shared/question-bank.js'
+  './',
+  './index.html',
+  './icon-192x192.png',
+  './icon-512x512.png',
+  './manifest.json',
+  './grammar-games/index.html',
+  './grammar-games/present-tense/verb-match/index.html',
+  './grammar-games/present-tense/fill-gap/index.html',
+  './grammar-games/present-tense/sentence-builder/index.html',
+  './grammar-games/adjectives/comparative-superlative/learn.html',
+  './grammar-games/adjectives/comparative-superlative/index.html',
+  './grammar-games/adverbs/frequency-adverbs/index.html',
+  './grammar-games/numbers/ordinal-numbers/learn.html',
+  './grammar-games/numbers/ordinal-numbers/index.html',
+  './letter-mole/index.html',
+  './letter-mole/styles.css',
+  './letter-mole/game.js',
+  './roblox-runner/index.html',
+  './word-garden-defense/index.html',
+  './word-garden-defense/styles.css',
+  './word-garden-defense/game.js',
+  './shared/question-bank.js'
 ];
 
-// Install: cache all assets
+// Install: cache assets individually so a single 404 doesn't abort the whole install.
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(ASSETS_TO_CACHE);
-    })
+    caches.open(CACHE_NAME).then(cache =>
+      Promise.allSettled(ASSETS_TO_CACHE.map(url => cache.add(url)))
+    )
   );
   self.skipWaiting();
 });

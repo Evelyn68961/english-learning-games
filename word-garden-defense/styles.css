@@ -217,12 +217,16 @@ body {
 /* ===== THEME SELECT ===== */
 #theme-screen {
     background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
-    /* Allow scrolling when the grid + back button exceed viewport height
-       (8+ categories on short screens). justify-content shifts to flex-start
-       so content grows downward instead of clipping at the centered overflow. */
+    /* 16 themes overflow the viewport on phones. justify-content shifts
+       to flex-start so content grows downward, and we explicitly enable
+       vertical pan: body sets touch-action: manipulation, which on iOS
+       Safari can disable momentum scrolling on nested fixed scrollers. */
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
     justify-content: flex-start;
-    padding: 40px 20px;
+    padding: 40px 20px 60px;
 }
 
 .theme-title {
