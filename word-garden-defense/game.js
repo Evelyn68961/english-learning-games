@@ -457,7 +457,6 @@ function startGame() {
 
     document.getElementById('hud').classList.add('active');
     document.getElementById('plant-cards').classList.add('active');
-    document.getElementById('ask-btn').classList.add('active');
     renderPlantCards();
     updateAskBtn();
     updateHUD();
@@ -470,7 +469,6 @@ function stopGame() {
     if (gameState.animFrame) cancelAnimationFrame(gameState.animFrame);
     document.getElementById('hud').classList.remove('active');
     document.getElementById('plant-cards').classList.remove('active');
-    document.getElementById('ask-btn').classList.remove('active');
     document.getElementById('question-panel').classList.remove('active');
     canvas.classList.remove('plant-mode');
     canvas.style.display = 'none';

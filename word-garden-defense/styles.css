@@ -360,6 +360,12 @@ body {
 
 .hud.active { display: flex; }
 
+.hud-group {
+    display: flex;
+    align-items: center;
+    gap: clamp(8px, 2.5vw, 16px);
+}
+
 .hud-item {
     color: #fff;
     font-weight: 800;
@@ -433,36 +439,31 @@ body {
 #game-canvas.plant-mode { cursor: crosshair; }
 
 /* ===== ASK-FOR-QUESTION BUTTON =====
-   Lets the player request an extra question on demand to earn more sun.
-   Hidden by default; gameplay screens add `.active` to reveal it. */
+   Inline pill that lives inside the HUD, next to the sun counter, so it
+   doesn't crowd the lawn lanes below. Visibility follows the HUD itself. */
 .ask-btn {
-    position: fixed;
-    right: 14px;
-    bottom: 18px;
-    display: none;
-    flex-direction: column;
+    display: inline-flex;
     align-items: center;
-    gap: 2px;
-    padding: 10px 14px;
+    gap: 5px;
+    padding: 5px 11px;
     background: linear-gradient(180deg, #FFE066, var(--sunflower));
     color: var(--green-dark);
-    border: 3px solid #E6BE00;
-    border-radius: 18px;
+    border: 2px solid #E6BE00;
+    border-radius: 999px;
     font-family: 'Nunito', sans-serif;
     font-weight: 800;
+    font-size: clamp(0.75rem, 2.5vw, 0.9rem);
+    line-height: 1;
     cursor: pointer;
-    box-shadow: 0 5px 0 #B8860B, 0 8px 18px rgba(0,0,0,0.35);
-    z-index: 23;
+    box-shadow: 0 2px 0 #B8860B;
     transition: transform 0.1s, box-shadow 0.1s, opacity 0.2s, filter 0.2s;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
 }
 
-.ask-btn.active { display: flex; }
-
 .ask-btn:active {
-    transform: translateY(3px);
-    box-shadow: 0 2px 0 #B8860B, 0 4px 10px rgba(0,0,0,0.3);
+    transform: translateY(1px);
+    box-shadow: 0 1px 0 #B8860B;
 }
 
 .ask-btn.disabled {
@@ -472,9 +473,7 @@ body {
     pointer-events: none;
 }
 
-.ask-btn-icon { font-size: 1.4rem; line-height: 1; }
-.ask-btn-label { font-size: 0.78rem; font-weight: 800; letter-spacing: 0.5px; }
-.ask-btn-reward { font-size: 0.7rem; font-weight: 700; color: #8B6914; }
+.ask-btn-label { font-weight: 800; }
 
 /* ===== QUESTION PANEL ===== */
 .question-panel {

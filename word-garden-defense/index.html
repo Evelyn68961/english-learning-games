@@ -59,19 +59,20 @@
 <canvas id="game-canvas"></canvas>
 
 <div class="hud" id="hud">
-    <div class="hud-item hud-sun">☀️ <span id="hud-sun">100</span></div>
-    <div class="hud-item hud-score">⭐ <span id="hud-score">0</span></div>
-    <div class="hud-item hud-wave">Wave <span id="hud-wave">1</span>/<span id="hud-total-waves">5</span></div>
-    <div class="hud-item hud-lives"><span id="hud-lives" class="lives-hearts">❤️❤️❤️</span></div>
+    <div class="hud-group">
+        <div class="hud-item hud-sun">☀️ <span id="hud-sun">100</span></div>
+        <button class="ask-btn" id="ask-btn" onclick="requestManualQuestion()">
+            📝 <span class="ask-btn-label">+50 ☀️</span>
+        </button>
+    </div>
+    <div class="hud-group">
+        <div class="hud-item hud-score">⭐ <span id="hud-score">0</span></div>
+        <div class="hud-item hud-wave">Wave <span id="hud-wave">1</span>/<span id="hud-total-waves">5</span></div>
+        <div class="hud-item hud-lives"><span id="hud-lives" class="lives-hearts">❤️❤️❤️</span></div>
+    </div>
 </div>
 
 <div class="plant-cards" id="plant-cards"></div>
-
-<button class="ask-btn" id="ask-btn" onclick="requestManualQuestion()">
-    <span class="ask-btn-icon">📝</span>
-    <span class="ask-btn-label">Question</span>
-    <span class="ask-btn-reward">+50 ☀️</span>
-</button>
 
 <div class="question-panel" id="question-panel">
     <div class="q-image" id="q-image"></div>
