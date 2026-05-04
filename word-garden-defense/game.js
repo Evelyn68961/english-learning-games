@@ -58,6 +58,12 @@ const TROLLER_TRIGGER_X_BUFFER = 25; // fire when zombie reaches LAWN_LEFT + thi
 const QUESTION_INTERVAL_MS = 15000;
 const MIN_QUESTIONS_PER_SESSION = 15;
 
+// Question reward shifts at this wave. Before: correct = +50 sun. From this
+// wave on, sunflowers should be self-sufficient for sun, so correct answers
+// instead grant an "upgrade token" — the player taps any unupgraded plant on
+// the field to double its defense power (without changing its lifespan).
+const UPGRADE_FROM_WAVE = 3;
+
 // ==================== GAME STATE ====================
 let currentTheme = null;
 // Learner level — 'elementary' shows only easy/medium grammar (Grades 3-6 syllabus),
@@ -135,7 +141,24 @@ function handleCanvasTap(e) {
 
     if (gameState.questionActive) return;
 
-    // 2. Tap an idle wallnut (no card selected) to roll it. Tap side of the nut
+    // 2. Spend a pending upgrade token on a tapped plant. Has to come before
+    // the wallnut-roll handler so a queued upgrade applies first; tap the
+    // wallnut again afterward to roll it.
+    if (gameState.upgradesPending > 0 && !gameState.selectedPlant) {
+        for (const p of gameState.plants) {
+            if (p.upgraded) continue;
+            if (Math.hypot(x - p.x, y - p.y) < 30) {
+                p.upgraded = true;
+                gameState.upgradesPending--;
+                playSound('correct');
+                showFeedback('⬆️ Upgraded!');
+                updateHUD();
+                return;
+            }
+        }
+    }
+
+    // 3. Tap an idle wallnut (no card selected) to roll it. Tap side of the nut
     // picks direction: right of it rolls forward into the horde, left of it
     // rolls backward through plants that have already been overrun.
     if (!gameState.selectedPlant) {
@@ -152,7 +175,7 @@ function handleCanvasTap(e) {
         }
     }
 
-    // 3. Plant placement (only if a card is selected)
+    // 4. Plant placement (only if a card is selected)
     if (!gameState.selectedPlant) return;
     if (y < GROUND_Y) return;
     const lane = Math.floor((y - GROUND_Y) / LANE_H);
@@ -199,7 +222,8 @@ function placePlant(type, col, lane) {
         rollHits: null,
         chompState: type === 'chomper' ? 'idle' : null,
         chompTimer: 0,
-        chompTarget: null,
+        chompTargets: null,
+        upgraded: false,
     });
     gameState.sun -= info.cost;
     gameState.selectedPlant = null;
@@ -424,6 +448,14 @@ function updateAskBtn() {
     const btn = document.getElementById('ask-btn');
     if (!btn) return;
     btn.classList.toggle('disabled', !gameState.isPlaying || gameState.questionActive);
+    const label = btn.querySelector('.ask-btn-label');
+    if (!label) return;
+    if (gameState.wave >= UPGRADE_FROM_WAVE) {
+        const n = gameState.upgradesPending || 0;
+        label.textContent = n > 0 ? `⬆️ x${n}` : '⬆️ Upgrade';
+    } else {
+        label.textContent = '+50 ☀️';
+    }
 }
 
 function answerQuestion(selected) {
@@ -441,9 +473,15 @@ function answerQuestion(selected) {
     if (isCorrect) {
         gameState.correctAnswers++;
         gameState.score += 10;
-        gameState.sun += 50;
-        playSound('correct');
-        showFeedback('✅ +50 ☀️');
+        if (gameState.wave >= UPGRADE_FROM_WAVE) {
+            gameState.upgradesPending++;
+            playSound('correct');
+            showFeedback('⬆️ Tap a plant to upgrade!');
+        } else {
+            gameState.sun += 50;
+            playSound('correct');
+            showFeedback('✅ +50 ☀️');
+        }
         speakWord(q.speakText);
     } else {
         playSound('wrong');
@@ -479,6 +517,7 @@ function updateHUD() {
     document.getElementById('hud-wave').textContent = gameState.wave;
     document.getElementById('hud-total-waves').textContent = gameState.totalWaves;
     document.getElementById('hud-lives').innerHTML = '❤️'.repeat(Math.max(0, gameState.lives)) + '🖤'.repeat(Math.max(0, 3 - gameState.lives));
+    updateAskBtn();
 }
 
 // ==================== GAME LOOP ====================
@@ -507,6 +546,7 @@ function startGame() {
         sun: 100, score: 0, lives: 3, wave: 1, totalWaves: 12,
         zombies: [], plants: [], projectiles: [], sunTokens: [], explosions: [],
         trollers: [],
+        upgradesPending: 0,
         isPlaying: true, questionActive: false, currentQuestion: null,
         questionsAnswered: 0, correctAnswers: 0,
         zombiesPerWave: 6, zombieSpeed: 0.6,
@@ -626,16 +666,26 @@ function update() {
         if (p.type === 'peashooter' && p.shootTimer > 45) {
             const hasTarget = gs.zombies.some(z => !z.dead && z.lane === p.lane && z.x > p.x);
             if (hasTarget) {
-                gs.projectiles.push({ x: p.x + 30, y: p.y, lane: p.lane, speed: 8 });
+                // Upgraded peashooter fires two peas per shot (offset on Y) for
+                // 2x DPS. shotsLeft still decrements once, so total ammo lifespan
+                // is unchanged — just the damage delivered in that lifespan doubles.
+                if (p.upgraded) {
+                    gs.projectiles.push({ x: p.x + 30, y: p.y - 5, lane: p.lane, speed: 8 });
+                    gs.projectiles.push({ x: p.x + 30, y: p.y + 5, lane: p.lane, speed: 8 });
+                } else {
+                    gs.projectiles.push({ x: p.x + 30, y: p.y, lane: p.lane, speed: 8 });
+                }
                 p.shootTimer = 0;
                 p.shotsLeft--;
                 playSound('shoot');
                 if (p.shotsLeft <= 0) p.spent = true;
             }
         }
-        // Sunflower drops a collectible sun token every ~5s
+        // Sunflower drops a collectible sun token every ~5s. Upgraded variant
+        // drops two tokens per cycle; production interval stays the same.
         if (p.type === 'sunflower' && p.shootTimer > 300) {
             spawnSunflowerSun(p);
+            if (p.upgraded) spawnSunflowerSun(p);
             p.shootTimer = 0;
         }
         // Cherry fuse — explode when timer hits zero, then mark for removal
@@ -753,11 +803,13 @@ function updatePumpkin(p, gs) {
             p.leapAge = 0;
             p.leapStartX = p.x;
             p.leapTargetX = target.x;
+            // Upgraded squash bounces a second time onto another zombie.
+            p.bouncesLeft = p.upgraded ? 2 : 1;
         }
     } else if (p.squashState === 'leap') {
         p.leapAge++;
         if (p.leapAge >= PUMPKIN_LEAP_FRAMES) {
-            // Land — squash zombies inside the kill zone at the landing spot
+            // Land — squash zombies inside the kill zone at the landing spot.
             for (const z of gs.zombies) {
                 if (z.dead || z.lane !== p.lane) continue;
                 if (Math.abs(z.x - p.leapTargetX) <= PUMPKIN_SQUASH_RADIUS) {
@@ -767,6 +819,29 @@ function updatePumpkin(p, gs) {
             }
             playSound('zombieDie');
             updateHUD();
+            p.bouncesLeft--;
+
+            if (p.bouncesLeft > 0) {
+                // Find the closest remaining zombie in the lane and bounce
+                // toward it. No range limit — the second bounce reaches across
+                // the whole lane so the upgrade reliably claims a second kill.
+                let next = null;
+                let best = Infinity;
+                for (const z of gs.zombies) {
+                    if (z.dead || z.lane !== p.lane) continue;
+                    const d = Math.abs(z.x - p.leapTargetX);
+                    if (d < best) {
+                        best = d;
+                        next = z;
+                    }
+                }
+                if (next) {
+                    p.leapStartX = p.leapTargetX;
+                    p.leapTargetX = next.x;
+                    p.leapAge = 0;
+                    return;
+                }
+            }
             p.spent = true;
         }
     }
@@ -775,35 +850,37 @@ function updatePumpkin(p, gs) {
 function updateChomper(p, gs) {
     if (p.chompState === 'idle') {
         const range = CELL_W * CHOMPER_BITE_RANGE_CELLS;
-        let target = null;
-        let best = Infinity;
+        // Forward bites only — zombies that have already passed us aren't
+        // candidates (the chomper faces right toward the spawn side).
+        const candidates = [];
         for (const z of gs.zombies) {
             if (z.dead || z.beingEaten || z.lane !== p.lane) continue;
             const dx = z.x - p.x;
-            // Forward bites only — zombies that have already passed us aren't
-            // candidates (the chomper faces right toward the spawn side).
-            if (dx >= 0 && dx <= range && dx < best) {
-                best = dx;
-                target = z;
-            }
+            if (dx >= 0 && dx <= range) candidates.push({ z, dx });
         }
-        if (target) {
+        candidates.sort((a, b) => a.dx - b.dx);
+        // Upgraded chomper grabs the two closest at once; otherwise just one.
+        const biteCount = p.upgraded ? 2 : 1;
+        const targets = candidates.slice(0, biteCount).map(c => c.z);
+        if (targets.length > 0) {
             p.chompState = 'biting';
             p.chompTimer = 0;
-            p.chompTarget = target;
-            target.beingEaten = true;
+            p.chompTargets = targets;
+            targets.forEach(z => { z.beingEaten = true; });
         }
     } else if (p.chompState === 'biting') {
         p.chompTimer++;
         if (p.chompTimer >= CHOMPER_BITE_FRAMES) {
-            if (p.chompTarget && !p.chompTarget.dead) {
-                p.chompTarget.dead = true;
-                p.chompTarget.beingEaten = false;
-                gs.score += 5;
-                playSound('zombieDie');
-                updateHUD();
-            }
-            p.chompTarget = null;
+            (p.chompTargets || []).forEach(z => {
+                if (!z.dead) {
+                    z.dead = true;
+                    z.beingEaten = false;
+                    gs.score += 5;
+                }
+            });
+            playSound('zombieDie');
+            updateHUD();
+            p.chompTargets = null;
             p.chompState = 'chewing';
             p.chompTimer = 0;
         }
@@ -882,7 +959,8 @@ function updateWallnutRoll(p, gs) {
             gs.score += 5;
             playSound('zombieDie');
             updateHUD();
-            if (p.rollKills >= WALLNUT_ROLL_MAX_KILLS) {
+            const maxKills = p.upgraded ? WALLNUT_ROLL_MAX_KILLS * 2 : WALLNUT_ROLL_MAX_KILLS;
+            if (p.rollKills >= maxKills) {
                 p.spent = true;
                 return;
             }
@@ -893,7 +971,8 @@ function updateWallnutRoll(p, gs) {
 }
 
 function explodeCherry(plant) {
-    const r = CHERRY_BLAST_RADIUS;
+    // Upgraded cherry doubles its blast radius — fuse length unchanged.
+    const r = plant.upgraded ? CHERRY_BLAST_RADIUS * 2 : CHERRY_BLAST_RADIUS;
     gameState.explosions.push({ x: plant.x, y: plant.y, age: 0, radius: r });
     gameState.zombies.forEach(z => {
         if (z.dead) return;
@@ -1187,6 +1266,18 @@ function drawCloud(x, y, scale) {
 function drawPlant(p) {
     const x = p.x, y = p.y;
     const bob = Math.sin(p.plantAnim) * 3;
+
+    // Upgraded plants: pulsing gold halo behind the body + a small star above.
+    if (p.upgraded) {
+        const r = 22 + Math.sin(p.plantAnim * 2) * 2;
+        const grad = ctx.createRadialGradient(x, y - 8, 4, x, y - 8, r + 6);
+        grad.addColorStop(0, 'rgba(255, 215, 0, 0.45)');
+        grad.addColorStop(1, 'rgba(255, 215, 0, 0)');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(x, y - 8, r + 6, 0, Math.PI * 2);
+        ctx.fill();
+    }
 
     // HP bar (only when damaged)
     if (p.hp < p.maxHp) {
