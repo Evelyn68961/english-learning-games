@@ -21,6 +21,18 @@ const PUMPKIN_LEAP_FRAMES = 30;   // ~0.5s leap animation
 const PUMPKIN_TRIGGER_CELLS = 2;  // trigger when a zombie is within N cell-widths (either direction)
 const PUMPKIN_SQUASH_RADIUS = 38; // landing kill zone (px)
 
+// Wallnut rolls when tapped: direction is set by tap position relative to the
+// nut (tap right → roll right, tap left → roll left). It plows through zombies
+// in its lane, crashing up to WALLNUT_ROLL_MAX_KILLS before it shatters.
+const WALLNUT_ROLL_SPEED = 4.5;
+const WALLNUT_ROLL_HIT_RADIUS = 26;
+const WALLNUT_ROLL_MAX_KILLS = 3;
+const WALLNUT_TAP_RADIUS = 30;
+// Auto-trigger: once a wallnut has been chewed down to this fraction of its
+// max HP, it goes out swinging — auto-rolls forward into the horde rather
+// than dying uselessly. Manual tap still works at full HP.
+const WALLNUT_AUTO_ROLL_HP_RATIO = 1 / 3;
+
 // ==================== QUESTION PACING ====================
 // Strict 15-second gap between questions, measured in wall-clock ms (NOT frames),
 // so the cadence is identical on 60 Hz and 144 Hz displays. Reset on dismissal
@@ -103,8 +115,26 @@ function handleCanvasTap(e) {
         }
     }
 
-    // 2. Plant placement (only if a card is selected and no question is active)
     if (gameState.questionActive) return;
+
+    // 2. Tap an idle wallnut (no card selected) to roll it. Tap side of the nut
+    // picks direction: right of it rolls forward into the horde, left of it
+    // rolls backward through plants that have already been overrun.
+    if (!gameState.selectedPlant) {
+        for (const p of gameState.plants) {
+            if (p.type !== 'wallnut' || p.rolling) continue;
+            if (Math.hypot(x - p.x, y - p.y) < WALLNUT_TAP_RADIUS) {
+                p.rolling = true;
+                p.rollDir = (x >= p.x) ? 1 : -1;
+                p.rollKills = 0;
+                p.rollHits = new Set();
+                playSound('plant');
+                return;
+            }
+        }
+    }
+
+    // 3. Plant placement (only if a card is selected)
     if (!gameState.selectedPlant) return;
     if (y < GROUND_Y) return;
     const lane = Math.floor((y - GROUND_Y) / LANE_H);
@@ -144,6 +174,11 @@ function placePlant(type, col, lane) {
         shotsLeft: type === 'peashooter' ? PEASHOOTER_SHOTS : 0,
         squashState: type === 'pumpkin' ? 'idle' : null,
         leapAge: 0,
+        rolling: false,
+        rollDir: 0,
+        rollKills: 0,
+        rollAngle: 0,
+        rollHits: null,
     });
     gameState.sun -= info.cost;
     gameState.selectedPlant = null;
@@ -525,8 +560,9 @@ function update() {
         if (z.dead) return;
         z.walkFrame = (z.walkFrame || 0) + 0.05;
 
-        // Plant directly in front of zombie?
-        const blocker = gs.plants.find(p => p.lane === z.lane && p.x < z.x + 6 && p.x > z.x - 26);
+        // Plant directly in front of zombie? A rolling wallnut isn't a blocker
+        // — it plows through, so zombies don't pause to chew on it.
+        const blocker = gs.plants.find(p => p.lane === z.lane && !(p.type === 'wallnut' && p.rolling) && p.x < z.x + 6 && p.x > z.x - 26);
         if (blocker) {
             z.eating = true;
             z.eatTimer = (z.eatTimer || 0) + 1;
@@ -588,6 +624,20 @@ function update() {
         // Final-defense plant: idle until a zombie comes close, then jumps,
         // squashes on land, single-use.
         if (p.type === 'pumpkin') updatePumpkin(p, gs);
+        // Wallnut: auto-launch a roll once it's been chewed down past the HP
+        // threshold (forward into the horde — zombies attack from the right),
+        // then plow through up to 3 zombies. Manual tap-to-roll still applies
+        // earlier in handleCanvasTap.
+        if (p.type === 'wallnut') {
+            if (!p.rolling && p.hp <= p.maxHp * WALLNUT_AUTO_ROLL_HP_RATIO) {
+                p.rolling = true;
+                p.rollDir = 1;
+                p.rollKills = 0;
+                p.rollHits = new Set();
+                playSound('plant');
+            }
+            if (p.rolling) updateWallnutRoll(p, gs);
+        }
     });
     gs.plants = gs.plants.filter(p => !p.exploded && !p.spent);
 
@@ -687,6 +737,32 @@ function updatePumpkin(p, gs) {
             p.spent = true;
         }
     }
+}
+
+function updateWallnutRoll(p, gs) {
+    p.x += WALLNUT_ROLL_SPEED * p.rollDir;
+    // Rotate proportional to travel — 2*PI per ~circumference (~110px) gives a
+    // believable rolling cadence for an 18x22 nut.
+    p.rollAngle += p.rollDir * (WALLNUT_ROLL_SPEED / 18);
+
+    for (const z of gs.zombies) {
+        if (z.dead || z.lane !== p.lane) continue;
+        if (p.rollHits.has(z)) continue;
+        if (Math.abs(z.x - p.x) <= WALLNUT_ROLL_HIT_RADIUS) {
+            z.dead = true;
+            p.rollHits.add(z);
+            p.rollKills++;
+            gs.score += 5;
+            playSound('zombieDie');
+            updateHUD();
+            if (p.rollKills >= WALLNUT_ROLL_MAX_KILLS) {
+                p.spent = true;
+                return;
+            }
+        }
+    }
+
+    if (p.x < -30 || p.x > W + 30) p.spent = true;
 }
 
 function explodeCherry(plant) {
@@ -1037,32 +1113,38 @@ function drawPlant(p) {
     }
 
     if (p.type === 'wallnut') {
+        const cy = y - 8 + bob * 0.5;
+        ctx.save();
+        ctx.translate(x, cy);
+        if (p.rolling) ctx.rotate(p.rollAngle);
         // Body (rounded brown nut)
         ctx.fillStyle = '#A0522D';
         ctx.beginPath();
-        ctx.ellipse(x, y - 8 + bob * 0.5, 18, 22, 0, 0, Math.PI * 2);
+        ctx.ellipse(0, 0, 18, 22, 0, 0, Math.PI * 2);
         ctx.fill();
         ctx.fillStyle = '#8B4513';
         ctx.beginPath();
-        ctx.ellipse(x - 6, y - 8 + bob * 0.5, 5, 8, -0.3, 0, Math.PI * 2);
+        ctx.ellipse(-6, 0, 5, 8, -0.3, 0, Math.PI * 2);
         ctx.fill();
         // Eyes
         ctx.fillStyle = '#fff';
         ctx.beginPath();
-        ctx.arc(x - 5, y - 10 + bob * 0.5, 4, 0, Math.PI * 2);
-        ctx.arc(x + 5, y - 10 + bob * 0.5, 4, 0, Math.PI * 2);
+        ctx.arc(-5, -2, 4, 0, Math.PI * 2);
+        ctx.arc(5, -2, 4, 0, Math.PI * 2);
         ctx.fill();
         ctx.fillStyle = '#333';
         ctx.beginPath();
-        ctx.arc(x - 4, y - 10 + bob * 0.5, 2, 0, Math.PI * 2);
-        ctx.arc(x + 6, y - 10 + bob * 0.5, 2, 0, Math.PI * 2);
+        ctx.arc(-4, -2, 2, 0, Math.PI * 2);
+        ctx.arc(6, -2, 2, 0, Math.PI * 2);
         ctx.fill();
-        // Mouth
+        // Mouth — open in a determined "O" while rolling, gentle smile when idle
         ctx.strokeStyle = '#333';
         ctx.lineWidth = 1.5;
         ctx.beginPath();
-        ctx.arc(x, y - 4 + bob * 0.5, 3, 0, Math.PI);
+        if (p.rolling) ctx.arc(0, 5, 3, 0, Math.PI * 2);
+        else ctx.arc(0, 4, 3, 0, Math.PI);
         ctx.stroke();
+        ctx.restore();
         return;
     }
 
