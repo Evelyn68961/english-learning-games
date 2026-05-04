@@ -9,10 +9,11 @@ const PLANT_TYPES = {
     sunflower:  { cost: 50,  icon: '🌻', hp: 4,  name: 'Sunflower',  produces: 'sun'   },
     peashooter: { cost: 100, icon: '🟢', hp: 4,  name: 'Peashooter', produces: 'peas'  },
     wallnut:    { cost: 50,  icon: '🌰', hp: 18, name: 'Wallnut',    produces: null    },
+    chomper:    { cost: 50,  icon: '🌷', hp: 4,  name: 'Chomper',    produces: 'bite'  },
     cherry:     { cost: 150, icon: '🍒', hp: 1,  name: 'Cherry Bomb', produces: 'bomb' },
     pumpkin:    { cost: 50,  icon: '🎃', hp: 1,  name: 'Squash',     produces: 'leap'  },
 };
-const PLANT_ORDER = ['sunflower', 'peashooter', 'wallnut', 'cherry', 'pumpkin'];
+const PLANT_ORDER = ['sunflower', 'peashooter', 'wallnut', 'chomper', 'cherry', 'pumpkin'];
 
 const CHERRY_FUSE_FRAMES = 60;    // ~1s windup before detonation
 const CHERRY_BLAST_RADIUS = 130;  // covers a 3x3 patch of cells
@@ -32,6 +33,14 @@ const WALLNUT_TAP_RADIUS = 30;
 // max HP, it goes out swinging — auto-rolls forward into the horde rather
 // than dying uselessly. Manual tap still works at full HP.
 const WALLNUT_AUTO_ROLL_HP_RATIO = 1 / 3;
+
+// Chomper: bites a single zombie that wanders within range, then chews for a
+// while during which it can't bite again — that gap is when it's vulnerable
+// and serves as a temporary blocker. The bitten zombie is frozen in place
+// until the bite snap completes (so the snap visibly catches its target).
+const CHOMPER_BITE_RANGE_CELLS = 1.2;
+const CHOMPER_BITE_FRAMES = 14;   // ~0.23s snap animation
+const CHOMPER_CHEW_FRAMES = 130;  // ~2.2s digest before it can bite again
 
 // ==================== QUESTION PACING ====================
 // Strict 15-second gap between questions, measured in wall-clock ms (NOT frames),
@@ -179,6 +188,9 @@ function placePlant(type, col, lane) {
         rollKills: 0,
         rollAngle: 0,
         rollHits: null,
+        chompState: type === 'chomper' ? 'idle' : null,
+        chompTimer: 0,
+        chompTarget: null,
     });
     gameState.sun -= info.cost;
     gameState.selectedPlant = null;
@@ -558,6 +570,9 @@ function update() {
     // Move zombies (or eat plant in path)
     gs.zombies.forEach(z => {
         if (z.dead) return;
+        // A chomper has clamped this zombie mid-snap — freeze it so the bite
+        // visibly catches its target instead of the zombie walking away.
+        if (z.beingEaten) return;
         z.walkFrame = (z.walkFrame || 0) + 0.05;
 
         // Plant directly in front of zombie? A rolling wallnut isn't a blocker
@@ -624,6 +639,10 @@ function update() {
         // Final-defense plant: idle until a zombie comes close, then jumps,
         // squashes on land, single-use.
         if (p.type === 'pumpkin') updatePumpkin(p, gs);
+        // Chomper: scan for a zombie just ahead in the same lane, snap to bite
+        // it, then chew. The chew gap is the vulnerability window during which
+        // the chomper holds the line as a temporary block but can't bite.
+        if (p.type === 'chomper') updateChomper(p, gs);
         // Wallnut: auto-launch a roll once it's been chewed down past the HP
         // threshold (forward into the horde — zombies attack from the right),
         // then plow through up to 3 zombies. Manual tap-to-roll still applies
@@ -735,6 +754,50 @@ function updatePumpkin(p, gs) {
             playSound('zombieDie');
             updateHUD();
             p.spent = true;
+        }
+    }
+}
+
+function updateChomper(p, gs) {
+    if (p.chompState === 'idle') {
+        const range = CELL_W * CHOMPER_BITE_RANGE_CELLS;
+        let target = null;
+        let best = Infinity;
+        for (const z of gs.zombies) {
+            if (z.dead || z.beingEaten || z.lane !== p.lane) continue;
+            const dx = z.x - p.x;
+            // Forward bites only — zombies that have already passed us aren't
+            // candidates (the chomper faces right toward the spawn side).
+            if (dx >= 0 && dx <= range && dx < best) {
+                best = dx;
+                target = z;
+            }
+        }
+        if (target) {
+            p.chompState = 'biting';
+            p.chompTimer = 0;
+            p.chompTarget = target;
+            target.beingEaten = true;
+        }
+    } else if (p.chompState === 'biting') {
+        p.chompTimer++;
+        if (p.chompTimer >= CHOMPER_BITE_FRAMES) {
+            if (p.chompTarget && !p.chompTarget.dead) {
+                p.chompTarget.dead = true;
+                p.chompTarget.beingEaten = false;
+                gs.score += 5;
+                playSound('zombieDie');
+                updateHUD();
+            }
+            p.chompTarget = null;
+            p.chompState = 'chewing';
+            p.chompTimer = 0;
+        }
+    } else if (p.chompState === 'chewing') {
+        p.chompTimer++;
+        if (p.chompTimer >= CHOMPER_CHEW_FRAMES) {
+            p.chompState = 'idle';
+            p.chompTimer = 0;
         }
     }
 }
@@ -1145,6 +1208,82 @@ function drawPlant(p) {
         else ctx.arc(0, 4, 3, 0, Math.PI);
         ctx.stroke();
         ctx.restore();
+        return;
+    }
+
+    if (p.type === 'chomper') {
+        // Mouth opens, lunges forward, snaps shut during 'biting'. Pulses
+        // shut while 'chewing'. Idle = slightly ajar with a hungry look.
+        let mouth = 4;       // half-height of the open mouth
+        let lunge = 0;       // forward lurch (px) toward zombies
+        let chewBulge = 0;   // belly bulge while digesting
+        if (p.chompState === 'biting') {
+            const t = p.chompTimer / CHOMPER_BITE_FRAMES;
+            // Open wide in the first half, snap closed in the second
+            mouth = t < 0.5 ? 4 + t * 28 : 18 - (t - 0.5) * 36;
+            lunge = Math.sin(t * Math.PI) * 16;
+        } else if (p.chompState === 'chewing') {
+            mouth = 3 + Math.abs(Math.sin(p.chompTimer * 0.35)) * 1.5;
+            chewBulge = 2 + Math.sin(p.chompTimer * 0.3) * 1.5;
+        }
+
+        // Stem
+        ctx.fillStyle = '#388E3C';
+        ctx.fillRect(x - 3, y - 5, 6, 25);
+        // Side leaves
+        ctx.fillStyle = '#4CAF50';
+        ctx.beginPath();
+        ctx.ellipse(x - 10, y + 6, 8, 4, -0.3, 0, Math.PI * 2);
+        ctx.ellipse(x + 10, y + 6, 8, 4, 0.3, 0, Math.PI * 2);
+        ctx.fill();
+
+        const cx = x + lunge;
+        const cy = y - 12 + bob * 0.5;
+        // Head — purple flytrap dome, slight bulge while chewing
+        const grad = ctx.createRadialGradient(cx - 4, cy - 4, 2, cx, cy, 18);
+        grad.addColorStop(0, '#B57EDC');
+        grad.addColorStop(1, '#5B2C7A');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(cx, cy, 16 + chewBulge, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Pink interior of the mouth (vertical opening)
+        ctx.fillStyle = '#FF1744';
+        ctx.beginPath();
+        ctx.ellipse(cx, cy + 3, 11, mouth, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Triangular teeth, top + bottom rows, closing on the mouth
+        ctx.fillStyle = '#fff';
+        for (const ox of [-8, -3, 2, 7]) {
+            // Top row points down toward the mouth
+            ctx.beginPath();
+            ctx.moveTo(cx + ox, cy + 3 - mouth);
+            ctx.lineTo(cx + ox - 2, cy + 3 - mouth + 4);
+            ctx.lineTo(cx + ox + 2, cy + 3 - mouth + 4);
+            ctx.closePath();
+            ctx.fill();
+            // Bottom row points up
+            ctx.beginPath();
+            ctx.moveTo(cx + ox, cy + 3 + mouth);
+            ctx.lineTo(cx + ox - 2, cy + 3 + mouth - 4);
+            ctx.lineTo(cx + ox + 2, cy + 3 + mouth - 4);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        // Eyes on top of head
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.arc(cx - 6, cy - 9, 3.5, 0, Math.PI * 2);
+        ctx.arc(cx + 6, cy - 9, 3.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#222';
+        ctx.beginPath();
+        ctx.arc(cx - 5, cy - 9, 1.7, 0, Math.PI * 2);
+        ctx.arc(cx + 7, cy - 9, 1.7, 0, Math.PI * 2);
+        ctx.fill();
         return;
     }
 
