@@ -42,6 +42,15 @@ const CHOMPER_BITE_RANGE_CELLS = 1.2;
 const CHOMPER_BITE_FRAMES = 14;   // ~0.23s snap animation
 const CHOMPER_CHEW_FRAMES = 130;  // ~2.2s digest before it can bite again
 
+// Lawn trolleys: one per lane, parked just left of the playable lawn. They
+// auto-fire when a zombie has broken past every defender in that lane and
+// reaches the gate area, then drive right at speed and crash every zombie
+// they touch. One-shot per lane — once it's fired, that lane has no more
+// safety net.
+const TROLLER_SPEED = 6;
+const TROLLER_KILL_RADIUS = 30;
+const TROLLER_TRIGGER_X_BUFFER = 25; // fire when zombie reaches LAWN_LEFT + this
+
 // ==================== QUESTION PACING ====================
 // Strict 15-second gap between questions, measured in wall-clock ms (NOT frames),
 // so the cadence is identical on 60 Hz and 144 Hz displays. Reset on dismissal
@@ -497,6 +506,7 @@ function startGame() {
     gameState = {
         sun: 100, score: 0, lives: 3, wave: 1, totalWaves: 12,
         zombies: [], plants: [], projectiles: [], sunTokens: [], explosions: [],
+        trollers: [],
         isPlaying: true, questionActive: false, currentQuestion: null,
         questionsAnswered: 0, correctAnswers: 0,
         zombiesPerWave: 6, zombieSpeed: 0.6,
@@ -514,6 +524,7 @@ function startGame() {
     updateAskBtn();
     updateHUD();
     resizeCanvas();
+    initTrollers();
     gameLoop();
 }
 
@@ -660,6 +671,9 @@ function update() {
     });
     gs.plants = gs.plants.filter(p => !p.exploded && !p.spent);
 
+    // Lawn trolleys — auto-fire safety net for breached lanes
+    updateTrollers(gs);
+
     // Tick explosion animations
     gs.explosions.forEach(e => e.age++);
     gs.explosions = gs.explosions.filter(e => e.age < 25);
@@ -800,6 +814,56 @@ function updateChomper(p, gs) {
             p.chompTimer = 0;
         }
     }
+}
+
+function initTrollers() {
+    gameState.trollers = [0, 1, 2].map(lane => ({
+        lane,
+        x: LAWN_LEFT - 28,
+        y: 0,                  // computed during draw from current LANE_H
+        fired: false,
+        alive: true,
+        wheelRot: 0,
+    }));
+}
+
+function updateTrollers(gs) {
+    const triggerX = LAWN_LEFT + TROLLER_TRIGGER_X_BUFFER;
+    gs.trollers.forEach(tr => {
+        if (!tr.alive) return;
+        if (!tr.fired) {
+            // Fire when a zombie has reached the gate area on this lane and
+            // there's nothing alive between it and the gate to stop it. The
+            // forward-plant check is what makes this a "no defenders" trigger
+            // rather than a blanket lawnmower — if a wallnut is still standing
+            // ahead of the zombie, give that defender a chance.
+            for (const z of gs.zombies) {
+                if (z.dead || z.lane !== tr.lane) continue;
+                if (z.x > triggerX) continue;
+                const blocking = gs.plants.some(p => p.lane === tr.lane && p.x < z.x);
+                if (!blocking) {
+                    tr.fired = true;
+                    playSound('shoot');
+                    break;
+                }
+            }
+            return;
+        }
+        // Fired: roll right, crash through every zombie in the lane
+        tr.x += TROLLER_SPEED;
+        tr.wheelRot += TROLLER_SPEED / 7;
+        for (const z of gs.zombies) {
+            if (z.dead || z.lane !== tr.lane) continue;
+            if (Math.abs(z.x - tr.x) < TROLLER_KILL_RADIUS) {
+                z.dead = true;
+                z.beingEaten = false;
+                gs.score += 5;
+                playSound('zombieDie');
+            }
+        }
+        if (tr.x > W + 40) tr.alive = false;
+    });
+    updateHUD();
 }
 
 function updateWallnutRoll(p, gs) {
@@ -980,6 +1044,10 @@ function draw() {
 
     gameState.zombies.forEach(z => { if (!z.dead) drawZombie(z); });
 
+    // Lawn trolleys — drawn after zombies so a firing trolley visibly mows
+    // over them. Idle trolleys sit just left of LAWN_LEFT.
+    gameState.trollers.forEach(tr => { if (tr.alive) drawTroller(tr); });
+
     // Sun tokens (collectible)
     gameState.sunTokens.forEach(s => drawSunToken(s));
 
@@ -1010,6 +1078,75 @@ function drawExplosion(e) {
         ctx.fill();
     }
     ctx.restore();
+}
+
+function drawTroller(tr) {
+    const y = GROUND_Y + tr.lane * LANE_H + LANE_H / 2;
+    const x = tr.x;
+
+    // Subtle shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.25)';
+    ctx.beginPath();
+    ctx.ellipse(x, y + 14, 18, 4, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Cart body — red with yellow trim, looks like a little lawn cart
+    ctx.fillStyle = '#C62828';
+    ctx.beginPath();
+    ctx.roundRect(x - 16, y - 8, 32, 16, 4);
+    ctx.fill();
+    ctx.fillStyle = '#FFD700';
+    ctx.fillRect(x - 16, y - 8, 32, 3);
+
+    // Engine block / hood
+    ctx.fillStyle = '#444';
+    ctx.fillRect(x - 7, y - 14, 14, 7);
+    ctx.fillStyle = '#888';
+    ctx.fillRect(x - 5, y - 12, 10, 3);
+
+    // Tiny green sprout on the hood — keeps the garden theme
+    ctx.fillStyle = '#388E3C';
+    ctx.fillRect(x - 1, y - 18, 2, 4);
+    ctx.fillStyle = '#7BC950';
+    ctx.beginPath();
+    ctx.ellipse(x - 3, y - 18, 3, 2, -0.3, 0, Math.PI * 2);
+    ctx.ellipse(x + 3, y - 18, 3, 2, 0.3, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Wheels (rotate while moving)
+    for (const wx of [-10, 10]) {
+        ctx.save();
+        ctx.translate(x + wx, y + 8);
+        ctx.rotate(tr.wheelRot);
+        ctx.fillStyle = '#222';
+        ctx.beginPath();
+        ctx.arc(0, 0, 7, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#666';
+        ctx.beginPath();
+        ctx.arc(0, 0, 3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#444';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(-6, 0); ctx.lineTo(6, 0);
+        ctx.moveTo(0, -6); ctx.lineTo(0, 6);
+        ctx.stroke();
+        ctx.restore();
+    }
+
+    // Speed lines while firing
+    if (tr.fired) {
+        ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+        ctx.lineWidth = 1.5;
+        for (let i = 0; i < 3; i++) {
+            const dx = -22 - i * 6;
+            ctx.beginPath();
+            ctx.moveTo(x + dx, y - 4 + i * 4);
+            ctx.lineTo(x + dx - 8, y - 4 + i * 4);
+            ctx.stroke();
+        }
+    }
 }
 
 function drawSunToken(s) {
