@@ -353,18 +353,28 @@ function renderThemes() {
 }
 
 // ==================== QUESTION GENERATION ====================
-// Difficulty rises with wave tier (every 3 waves):
+// Difficulty rises with wave tier:
 //   - Question-type mix shifts from vocab-heavy → spelling/grammar-heavy.
-//   - Word + grammar pools cap at:
-//       tier 0 (waves 1-3) -> diff 0 (starter, very-easy only),
-//       tier 1 (waves 4-6) -> diff 2, tier 2 (waves 7-9) -> diff 3,
-//       tier 3 (waves 10-12) -> diff 4.
-//     Tier 0 strictly uses diff-0 content so early-elementary kids aren't
-//     thrown into A1 grammar before they're ready; later tiers unchanged.
+//   - Tier 0 (waves 1-3) is strictly diff 0 — starter content only, so early-
+//     elementary kids aren't thrown into A1 grammar before they're ready.
+//   - For elementary/junior: 12 waves, tier = floor((wave-1)/3), maxDiff caps
+//     at 4. Tier mapping: 0→0, 1→2, 2→3, 3→4.
+//   - For senior: 16 waves, denser progression so seniors actually face the
+//     大考中心 L3-L6 content in late waves. Tier mapping: 0→0, 1→2, 2→3,
+//     3→4, 4→6, 5→8 (3 waves per tier; last two tiers expose senior diffs).
 function generateQuestion(theme, wave) {
     const t = theme;
     const tier = Math.floor((wave - 1) / 3);
-    const maxDifficulty = tier === 0 ? 0 : Math.min(4, tier + 1);
+    const isSenior = selectedLevel === 'senior';
+    const cap = isSenior ? 8 : 4;
+    let maxDifficulty;
+    if (tier === 0) maxDifficulty = 0;
+    else if (!isSenior) maxDifficulty = Math.min(cap, tier + 1);
+    else {
+        // Senior curve: tier 1→2, 2→3, 3→4, 4→6, 5→8. Junior peak at tier 3.
+        const seniorMap = [0, 2, 3, 4, 6, 8];
+        maxDifficulty = seniorMap[Math.min(tier, seniorMap.length - 1)];
+    }
 
     const r = Math.random();
     let type;
@@ -376,7 +386,7 @@ function generateQuestion(theme, wave) {
 
     // Cap word difficulty at the same tier as grammar so a tier-0 wave never pulls
     // a B1 word like 'submarine' or 'photographer' out of the bank.
-    const wordsForTier = t.words.filter(w => (w.difficulty || 1) <= maxDifficulty);
+    const wordsForTier = t.words.filter(w => (w.difficulty ?? 1) <= maxDifficulty);
     const wordPool = wordsForTier.length > 0 ? wordsForTier : t.words;
 
     if (type === 'vocab') {
@@ -402,7 +412,7 @@ function generateQuestion(theme, wave) {
         return { type: 'spelling', image: w.emoji, prompt: blanked, hint: w.hint, answer: correctLetter, options, speakText: w.word };
     }
 
-    const eligible = t.grammar.filter(g => (g.difficulty || 1) <= maxDifficulty);
+    const eligible = t.grammar.filter(g => (g.difficulty ?? 1) <= maxDifficulty);
     const pool = eligible.length > 0 ? eligible : t.grammar;
     const g = pool[Math.floor(Math.random() * pool.length)];
     return { type: 'grammar', image: '', prompt: g.sentence, hint: g.hint, answer: g.answer, options: shuffle([...g.options]), speakText: g.sentence.replace('___', g.answer) };
@@ -525,7 +535,7 @@ function updateHUD() {
 
 // ==================== GAME LOOP ====================
 function setLevel(level) {
-    if (level !== 'elementary' && level !== 'junior') return;
+    if (!['elementary', 'junior', 'senior'].includes(level)) return;
     selectedLevel = level;
     document.querySelectorAll('.level-btn').forEach(btn => {
         btn.classList.toggle('selected', btn.dataset.level === level);
@@ -545,8 +555,11 @@ function startGame() {
     showScreen('');
     canvas.style.display = 'block';
 
+    // Senior players get 4 extra waves so they actually face the 大考中心
+    // L3-L6 difficulty curve in a single session; elementary/junior stay at 12.
+    const totalWaves = selectedLevel === 'senior' ? 16 : 12;
     gameState = {
-        sun: 100, score: 0, lives: 3, wave: 1, totalWaves: 12,
+        sun: 100, score: 0, lives: 3, wave: 1, totalWaves,
         zombies: [], plants: [], projectiles: [], sunTokens: [], explosions: [],
         trollers: [],
         upgradesPending: 0,
