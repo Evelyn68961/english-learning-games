@@ -634,8 +634,9 @@ function update() {
         gs.sunTokenTimer = 0;
     }
 
-    // Move zombies (or eat plant in path)
-    gs.zombies.forEach(z => {
+    // Move zombies (or eat plant in path). Frozen while a question is up so
+    // the player can answer without losing ground.
+    if (!gs.questionActive) gs.zombies.forEach(z => {
         if (z.dead) return;
         // A chomper has clamped this zombie mid-snap — freeze it so the bite
         // visibly catches its target instead of the zombie walking away.
