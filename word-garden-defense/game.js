@@ -676,8 +676,8 @@ function update() {
         }
     });
 
-    // Plants
-    gs.plants.forEach(p => {
+    // Plants — also frozen during a question so the battlefield is fully paused.
+    if (!gs.questionActive) gs.plants.forEach(p => {
         p.shootTimer++;
         p.plantAnim += 0.08;
         if (p.type === 'peashooter' && p.shootTimer > 45) {
@@ -728,7 +728,14 @@ function update() {
         if (p.type === 'wallnut') {
             if (!p.rolling && p.hp <= p.maxHp * WALLNUT_AUTO_ROLL_HP_RATIO) {
                 p.rolling = true;
-                p.rollDir = 1;
+                // Roll toward the denser side of the lane so the nut takes out
+                // the most zombies. Tie / empty lane → forward (right).
+                let leftCount = 0, rightCount = 0;
+                gs.zombies.forEach(z => {
+                    if (z.dead || z.lane !== p.lane) return;
+                    if (z.x < p.x) leftCount++; else rightCount++;
+                });
+                p.rollDir = (leftCount > rightCount) ? -1 : 1;
                 p.rollKills = 0;
                 p.rollHits = new Set();
                 playSound('plant');
