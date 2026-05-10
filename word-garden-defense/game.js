@@ -104,15 +104,35 @@ const ctx = canvas.getContext('2d');
 let W, H, GROUND_Y, LANE_H, LAWN_LEFT, CELL_W, GRID_COLS;
 
 function resizeCanvas() {
-    W = canvas.width = window.innerWidth;
-    H = canvas.height = window.innerHeight;
+    // Prefer visualViewport: on iOS it excludes the dynamic URL bar / keyboard,
+    // so the canvas matches what's actually visible instead of overflowing
+    // under the toolbar.
+    const vv = window.visualViewport;
+    W = canvas.width = vv ? vv.width : window.innerWidth;
+    H = canvas.height = vv ? vv.height : window.innerHeight;
     GROUND_Y = H * 0.55;
     LANE_H = (H - GROUND_Y - 80) / 3;
     LAWN_LEFT = 90;
     CELL_W = Math.min(95, Math.max(60, (W - LAWN_LEFT - 10) / 9));
     GRID_COLS = Math.max(4, Math.floor((W - LAWN_LEFT - 10) / CELL_W));
+
+    // Pin the plant-cards bar directly under the HUD, regardless of HUD height.
+    const hud = document.getElementById('hud');
+    if (hud) {
+        const hudH = hud.classList.contains('active') ? hud.offsetHeight : 0;
+        document.documentElement.style.setProperty('--hud-h', hudH + 'px');
+    }
 }
 window.addEventListener('resize', resizeCanvas);
+window.addEventListener('orientationchange', () => {
+    // iOS sometimes reports stale dimensions until after the rotation animation;
+    // re-measure on the next frame and again shortly after to catch both.
+    requestAnimationFrame(resizeCanvas);
+    setTimeout(resizeCanvas, 250);
+});
+if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', resizeCanvas);
+}
 resizeCanvas();
 
 // ==================== INPUT (tap-to-place) ====================
