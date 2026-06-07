@@ -445,6 +445,32 @@ body {
 /* ===== ASK-FOR-QUESTION BUTTON =====
    Inline pill that lives inside the HUD, next to the sun counter, so it
    doesn't crowd the lawn lanes below. Visibility follows the HUD itself. */
+/* Round back button in the HUD; lets players quit a run without closing the
+   app. Visibility follows the HUD itself. */
+.hud-back-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: clamp(30px, 9vw, 38px);
+    height: clamp(30px, 9vw, 38px);
+    padding: 0;
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+    border: 2px solid rgba(255,255,255,0.35);
+    border-radius: 50%;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: clamp(1.1rem, 4vw, 1.4rem);
+    line-height: 1;
+    cursor: pointer;
+    transition: transform 0.1s, background 0.2s;
+}
+
+.hud-back-btn:active {
+    transform: translateY(1px);
+    background: rgba(255,255,255,0.3);
+}
+
 .ask-btn {
     display: inline-flex;
     align-items: center;

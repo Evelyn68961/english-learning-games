@@ -360,6 +360,13 @@ function showThemes() {
     showScreen('theme-screen');
 }
 
+// In-game back button: confirm before abandoning an active run so a stray tap
+// during play doesn't wipe out progress.
+function quitToThemes() {
+    if (gameState.isPlaying && !confirm('Quit this game and go back to themes?')) return;
+    showThemes();
+}
+
 function renderThemes() {
     const grid = document.getElementById('theme-grid');
     grid.innerHTML = THEMES.map(t => `
