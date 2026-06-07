@@ -128,6 +128,31 @@ body {
     left: 15%;
 }
 
+.mole-ear {
+    position: absolute;
+    top: -6%;
+    width: 32%;
+    height: 0;
+    padding-bottom: 32%;
+    background: #8B4513;
+    border-radius: 50%;
+    z-index: -1;
+}
+
+.mole-ear::after {
+    content: '';
+    position: absolute;
+    width: 55%;
+    height: 55%;
+    top: 22%;
+    left: 22.5%;
+    background: #D2691E;
+    border-radius: 50%;
+}
+
+.mole-ear-left { left: -4%; }
+.mole-ear-right { right: -4%; }
+
 .mole-eyes {
     position: absolute;
     top: 25%;
@@ -438,6 +463,34 @@ body {
     text-shadow: 2px 2px 0 rgba(0,0,0,0.3), -1px -1px 0 rgba(0,0,0,0.2);
     z-index: 1;
 }
+
+.mole-ear-game {
+    position: absolute;
+    top: -8%;
+    width: 30%;
+    height: 0;
+    padding-bottom: 30%;
+    background: #D2691E;
+    border-radius: 50%;
+    z-index: -1;
+}
+
+.mole-ear-game::after {
+    content: '';
+    position: absolute;
+    width: 55%;
+    height: 55%;
+    top: 22%;
+    left: 22.5%;
+    background: #B0561A;
+    border-radius: 50%;
+}
+
+.mole-ear-game-left { left: -3%; }
+.mole-ear-game-right { right: -3%; }
+
+.mole.hit .mole-ear-game { background: #90EE90; }
+.mole.hit .mole-ear-game::after { background: #5FC95F; }
 
 .mole-face {
     position: absolute;

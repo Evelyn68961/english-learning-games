@@ -130,6 +130,8 @@ function createGameBoard() {
             <div class="hole-back"></div>
             <div class="mole" id="mole-${i}" onclick="hitMole(${i})">
                 <div class="mole-body">
+                    <div class="mole-ear-game mole-ear-game-left"></div>
+                    <div class="mole-ear-game mole-ear-game-right"></div>
                     <div class="mole-face">
                         <div class="mini-eyes">
                             <div class="mini-eye"></div>
