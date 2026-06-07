@@ -56,6 +56,17 @@
     <button class="back-btn" onclick="showTitle()">← Back</button>
 </div>
 
+<!-- ===== LEVEL SELECT (elementary) ===== -->
+<div id="level-screen" class="screen">
+    <div class="level-theme-title" id="level-theme-title"></div>
+    <div class="level-progress">
+        <div class="level-progress-label" id="level-progress-label">Words learned: 0 / 0</div>
+        <div class="level-progress-bar"><div class="level-progress-fill" id="level-progress-fill"></div></div>
+    </div>
+    <div class="level-grid" id="level-grid"></div>
+    <button class="back-btn" onclick="showThemes()">← Back</button>
+</div>
+
 <!-- ===== GAME ===== -->
 <canvas id="game-canvas"></canvas>
 
@@ -77,6 +88,7 @@
 <div class="plant-cards" id="plant-cards"></div>
 
 <div class="question-panel" id="question-panel">
+    <div class="teach-label">📘 Learn this!</div>
     <div class="q-image" id="q-image"></div>
     <div class="q-prompt" id="q-prompt"></div>
     <div class="q-hint" id="q-hint"></div>
@@ -91,14 +103,11 @@
     <div class="result-title" id="result-title"></div>
     <div class="result-stars" id="result-stars"></div>
     <div class="result-stats" id="result-stats"></div>
-    <div class="btn-group">
-        <button class="game-btn btn-play" onclick="restartGame()">Play Again</button>
-        <button class="game-btn btn-home" onclick="showThemes()">Themes</button>
-        <button class="game-btn btn-home" onclick="showTitle()">Home</button>
-    </div>
+    <div class="btn-group" id="result-btns"></div>
 </div>
 
 <script src="../shared/question-bank.js"></script>
+<script src="progress.js"></script>
 <script src="game.js"></script>
 </body>
 </html>

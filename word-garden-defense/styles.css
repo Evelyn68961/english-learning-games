@@ -326,6 +326,91 @@ body {
     color: rgba(255,255,255,0.5);
 }
 
+/* ===== LEVEL SELECT (elementary) ===== */
+.level-theme-title {
+    font-family: 'Lilita One', cursive;
+    font-size: clamp(1.6rem, 6vw, 2.4rem);
+    color: #fff;
+    margin-bottom: 14px;
+}
+
+.level-progress {
+    width: 90%;
+    max-width: 420px;
+    margin: 0 auto 22px;
+}
+
+.level-progress-label {
+    color: rgba(255,255,255,0.75);
+    font-weight: 800;
+    font-size: clamp(0.85rem, 2.5vw, 1rem);
+    margin-bottom: 6px;
+}
+
+.level-progress-bar {
+    height: 12px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.level-progress-fill {
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, var(--green-light, #7BC950), var(--sunflower));
+    border-radius: 999px;
+    transition: width 0.4s ease;
+}
+
+.level-grid {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+    max-width: 600px;
+    width: 95%;
+    margin: 0 auto;
+}
+
+.level-card {
+    background: rgba(255,255,255,0.08);
+    border: 2px solid rgba(255,255,255,0.12);
+    border-radius: 20px;
+    padding: 22px 18px;
+    width: 150px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+}
+
+.level-card:hover { transform: translateY(-4px); border-color: var(--sunflower); }
+.level-card.locked { opacity: 0.45; pointer-events: none; }
+
+.level-card .lock-icon {
+    position: absolute;
+    top: 10px; right: 12px;
+    font-size: 1.3rem;
+}
+
+.level-emoji { font-size: 2.8rem; display: block; margin-bottom: 6px; }
+.level-name {
+    font-family: 'Lilita One', cursive;
+    font-size: clamp(1.1rem, 3.5vw, 1.4rem);
+    color: #fff;
+}
+.level-sub {
+    color: rgba(255,255,255,0.6);
+    font-weight: 800;
+    font-size: 0.85rem;
+    margin-bottom: 8px;
+}
+.level-stars {
+    font-size: 1.1rem;
+    letter-spacing: 2px;
+    min-height: 1.2em;
+}
+
 .back-btn {
     margin-top: 20px;
     padding: 12px 30px;
@@ -576,6 +661,38 @@ body {
     25% { transform: translateX(-8px); }
     75% { transform: translateX(8px); }
 }
+
+/* ===== TEACH CARD (elementary first-encounter) ===== */
+/* The teach card reuses #question-panel; .teach-mode swaps in a learn-first
+   look: a green accent, a "Learn this!" banner, the answer revealed big, and a
+   single full-width Got-it button instead of multiple choices. */
+.teach-label {
+    display: none;
+    color: var(--sunflower);
+    font-family: 'Lilita One', cursive;
+    font-size: clamp(1rem, 3.5vw, 1.4rem);
+    margin-bottom: 6px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+.question-panel.teach-mode .teach-label { display: block; }
+
+.question-panel.teach-mode {
+    background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(20,60,20,0.9) 22%);
+}
+.question-panel.teach-mode .q-prompt {
+    font-size: clamp(1.6rem, 6vw, 2.4rem);
+    color: var(--sunflower);
+}
+.question-panel.teach-mode .q-image { font-size: 4rem; }
+
+.q-btn.teach-got-it {
+    background: linear-gradient(180deg, #8BE066, var(--green-light, #5AA83A));
+    border-color: #3D7A28;
+    color: #15310f;
+    min-width: 220px;
+    box-shadow: 0 3px 0 #2D5A27;
+}
+.q-btn.teach-got-it:hover { background: linear-gradient(180deg, #9BF076, #6BB84A); }
 
 /* ===== FEEDBACK ===== */
 .feedback-popup {

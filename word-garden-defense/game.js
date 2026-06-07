@@ -64,6 +64,26 @@ const MIN_QUESTIONS_PER_SESSION = 15;
 // the field to double its defense power (without changing its lifespan).
 const UPGRADE_FROM_WAVE = 3;
 
+// ==================== ELEMENTARY LEVELS ====================
+// Elementary play is split into 3 short, unlockable levels per theme. Each
+// level pins question difficulty to one stage (= the `difficulty` band in the
+// question bank) so content ramps gently: Starter → Basic → Growing. Clearing
+// a level unlocks the next (see progress.js). Junior/senior ignore this and
+// run the original continuous 12/16-wave session.
+const ELEM_LEVELS = [
+    { id: 1, name: 'Starter', emoji: '🌱', stage: 0, waves: 4 },
+    { id: 2, name: 'Basic',   emoji: '🌿', stage: 1, waves: 4 },
+    { id: 3, name: 'Growing', emoji: '🌻', stage: 2, waves: 5 },
+];
+
+// Zombie difficulty per learner level. Elementary is moderately gentler — it
+// starts with fewer, slower zombies and ramps more slowly so kids have time to
+// read and answer. `default` reproduces the original junior/senior tuning.
+const ZOMBIE_TUNING = {
+    elementary: { zombiesPerWave: 4, zombieSpeed: 0.5, spawnInterval: 110, dZombies: 2, dSpeed: 0.08, dInterval: 8,  minInterval: 70 },
+    default:    { zombiesPerWave: 6, zombieSpeed: 0.6, spawnInterval: 90,  dZombies: 3, dSpeed: 0.12, dInterval: 10, minInterval: 50 },
+};
+
 // ==================== GAME STATE ====================
 let currentTheme = null;
 // Learner level — 'elementary' shows only easy/medium grammar (Grades 3-6 syllabus),
@@ -361,10 +381,12 @@ function showThemes() {
 }
 
 // In-game back button: confirm before abandoning an active run so a stray tap
-// during play doesn't wipe out progress.
+// during play doesn't wipe out progress. Elementary returns to its level
+// picker; junior/senior return to the theme grid.
 function quitToThemes() {
-    if (gameState.isPlaying && !confirm('Quit this game and go back to themes?')) return;
-    showThemes();
+    if (gameState.isPlaying && !confirm('Quit this game and go back?')) return;
+    if (gameState.levelMode && gameState.themeId) showLevelSelect(gameState.themeId);
+    else showThemes();
 }
 
 function renderThemes() {
@@ -391,6 +413,17 @@ function renderThemes() {
 //     3→4, 4→6, 5→8 (3 waves per tier; last two tiers expose senior diffs).
 function generateQuestion(theme, wave) {
     const t = theme;
+
+    // Elementary level mode: difficulty is pinned to the current level's stage
+    // (no rising tier curve), and the question mix stays vocab-heavy so young
+    // learners spend more time on words than grammar.
+    if (gameState.levelMode && gameState.levelDef) {
+        const maxDifficulty = gameState.levelDef.stage;
+        const r = Math.random();
+        let type = r < 0.5 ? 'vocab' : r < 0.8 ? 'spelling' : 'grammar';
+        return buildQuestion(t, type, maxDifficulty);
+    }
+
     const tier = Math.floor((wave - 1) / 3);
     const isSenior = selectedLevel === 'senior';
     const cap = isSenior ? 8 : 4;
@@ -409,10 +442,20 @@ function generateQuestion(theme, wave) {
     else if (tier === 1) type = r < 0.30 ? 'vocab' : r < 0.65 ? 'spelling' : 'grammar';
     else                 type = r < 0.20 ? 'vocab' : r < 0.45 ? 'spelling' : 'grammar';
 
-    if (type === 'grammar' && t.grammar.length === 0) type = 'vocab';
+    return buildQuestion(t, type, maxDifficulty);
+}
 
-    // Cap word difficulty at the same tier as grammar so a tier-0 wave never pulls
-    // a B1 word like 'submarine' or 'photographer' out of the bank.
+// Build a single question of the given type, drawing only from content at or
+// below maxDifficulty. Shared by the junior/senior tier curve and the
+// elementary stage-pinned path.
+function buildQuestion(t, type, maxDifficulty) {
+    if (type === 'grammar') {
+        const eligible = t.grammar.filter(g => (g.difficulty ?? 1) <= maxDifficulty);
+        if (eligible.length === 0) type = 'vocab';  // fall back if no grammar yet
+    }
+
+    // Cap word difficulty so an early stage/tier never pulls a harder word than
+    // it should out of the bank.
     const wordsForTier = t.words.filter(w => (w.difficulty ?? 1) <= maxDifficulty);
     const wordPool = wordsForTier.length > 0 ? wordsForTier : t.words;
 
@@ -455,12 +498,35 @@ function shuffle(arr) {
 }
 
 // ==================== QUESTION UI ====================
+// Identifier for teach-once tracking: grammar by its sentence, vocab/spelling
+// by the word (so seeing a word taught once covers both its meaning and spelling).
+function teachKey(q) {
+    return q.type === 'grammar' ? 'g:' + q.prompt : 'w:' + q.speakText;
+}
+
 function showQuestion() {
     if (gameState.questionActive) return;
     gameState.questionActive = true;
 
     const q = generateQuestion(currentTheme, gameState.wave);
     gameState.currentQuestion = q;
+
+    // Elementary level mode teaches a brand-new word/pattern before quizzing it:
+    // show a teach card with the answer revealed, then quiz the same item.
+    if (gameState.levelMode && gameState.taught && !gameState.taught.has(teachKey(q))) {
+        gameState.taught.add(teachKey(q));
+        showTeachCard(q);
+        return;
+    }
+
+    renderQuestion(q);
+}
+
+// Render the answerable question (options + tap handlers). Split out so the
+// teach card can hand off to it after the learner taps "Got it".
+function renderQuestion(q) {
+    const panel = document.getElementById('question-panel');
+    panel.classList.remove('teach-mode');
 
     document.getElementById('q-image').textContent = q.image;
     document.getElementById('q-prompt').textContent = q.prompt;
@@ -469,10 +535,36 @@ function showQuestion() {
     const optDiv = document.getElementById('q-options');
     optDiv.innerHTML = q.options.map(o => `<button class="q-btn" onclick="answerQuestion('${o}')">${o}</button>`).join('');
 
-    document.getElementById('question-panel').classList.add('active');
+    panel.classList.add('active');
     updateAskBtn();
 
     if (q.type === 'vocab') speakWord(q.answer);
+}
+
+// Teaching card (elementary): reveals the answer with audio, then a single
+// "Got it" button leads into the actual question for the same item.
+function showTeachCard(q) {
+    const panel = document.getElementById('question-panel');
+    panel.classList.add('teach-mode');
+
+    let promptText;
+    if (q.type === 'grammar')       promptText = q.prompt.replace('___', q.answer);
+    else if (q.type === 'spelling') promptText = q.speakText; // full word
+    else                            promptText = q.answer;    // vocab word
+
+    document.getElementById('q-image').textContent = q.image || '📘';
+    document.getElementById('q-prompt').textContent = promptText;
+    document.getElementById('q-hint').textContent = q.hint ? `💡 ${q.hint}` : '';
+    document.getElementById('q-options').innerHTML =
+        `<button class="q-btn teach-got-it" onclick="dismissTeach()">我會了 Got it! 👍</button>`;
+
+    panel.classList.add('active');
+    updateAskBtn();
+    speakWord(q.speakText);
+}
+
+function dismissTeach() {
+    renderQuestion(gameState.currentQuestion);
 }
 
 // Manual question request — lets the player earn extra sun on demand.
@@ -523,6 +615,11 @@ function answerQuestion(selected) {
             showFeedback('✅ +50 ☀️');
         }
         speakWord(q.speakText);
+        // Elementary: count a vocab/spelling word as "mastered" on first correct
+        // answer (grammar patterns aren't counted toward the words-learned total).
+        if (gameState.levelMode && (q.type === 'vocab' || q.type === 'spelling')) {
+            window.WGD_PROGRESS.recordWordMastered(gameState.themeId, q.speakText);
+        }
     } else {
         playSound('wrong');
         showFeedback('❌ ' + q.answer);
@@ -571,20 +668,70 @@ function setLevel(level) {
 
 function selectTheme(id) {
     initAudio();
-    // Filter the chosen theme's grammar by selected learner level so elementary
-    // sessions never see junior-high sentences (past tense, comparatives, etc.).
+    // Elementary uses the staged, unlockable level flow — pick a level first.
+    if (selectedLevel === 'elementary') {
+        showLevelSelect(id);
+        return;
+    }
+    // Junior/senior: filter the theme's content to the level and start a
+    // continuous session (original behavior).
     const themesForLevel = window.QUESTION_BANK.forLevel(selectedLevel);
     currentTheme = themesForLevel.find(t => t.id === id);
     startGame();
 }
 
-function startGame() {
+// ==================== ELEMENTARY LEVEL SELECT ====================
+let pendingThemeId = null; // theme awaiting a level choice in elementary mode
+
+function showLevelSelect(themeId) {
+    stopGame();
+    pendingThemeId = themeId;
+    // currentTheme drives question generation + the words-learned total, so set
+    // it to the elementary-filtered theme here too.
+    currentTheme = window.QUESTION_BANK.forLevel('elementary').find(t => t.id === themeId);
+    renderLevelSelect();
+    showScreen('level-screen');
+}
+
+function renderLevelSelect() {
+    const P = window.WGD_PROGRESS;
+    const themeId = pendingThemeId;
+    document.getElementById('level-theme-title').textContent = `${currentTheme.emoji} ${currentTheme.name}`;
+
+    const total = currentTheme.words.length;          // elementary words in theme
+    const mastered = P.wordsMasteredCount(themeId);
+    document.getElementById('level-progress-label').textContent = `Words learned: ${mastered} / ${total}`;
+    document.getElementById('level-progress-fill').style.width = (total ? Math.round(mastered / total * 100) : 0) + '%';
+
+    document.getElementById('level-grid').innerHTML = ELEM_LEVELS.map(lv => {
+        const unlocked = P.isLevelUnlocked(themeId, lv.id);
+        const info = P.levelInfo(themeId, lv.id);
+        const stars = info ? info.stars : 0;
+        const starStr = info ? '⭐'.repeat(stars) + '☆'.repeat(3 - stars) : '';
+        return `<div class="level-card ${unlocked ? '' : 'locked'}" ${unlocked ? `onclick="playLevel(${lv.id})"` : ''}>
+            ${unlocked ? '' : '<span class="lock-icon">🔒</span>'}
+            <span class="level-emoji">${lv.emoji}</span>
+            <div class="level-name">Level ${lv.id}</div>
+            <div class="level-sub">${lv.name}</div>
+            <div class="level-stars">${starStr}</div>
+        </div>`;
+    }).join('');
+}
+
+function playLevel(levelId) {
+    if (!window.WGD_PROGRESS.isLevelUnlocked(pendingThemeId, levelId)) return;
+    startGame(ELEM_LEVELS.find(l => l.id === levelId));
+}
+
+function startGame(levelDef) {
     showScreen('');
     canvas.style.display = 'block';
 
-    // Senior players get 4 extra waves so they actually face the 大考中心
-    // L3-L6 difficulty curve in a single session; elementary/junior stay at 12.
-    const totalWaves = selectedLevel === 'senior' ? 16 : 12;
+    // Elementary level mode runs a short per-stage session; junior stays at 12
+    // waves and senior gets 16 (so seniors face the 大考中心 L3-L6 curve).
+    const levelMode = selectedLevel === 'elementary' && !!levelDef;
+    const tune = levelMode ? ZOMBIE_TUNING.elementary : ZOMBIE_TUNING.default;
+    const totalWaves = levelMode ? levelDef.waves : (selectedLevel === 'senior' ? 16 : 12);
     gameState = {
         sun: 100, score: 0, lives: 3, wave: 1, totalWaves,
         zombies: [], plants: [], projectiles: [], sunTokens: [], explosions: [],
@@ -592,13 +739,21 @@ function startGame() {
         upgradesPending: 0,
         isPlaying: true, questionActive: false, currentQuestion: null,
         questionsAnswered: 0, correctAnswers: 0,
-        zombiesPerWave: 6, zombieSpeed: 0.6,
-        spawnTimer: 0, spawnInterval: 90, waveZombiesSpawned: 0,
+        zombiesPerWave: tune.zombiesPerWave, zombieSpeed: tune.zombieSpeed,
+        spawnTimer: 0, spawnInterval: tune.spawnInterval, waveZombiesSpawned: 0,
         animFrame: null, nextQuestionAt: performance.now() + QUESTION_INTERVAL_MS,
         triggerZombie: null,
         selectedPlant: null,
         sunTokenTimer: 0,
         damageCooldown: 0,
+        // Elementary level mode: staged difficulty, gentler ramp, in-game
+        // teaching, and progress tracking. `taught` keys items already shown on
+        // a teach card this session (see teachKey).
+        levelMode,
+        levelDef: levelMode ? levelDef : null,
+        themeId: levelMode ? pendingThemeId : null,
+        tuning: tune,
+        taught: new Set(),
     };
 
     document.getElementById('hud').classList.add('active');
@@ -608,6 +763,7 @@ function startGame() {
     updateHUD();
     resizeCanvas();
     initTrollers();
+    if (levelMode) showFeedback(`${levelDef.emoji} Level ${levelDef.id}: ${levelDef.name}`);
     gameLoop();
 }
 
@@ -622,8 +778,9 @@ function stopGame() {
 }
 
 function restartGame() {
+    const lv = gameState.levelMode ? gameState.levelDef : null;
     stopGame();
-    startGame();
+    startGame(lv);
 }
 
 function gameLoop() {
@@ -814,18 +971,22 @@ function update() {
 
     // Wave complete check
     if (gs.waveZombiesSpawned >= gs.zombiesPerWave && gs.zombies.filter(z => !z.dead).length === 0) {
+        const tune = gs.tuning;
         if (gs.wave < gs.totalWaves) {
             gs.wave++;
             gs.waveZombiesSpawned = 0;
-            gs.zombiesPerWave += 3;
-            gs.zombieSpeed += 0.12;
-            gs.spawnInterval = Math.max(50, gs.spawnInterval - 10);
+            gs.zombiesPerWave += tune.dZombies;
+            gs.zombieSpeed += tune.dSpeed;
+            gs.spawnInterval = Math.max(tune.minInterval, gs.spawnInterval - tune.dInterval);
             updateHUD();
             showFeedback(`🌊 Wave ${gs.wave}!`);
+        } else if (gs.levelMode) {
+            // Elementary level cleared — short run, no bonus-round extension.
+            finishLevel();
         } else if (gs.questionsAnswered < MIN_QUESTIONS_PER_SESSION) {
             // Final wave done but session needs more questions — extend with a bonus wave at stable difficulty.
             gs.waveZombiesSpawned = 0;
-            gs.zombiesPerWave = 6;
+            gs.zombiesPerWave = tune.zombiesPerWave;
             showFeedback(`🎯 Bonus Round! (${gs.questionsAnswered}/${MIN_QUESTIONS_PER_SESSION})`);
         } else {
             endGame(true);
@@ -1081,11 +1242,23 @@ function spawnZombie() {
     });
 }
 
+function accuracyPct() {
+    return gameState.questionsAnswered > 0
+        ? Math.round(gameState.correctAnswers / gameState.questionsAnswered * 100) : 0;
+}
+
 function endGame(won) {
     gameState.isPlaying = false;
     stopGame();
 
-    const accuracy = gameState.questionsAnswered > 0 ? Math.round(gameState.correctAnswers / gameState.questionsAnswered * 100) : 0;
+    // Elementary level mode has its own result screen (a win flows through
+    // finishLevel; this path is the loss — lives ran out).
+    if (gameState.levelMode) {
+        showLevelResult(false, 0);
+        return;
+    }
+
+    const accuracy = accuracyPct();
     const stars = accuracy >= 90 ? 3 : accuracy >= 60 ? 2 : 1;
 
     document.getElementById('result-icon').textContent = won ? '🏆' : '💀';
@@ -1096,6 +1269,54 @@ function endGame(won) {
         Correct: ${gameState.correctAnswers}/${gameState.questionsAnswered} (${accuracy}%)<br>
         Wave: ${gameState.wave}/${gameState.totalWaves}
     `;
+    document.getElementById('result-btns').innerHTML = `
+        <button class="game-btn btn-play" onclick="restartGame()">Play Again</button>
+        <button class="game-btn btn-home" onclick="showThemes()">Themes</button>
+        <button class="game-btn btn-home" onclick="showTitle()">Home</button>
+    `;
+    showScreen('result-screen');
+}
+
+// Elementary level cleared: rate the run, persist the result (unlocks the next
+// level), and show the level result screen.
+function finishLevel() {
+    gameState.isPlaying = false;
+    stopGame();
+    const gs = gameState;
+    const accuracy = accuracyPct();
+    let stars = 1;
+    if (gs.lives >= 3 || accuracy >= 90) stars = 3;
+    else if (gs.lives >= 2 || accuracy >= 70) stars = 2;
+    window.WGD_PROGRESS.recordLevelResult(gs.themeId, gs.levelDef.id, { stars, score: gs.score });
+    showLevelResult(true, stars);
+}
+
+function showLevelResult(won, stars) {
+    const gs = gameState;
+    const P = window.WGD_PROGRESS;
+    const lv = gs.levelDef;
+    const accuracy = accuracyPct();
+
+    document.getElementById('result-icon').textContent = won ? '🏆' : '💀';
+    document.getElementById('result-title').textContent = won ? `Level ${lv.id} Clear!` : 'Try Again!';
+    document.getElementById('result-stars').textContent = won ? '⭐'.repeat(stars) + '☆'.repeat(3 - stars) : '';
+
+    const mastered = P.wordsMasteredCount(gs.themeId);
+    const total = currentTheme.words.length;
+    document.getElementById('result-stats').innerHTML = `
+        Score: ${gs.score}<br>
+        Correct: ${gs.correctAnswers}/${gs.questionsAnswered} (${accuracy}%)<br>
+        Words learned: ${mastered} / ${total}
+    `;
+
+    const btns = [];
+    const next = ELEM_LEVELS.find(l => l.id === lv.id + 1);
+    if (won && next) btns.push(`<button class="game-btn btn-play" onclick="playLevel(${next.id})">Next Level →</button>`);
+    btns.push(`<button class="game-btn btn-play" onclick="playLevel(${lv.id})">${won ? 'Replay' : 'Retry'}</button>`);
+    btns.push(`<button class="game-btn btn-home" onclick="showLevelSelect('${gs.themeId}')">Levels</button>`);
+    btns.push(`<button class="game-btn btn-home" onclick="showTitle()">Home</button>`);
+    document.getElementById('result-btns').innerHTML = btns.join('');
+
     showScreen('result-screen');
 }
 
