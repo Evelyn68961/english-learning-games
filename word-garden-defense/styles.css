@@ -362,6 +362,15 @@ body {
     transition: width 0.4s ease;
 }
 
+/* Parallel grammar meter — distinct hue so words vs. patterns read apart. */
+.level-progress-label.patterns {
+    margin-top: 12px;
+}
+
+.level-progress-fill.patterns {
+    background: linear-gradient(90deg, #5BC0EB, #7B61FF);
+}
+
 .level-grid {
     display: flex;
     gap: 16px;

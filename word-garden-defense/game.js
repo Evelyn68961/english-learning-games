@@ -64,25 +64,42 @@ const MIN_QUESTIONS_PER_SESSION = 15;
 // the field to double its defense power (without changing its lifespan).
 const UPGRADE_FROM_WAVE = 3;
 
-// ==================== ELEMENTARY LEVELS ====================
-// Elementary play is split into 3 short, unlockable levels per theme. Each
-// level pins question difficulty to one stage (= the `difficulty` band in the
-// question bank) so content ramps gently: Starter → Basic → Growing. Clearing
-// a level unlocks the next (see progress.js). Junior/senior ignore this and
-// run the original continuous 12/16-wave session.
-const ELEM_LEVELS = [
-    { id: 1, name: 'Starter', emoji: '🌱', stage: 0, waves: 4 },
-    { id: 2, name: 'Basic',   emoji: '🌿', stage: 1, waves: 4 },
-    { id: 3, name: 'Growing', emoji: '🌻', stage: 2, waves: 5 },
-];
+// ==================== STAGED LEVELS ====================
+// Every band plays a theme as a short series of unlockable levels. Each level
+// pins question difficulty to a `stage` ceiling (= the `difficulty` band in the
+// question bank) so content ramps gently, and clearing a level unlocks the next
+// (see progress.js). `stage` matches the bank's 0-8 difficulty scale:
+//   0 starter · 1 A1 · 2 A2 · 3 B1 · 4 B2-prep · 5-6 大考 L3-L4 · 7-8 L5-L6.
+// Each band's last level caps at the hardest difficulty its `forLevel()` filter
+// exposes, so no level ever asks for content the theme can't supply.
+const LEVEL_SETS = {
+    elementary: [
+        { id: 1, name: 'Starter', emoji: '🌱', stage: 0, waves: 4 },
+        { id: 2, name: 'Basic',   emoji: '🌿', stage: 1, waves: 4 },
+        { id: 3, name: 'Growing', emoji: '🌻', stage: 2, waves: 5 },
+    ],
+    junior: [
+        { id: 1, name: 'Foundation', emoji: '🌿', stage: 2, waves: 5 },
+        { id: 2, name: 'Builder',    emoji: '🌳', stage: 3, waves: 6 },
+        { id: 3, name: 'Mastery',    emoji: '🏅', stage: 4, waves: 7 },
+    ],
+    senior: [
+        { id: 1, name: 'Review',   emoji: '📗', stage: 4, waves: 5 },
+        { id: 2, name: '學測 GSAT', emoji: '📘', stage: 6, waves: 7 },
+        { id: 3, name: '分科 AST',  emoji: '🎓', stage: 8, waves: 8 },
+    ],
+};
+// Levels for the active band; falls back to elementary for an unknown band.
+function levelsFor(band) { return LEVEL_SETS[band] || LEVEL_SETS.elementary; }
 
-// Zombie difficulty per learner level. Elementary is moderately gentler — it
+// Zombie difficulty per learner band. Elementary is moderately gentler — it
 // starts with fewer, slower zombies and ramps more slowly so kids have time to
-// read and answer. `default` reproduces the original junior/senior tuning.
+// read and answer. `default` is the tougher junior/senior tuning.
 const ZOMBIE_TUNING = {
     elementary: { zombiesPerWave: 4, zombieSpeed: 0.5, spawnInterval: 110, dZombies: 2, dSpeed: 0.08, dInterval: 8,  minInterval: 70 },
     default:    { zombiesPerWave: 6, zombieSpeed: 0.6, spawnInterval: 90,  dZombies: 3, dSpeed: 0.12, dInterval: 10, minInterval: 50 },
 };
+function tuningFor(band) { return band === 'elementary' ? ZOMBIE_TUNING.elementary : ZOMBIE_TUNING.default; }
 
 // ==================== GAME STATE ====================
 let currentTheme = null;
@@ -414,13 +431,17 @@ function renderThemes() {
 function generateQuestion(theme, wave) {
     const t = theme;
 
-    // Elementary level mode: difficulty is pinned to the current level's stage
-    // (no rising tier curve), and the question mix stays vocab-heavy so young
-    // learners spend more time on words than grammar.
+    // Staged level mode: difficulty is pinned to the current level's stage
+    // (no rising tier curve). The question mix shifts by band — elementary
+    // stays vocab-heavy so young learners spend more time on words, while
+    // junior/senior lean harder into grammar to match their exam focus.
     if (gameState.levelMode && gameState.levelDef) {
         const maxDifficulty = gameState.levelDef.stage;
         const r = Math.random();
-        let type = r < 0.5 ? 'vocab' : r < 0.8 ? 'spelling' : 'grammar';
+        let type;
+        if (gameState.band === 'senior')      type = r < 0.30 ? 'vocab' : r < 0.50 ? 'spelling' : 'grammar';
+        else if (gameState.band === 'junior') type = r < 0.40 ? 'vocab' : r < 0.65 ? 'spelling' : 'grammar';
+        else                                  type = r < 0.50 ? 'vocab' : r < 0.80 ? 'spelling' : 'grammar';
         return buildQuestion(t, type, maxDifficulty);
     }
 
@@ -615,10 +636,16 @@ function answerQuestion(selected) {
             showFeedback('✅ +50 ☀️');
         }
         speakWord(q.speakText);
-        // Elementary: count a vocab/spelling word as "mastered" on first correct
-        // answer (grammar patterns aren't counted toward the words-learned total).
-        if (gameState.levelMode && (q.type === 'vocab' || q.type === 'spelling')) {
-            window.WGD_PROGRESS.recordWordMastered(gameState.themeId, q.speakText);
+        // Record mastery on first correct answer. Vocab/spelling feed the
+        // "Words learned" meter (keyed by the word); grammar feeds the parallel
+        // "Patterns learned" meter (keyed by the sentence). The two are tracked
+        // separately so a grammar-heavy band still shows real progress.
+        if (gameState.levelMode) {
+            if (q.type === 'vocab' || q.type === 'spelling') {
+                window.WGD_PROGRESS.recordWordMastered(gameState.band, gameState.themeId, q.speakText);
+            } else if (q.type === 'grammar') {
+                window.WGD_PROGRESS.recordGrammarMastered(gameState.band, gameState.themeId, q.prompt);
+            }
         }
     } else {
         playSound('wrong');
@@ -668,44 +695,62 @@ function setLevel(level) {
 
 function selectTheme(id) {
     initAudio();
-    // Elementary uses the staged, unlockable level flow — pick a level first.
-    if (selectedLevel === 'elementary') {
-        showLevelSelect(id);
-        return;
-    }
-    // Junior/senior: filter the theme's content to the level and start a
-    // continuous session (original behavior).
-    const themesForLevel = window.QUESTION_BANK.forLevel(selectedLevel);
-    currentTheme = themesForLevel.find(t => t.id === id);
-    startGame();
+    // Every band uses the staged, unlockable level flow — pick a level first.
+    showLevelSelect(id);
 }
 
-// ==================== ELEMENTARY LEVEL SELECT ====================
-let pendingThemeId = null; // theme awaiting a level choice in elementary mode
+// ==================== LEVEL SELECT ====================
+let pendingThemeId = null; // theme awaiting a level choice
 
 function showLevelSelect(themeId) {
     stopGame();
     pendingThemeId = themeId;
     // currentTheme drives question generation + the words-learned total, so set
-    // it to the elementary-filtered theme here too.
-    currentTheme = window.QUESTION_BANK.forLevel('elementary').find(t => t.id === themeId);
-    renderLevelSelect();
+    // it to the band-filtered theme here too.
+    currentTheme = window.QUESTION_BANK.forLevel(selectedLevel).find(t => t.id === themeId);
+    // Reveal the screen BEFORE filling the bars: a width transition only plays
+    // when the element is visible, so the order has to be show-then-fill.
     showScreen('level-screen');
+    renderLevelSelect();
 }
+
+// Animate a progress-fill bar from 0 to `pct`. Resetting to 0 and forcing a
+// reflow before setting the target gives the CSS width transition a start frame
+// to animate from, so the bar visibly grows on each (re)render.
+function animateFill(el, pct) {
+    el.style.width = '0%';
+    void el.offsetWidth; // force reflow so the next change is a transition
+    el.style.width = pct + '%';
+}
+
+// Per-band subtitle under the theme title on the level-select screen.
+const BAND_LABELS = {
+    elementary: '國小 Elementary',
+    junior: '國中 Junior High',
+    senior: '高中 Senior High',
+};
 
 function renderLevelSelect() {
     const P = window.WGD_PROGRESS;
+    const band = selectedLevel;
     const themeId = pendingThemeId;
-    document.getElementById('level-theme-title').textContent = `${currentTheme.emoji} ${currentTheme.name}`;
+    document.getElementById('level-theme-title').textContent =
+        `${currentTheme.emoji} ${currentTheme.name} · ${BAND_LABELS[band] || ''}`;
 
-    const total = currentTheme.words.length;          // elementary words in theme
-    const mastered = P.wordsMasteredCount(themeId);
+    const total = currentTheme.words.length;          // words available in this band
+    const mastered = P.wordsMasteredCount(band, themeId);
     document.getElementById('level-progress-label').textContent = `Words learned: ${mastered} / ${total}`;
-    document.getElementById('level-progress-fill').style.width = (total ? Math.round(mastered / total * 100) : 0) + '%';
+    animateFill(document.getElementById('level-progress-fill'), total ? Math.round(mastered / total * 100) : 0);
 
-    document.getElementById('level-grid').innerHTML = ELEM_LEVELS.map(lv => {
-        const unlocked = P.isLevelUnlocked(themeId, lv.id);
-        const info = P.levelInfo(themeId, lv.id);
+    // Parallel grammar meter — distinct sentence patterns answered correctly.
+    const gTotal = currentTheme.grammar.length;       // patterns available in this band
+    const gMastered = P.grammarMasteredCount(band, themeId);
+    document.getElementById('level-grammar-label').textContent = `Patterns learned: ${gMastered} / ${gTotal}`;
+    animateFill(document.getElementById('level-grammar-fill'), gTotal ? Math.round(gMastered / gTotal * 100) : 0);
+
+    document.getElementById('level-grid').innerHTML = levelsFor(band).map(lv => {
+        const unlocked = P.isLevelUnlocked(band, themeId, lv.id);
+        const info = P.levelInfo(band, themeId, lv.id);
         const stars = info ? info.stars : 0;
         const starStr = info ? '⭐'.repeat(stars) + '☆'.repeat(3 - stars) : '';
         return `<div class="level-card ${unlocked ? '' : 'locked'}" ${unlocked ? `onclick="playLevel(${lv.id})"` : ''}>
@@ -719,18 +764,19 @@ function renderLevelSelect() {
 }
 
 function playLevel(levelId) {
-    if (!window.WGD_PROGRESS.isLevelUnlocked(pendingThemeId, levelId)) return;
-    startGame(ELEM_LEVELS.find(l => l.id === levelId));
+    if (!window.WGD_PROGRESS.isLevelUnlocked(selectedLevel, pendingThemeId, levelId)) return;
+    startGame(levelsFor(selectedLevel).find(l => l.id === levelId));
 }
 
 function startGame(levelDef) {
     showScreen('');
     canvas.style.display = 'block';
 
-    // Elementary level mode runs a short per-stage session; junior stays at 12
-    // waves and senior gets 16 (so seniors face the 大考中心 L3-L6 curve).
-    const levelMode = selectedLevel === 'elementary' && !!levelDef;
-    const tune = levelMode ? ZOMBIE_TUNING.elementary : ZOMBIE_TUNING.default;
+    // Every band runs a short per-stage session driven by the chosen level.
+    // Elementary uses gentler zombie tuning; junior/senior use the tougher
+    // default. Wave count comes from the level definition.
+    const levelMode = !!levelDef;
+    const tune = tuningFor(selectedLevel);
     const totalWaves = levelMode ? levelDef.waves : (selectedLevel === 'senior' ? 16 : 12);
     gameState = {
         sun: 100, score: 0, lives: 3, wave: 1, totalWaves,
@@ -746,10 +792,11 @@ function startGame(levelDef) {
         selectedPlant: null,
         sunTokenTimer: 0,
         damageCooldown: 0,
-        // Elementary level mode: staged difficulty, gentler ramp, in-game
-        // teaching, and progress tracking. `taught` keys items already shown on
+        // Staged level mode: stage-pinned difficulty, in-game teaching, and
+        // progress tracking (all bands). `taught` keys items already shown on
         // a teach card this session (see teachKey).
         levelMode,
+        band: selectedLevel,
         levelDef: levelMode ? levelDef : null,
         themeId: levelMode ? pendingThemeId : null,
         tuning: tune,
@@ -1287,7 +1334,7 @@ function finishLevel() {
     let stars = 1;
     if (gs.lives >= 3 || accuracy >= 90) stars = 3;
     else if (gs.lives >= 2 || accuracy >= 70) stars = 2;
-    window.WGD_PROGRESS.recordLevelResult(gs.themeId, gs.levelDef.id, { stars, score: gs.score });
+    window.WGD_PROGRESS.recordLevelResult(gs.band, gs.themeId, gs.levelDef.id, { stars, score: gs.score });
     showLevelResult(true, stars);
 }
 
@@ -1301,16 +1348,19 @@ function showLevelResult(won, stars) {
     document.getElementById('result-title').textContent = won ? `Level ${lv.id} Clear!` : 'Try Again!';
     document.getElementById('result-stars').textContent = won ? '⭐'.repeat(stars) + '☆'.repeat(3 - stars) : '';
 
-    const mastered = P.wordsMasteredCount(gs.themeId);
+    const mastered = P.wordsMasteredCount(gs.band, gs.themeId);
     const total = currentTheme.words.length;
+    const gMastered = P.grammarMasteredCount(gs.band, gs.themeId);
+    const gTotal = currentTheme.grammar.length;
     document.getElementById('result-stats').innerHTML = `
         Score: ${gs.score}<br>
         Correct: ${gs.correctAnswers}/${gs.questionsAnswered} (${accuracy}%)<br>
-        Words learned: ${mastered} / ${total}
+        Words learned: ${mastered} / ${total}<br>
+        Patterns learned: ${gMastered} / ${gTotal}
     `;
 
     const btns = [];
-    const next = ELEM_LEVELS.find(l => l.id === lv.id + 1);
+    const next = levelsFor(gs.band).find(l => l.id === lv.id + 1);
     if (won && next) btns.push(`<button class="game-btn btn-play" onclick="playLevel(${next.id})">Next Level →</button>`);
     btns.push(`<button class="game-btn btn-play" onclick="playLevel(${lv.id})">${won ? 'Replay' : 'Retry'}</button>`);
     btns.push(`<button class="game-btn btn-home" onclick="showLevelSelect('${gs.themeId}')">Levels</button>`);

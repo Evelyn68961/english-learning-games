@@ -1,20 +1,23 @@
-// ==================== LEARNING PROGRESS (elementary) ====================
-// Persists per-theme progress for the elementary level-based mode to
-// localStorage so a learner keeps their unlocked levels, stars, mastered
-// words, and best score across sessions. All access goes through these
-// helpers; every read/write is wrapped so a blocked or unavailable
-// localStorage (private mode, file://) degrades to an in-memory no-op
-// instead of throwing.
+// ==================== LEARNING PROGRESS ====================
+// Persists per-theme progress for the staged level-based mode to localStorage
+// so a learner keeps their unlocked levels, stars, mastered words, and best
+// score across sessions. Progress is kept separately per school band
+// (elementary / junior / senior) so a learner's three tracks never collide.
+// All access goes through these helpers; every read/write is wrapped so a
+// blocked or unavailable localStorage (private mode, file://) degrades to an
+// in-memory no-op instead of throwing.
 //
 // Shape of the stored object (key: STORAGE_KEY):
-//   { elementary: { <themeId>: {
+//   { <band>: { <themeId>: {
 //       levels:  { "1": { cleared: true, stars: 3 }, ... },
 //       bestScore: 0,
-//       mastered: ["cat", "dog", ...]   // distinct words answered correctly
-//   } } }
+//       mastered: ["cat", "dog", ...]        // distinct words answered correctly
+//       masteredGrammar: ["He ___ tall.", ...] // distinct grammar patterns (by sentence)
+//   } } }            band ∈ { elementary, junior, senior }
 
 (function () {
     const STORAGE_KEY = 'wgd-progress-v1';
+    const BANDS = ['elementary', 'junior', 'senior'];
     let memoryFallback = null; // used when localStorage is unavailable
 
     function storageAvailable() {
@@ -29,8 +32,14 @@
     }
     const HAS_STORAGE = storageAvailable();
 
+    // Normalize an arbitrary band to a known one so a typo can never write into
+    // a stray top-level key.
+    function normBand(band) {
+        return BANDS.includes(band) ? band : 'elementary';
+    }
+
     function emptyProgress() {
-        return { elementary: {} };
+        return { elementary: {}, junior: {}, senior: {} };
     }
 
     function loadProgress() {
@@ -40,7 +49,8 @@
             if (!raw) return emptyProgress();
             const parsed = JSON.parse(raw);
             if (!parsed || typeof parsed !== 'object') return emptyProgress();
-            if (!parsed.elementary) parsed.elementary = {};
+            // Backfill any missing band so older saves (elementary-only) load.
+            BANDS.forEach(b => { if (!parsed[b]) parsed[b] = {}; });
             return parsed;
         } catch (e) {
             return emptyProgress();
@@ -58,28 +68,30 @@
         }
     }
 
-    // Return (creating if needed) the progress record for one elementary theme.
-    function getThemeProgress(themeId) {
+    // Return (creating if needed) the progress record for one theme within a band.
+    function getThemeProgress(band, themeId) {
         const data = loadProgress();
-        const t = data.elementary[themeId] || (data.elementary[themeId] = {});
+        const bucket = data[normBand(band)];
+        const t = bucket[themeId] || (bucket[themeId] = {});
         if (!t.levels) t.levels = {};
         if (typeof t.bestScore !== 'number') t.bestScore = 0;
         if (!Array.isArray(t.mastered)) t.mastered = [];
+        if (!Array.isArray(t.masteredGrammar)) t.masteredGrammar = [];
         return { data, theme: t };
     }
 
     // Level 1 is always unlocked; level N unlocks once level N-1 is cleared.
-    function isLevelUnlocked(themeId, levelId) {
+    function isLevelUnlocked(band, themeId, levelId) {
         if (levelId <= 1) return true;
-        const { theme } = getThemeProgress(themeId);
+        const { theme } = getThemeProgress(band, themeId);
         const prev = theme.levels[levelId - 1];
         return !!(prev && prev.cleared);
     }
 
     // Record a finished level run. Keeps the BEST star rating earned and marks
     // the level cleared (so unlocks never regress on a worse replay).
-    function recordLevelResult(themeId, levelId, { stars, score }) {
-        const { data, theme } = getThemeProgress(themeId);
+    function recordLevelResult(band, themeId, levelId, { stars, score }) {
+        const { data, theme } = getThemeProgress(band, themeId);
         const existing = theme.levels[levelId] || {};
         theme.levels[levelId] = {
             cleared: true,
@@ -90,25 +102,40 @@
     }
 
     // Mark a word as mastered (first correct answer). Idempotent.
-    function recordWordMastered(themeId, word) {
+    function recordWordMastered(band, themeId, word) {
         if (!word) return;
-        const { data, theme } = getThemeProgress(themeId);
+        const { data, theme } = getThemeProgress(band, themeId);
         if (!theme.mastered.includes(word)) {
             theme.mastered.push(word);
             saveProgress(data);
         }
     }
 
-    function wordsMasteredCount(themeId) {
-        return getThemeProgress(themeId).theme.mastered.length;
+    function wordsMasteredCount(band, themeId) {
+        return getThemeProgress(band, themeId).theme.mastered.length;
     }
 
-    function bestScore(themeId) {
-        return getThemeProgress(themeId).theme.bestScore;
+    // Mark a grammar pattern as mastered (first correct answer), keyed by its
+    // sentence so each distinct pattern is counted once. Idempotent.
+    function recordGrammarMastered(band, themeId, key) {
+        if (!key) return;
+        const { data, theme } = getThemeProgress(band, themeId);
+        if (!theme.masteredGrammar.includes(key)) {
+            theme.masteredGrammar.push(key);
+            saveProgress(data);
+        }
     }
 
-    function levelInfo(themeId, levelId) {
-        return getThemeProgress(themeId).theme.levels[levelId] || null;
+    function grammarMasteredCount(band, themeId) {
+        return getThemeProgress(band, themeId).theme.masteredGrammar.length;
+    }
+
+    function bestScore(band, themeId) {
+        return getThemeProgress(band, themeId).theme.bestScore;
+    }
+
+    function levelInfo(band, themeId, levelId) {
+        return getThemeProgress(band, themeId).theme.levels[levelId] || null;
     }
 
     window.WGD_PROGRESS = {
@@ -119,6 +146,8 @@
         recordLevelResult,
         recordWordMastered,
         wordsMasteredCount,
+        recordGrammarMastered,
+        grammarMasteredCount,
         bestScore,
         levelInfo,
     };
