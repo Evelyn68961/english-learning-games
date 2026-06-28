@@ -15,6 +15,30 @@ const VOCAB_LEVELS = window.QUESTION_BANK.themes.map(theme => ({
     minScore: 0,
 }));
 
+// Grammar mode — be-verbs (am / is / are) subject-verb agreement.
+// The moles always carry these three choices; the kid whacks the one that
+// fills the blank for the shown subject. Kept deliberately narrow (be-verbs
+// only) for v1 — do/does is a planned follow-up.
+const BE_OPTIONS = ['am', 'is', 'are'];
+const GRAMMAR_ITEMS = [
+    { emoji: '🙋', sentence: 'I ___ happy.',       answer: 'am',  hint: '我很開心' },
+    { emoji: '🙋', sentence: 'I ___ a student.',   answer: 'am',  hint: '我是學生' },
+    { emoji: '🙋', sentence: 'I ___ hungry.',      answer: 'am',  hint: '我餓了' },
+    { emoji: '👉', sentence: 'You ___ my friend.', answer: 'are', hint: '你是我的朋友' },
+    { emoji: '👉', sentence: 'You ___ tall.',      answer: 'are', hint: '你很高' },
+    { emoji: '👉', sentence: 'You ___ kind.',      answer: 'are', hint: '你很善良' },
+    { emoji: '👦', sentence: 'He ___ tall.',       answer: 'is',  hint: '他很高' },
+    { emoji: '👦', sentence: 'He ___ my dad.',     answer: 'is',  hint: '他是我爸爸' },
+    { emoji: '👧', sentence: 'She ___ kind.',      answer: 'is',  hint: '她很善良' },
+    { emoji: '👧', sentence: 'She ___ happy.',     answer: 'is',  hint: '她很開心' },
+    { emoji: '🐱', sentence: 'It ___ a cat.',      answer: 'is',  hint: '它是一隻貓' },
+    { emoji: '🐱', sentence: 'It ___ big.',        answer: 'is',  hint: '它很大' },
+    { emoji: '👨‍👩‍👧', sentence: 'We ___ ready.',    answer: 'are', hint: '我們準備好了' },
+    { emoji: '👨‍👩‍👧', sentence: 'We ___ happy.',    answer: 'are', hint: '我們很開心' },
+    { emoji: '👬', sentence: 'They ___ here.',     answer: 'are', hint: '他們在這裡' },
+    { emoji: '👬', sentence: 'They ___ friends.',  answer: 'are', hint: '他們是朋友' },
+];
+
 const ENCOURAGEMENTS = {
     correct: ['Awesome!', 'Great!', 'Wow!', 'Super!', 'Yes!', 'Perfect!', '🌟', '🎉'],
     wrong: ['Try again!', 'Almost!', 'Keep going!', 'You can do it!', 'Next time!'],
@@ -157,7 +181,15 @@ function selectMode(mode) {
 // Update level badges on start screen
 function updateLevelBadges() {
     const container = document.getElementById('level-badges');
-    if (gameState.selectedMode === 'vocab') {
+    if (gameState.selectedMode === 'grammar') {
+        const rules = [
+            ['🙋 I', 'am'], ['👉 You', 'are'], ['👦 He', 'is'],
+            ['👧 She', 'is'], ['🐱 It', 'is'], ['👬 They', 'are'],
+        ];
+        container.innerHTML = rules
+            .map(([subj, be]) => `<span class="level-badge">${subj} → ${be}</span>`)
+            .join('');
+    } else if (gameState.selectedMode === 'vocab') {
         container.innerHTML = VOCAB_LEVELS.map(level => {
             const preview = level.items.slice(0, 3).map(it => it.emoji).join(' ');
             return `<span class="level-badge">${level.category}: ${preview}</span>`;
@@ -200,17 +232,32 @@ function startGame() {
 
     if (gameState.selectedMode === 'vocab') {
         showCategorySelect();
+    } else if (gameState.selectedMode === 'grammar') {
+        showGrammarTeach();
     } else {
         beginMoleGame();
     }
 }
 
+// ── Grammar Teach Screen ──
+function showGrammarTeach() {
+    showScreen('grammar-teach-screen');
+}
+
 function beginMoleGame() {
+    // Clean slate on every start. Letters reaches here via startGame (already
+    // reset), but the vocab/grammar "Play Again" paths enter here directly, so
+    // reset score/timer/speed here too or a replay would start at 0 seconds.
+    gameState.score = 0;
+    gameState.timeLeft = 60;
+    gameState.moleSpeed = 2000;
+    gameState.activeMoles = new Set();
     gameState.isPlaying = true;
     updateCurrentLetters();
     createGameBoard();
     updateDisplay();
     showScreen('game-screen');
+    document.getElementById('timer').textContent = `⏱️ ${gameState.timeLeft}`;
     pickNewTarget();
     startTimer();
     startMoleLoop();
@@ -403,7 +450,9 @@ function stopGame() {
 }
 
 function updateCurrentLetters() {
-    if (gameState.selectedMode === 'vocab') {
+    if (gameState.selectedMode === 'grammar') {
+        gameState.currentItems = [...GRAMMAR_ITEMS];
+    } else if (gameState.selectedMode === 'vocab') {
         gameState.currentItems = [...VOCAB_LEVELS[gameState.selectedCategory].items];
     } else {
         gameState.currentLetters = [];
@@ -418,10 +467,21 @@ function pickNewTarget() {
     const letterEl = document.getElementById('target-letter');
     const hintEl = document.getElementById('target-word-hint');
 
-    if (gameState.selectedMode === 'vocab') {
+    if (gameState.selectedMode === 'grammar') {
+        const available = gameState.currentItems;
+        gameState.targetItem = available[Math.floor(Math.random() * available.length)];
+        labelEl.textContent = 'Fill in the blank:';
+        letterEl.classList.add('grammar-sentence');
+        letterEl.style.fontSize = '';
+        letterEl.innerHTML = `${gameState.targetItem.emoji} ` +
+            gameState.targetItem.sentence.replace('___', '<span class="target-blank"></span>');
+        hintEl.textContent = gameState.targetItem.hint;
+        hintEl.style.display = 'block';
+    } else if (gameState.selectedMode === 'vocab') {
         const available = gameState.currentItems;
         gameState.targetItem = available[Math.floor(Math.random() * available.length)];
         labelEl.textContent = 'Find the word for:';
+        letterEl.classList.remove('grammar-sentence');
         letterEl.textContent = gameState.targetItem.emoji;
         letterEl.style.fontSize = 'clamp(3rem, 12vw, 5rem)';
         hintEl.style.display = 'none';
@@ -429,6 +489,7 @@ function pickNewTarget() {
         const available = gameState.currentLetters;
         gameState.targetLetter = available[Math.floor(Math.random() * available.length)];
         labelEl.textContent = 'Find the letter:';
+        letterEl.classList.remove('grammar-sentence');
         letterEl.textContent = gameState.targetLetter;
         letterEl.style.fontSize = '';
         hintEl.style.display = 'none';
@@ -472,7 +533,19 @@ function spawnMole() {
     const mole = document.getElementById(`mole-${holeIndex}`);
     const letterEl = document.getElementById(`letter-${holeIndex}`);
 
-    if (gameState.selectedMode === 'vocab') {
+    if (gameState.selectedMode === 'grammar') {
+        let word;
+        if (Math.random() < 0.45) {
+            word = gameState.targetItem.answer;
+        } else {
+            const others = BE_OPTIONS.filter(w => w !== gameState.targetItem.answer);
+            word = others[Math.floor(Math.random() * others.length)];
+        }
+        letterEl.style.fontSize = 'clamp(1.6rem, 5.5vw, 2.4rem)';
+        letterEl.textContent = word;
+        mole.dataset.word = word;
+        delete mole.dataset.letter;
+    } else if (gameState.selectedMode === 'vocab') {
         let item;
         if (Math.random() < 0.4) {
             item = gameState.targetItem;
@@ -520,9 +593,14 @@ function hitMole(index) {
     const mole = document.getElementById(`mole-${index}`);
     if (!mole.classList.contains('active')) return;
 
-    const isCorrect = gameState.selectedMode === 'vocab'
-        ? mole.dataset.word === gameState.targetItem.word
-        : mole.dataset.letter.toUpperCase() === gameState.targetLetter;
+    let isCorrect;
+    if (gameState.selectedMode === 'grammar') {
+        isCorrect = mole.dataset.word === gameState.targetItem.answer;
+    } else if (gameState.selectedMode === 'vocab') {
+        isCorrect = mole.dataset.word === gameState.targetItem.word;
+    } else {
+        isCorrect = mole.dataset.letter.toUpperCase() === gameState.targetLetter;
+    }
 
     if (isCorrect) {
         gameState.score += 10;
@@ -585,7 +663,7 @@ function createStars(e) {
 }
 
 function checkLevelUp() {
-    if (gameState.selectedMode === 'vocab') return;
+    if (gameState.selectedMode !== 'letters') return;
     const nextLevel = gameState.level + 1;
     if (nextLevel < LEVELS.length && gameState.score >= LEVELS[nextLevel].minScore) {
         gameState.level = nextLevel;
@@ -635,7 +713,9 @@ function createConfetti() {
 
 function updateDisplay() {
     document.getElementById('score').textContent = gameState.score;
-    if (gameState.selectedMode === 'vocab') {
+    if (gameState.selectedMode === 'grammar') {
+        document.getElementById('level-indicator').textContent = 'Be Verbs';
+    } else if (gameState.selectedMode === 'vocab') {
         document.getElementById('level-indicator').textContent =
             VOCAB_LEVELS[gameState.selectedCategory].category;
     } else {
@@ -676,7 +756,14 @@ function endGame() {
     document.getElementById('end-title').textContent = title;
     document.getElementById('encouragement').textContent = encouragement;
 
-    if (gameState.selectedMode === 'vocab') {
+    if (gameState.selectedMode === 'grammar') {
+        const playAgain = document.getElementById('play-again-btn');
+        const second = document.getElementById('second-btn');
+        playAgain.textContent = 'Play Again';
+        playAgain.onclick = showGrammarTeach;
+        second.textContent = 'Home';
+        second.onclick = goToStart;
+    } else if (gameState.selectedMode === 'vocab') {
         const playAgain = document.getElementById('play-again-btn');
         const second = document.getElementById('second-btn');
         playAgain.textContent = 'Play Again';

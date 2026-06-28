@@ -36,6 +36,7 @@
         <div class="mode-selector">
             <button class="mode-btn active" id="mode-letters" onclick="selectMode('letters')">🔤 Letters</button>
             <button class="mode-btn" id="mode-vocab" onclick="selectMode('vocab')">📝 Words</button>
+            <button class="mode-btn" id="mode-grammar" onclick="selectMode('grammar')">🧩 Grammar</button>
         </div>
 
         <button class="play-btn" onclick="startGame()">Play!</button>
@@ -136,6 +137,27 @@
             <p>You know all the words! Ready to play?</p>
             <button class="btn btn-primary" onclick="beginMoleGame()">Play Mole Game! 🔨</button>
         </div>
+    </div>
+
+    <!-- Grammar Teach Screen (be-verbs: am / is / are) -->
+    <div id="grammar-teach-screen" class="screen">
+        <div class="learn-header">
+            <button class="back-btn" onclick="goToStart()">← Back</button>
+            <h2>Be Verbs</h2>
+            <div class="spacer"></div>
+        </div>
+        <h2 class="learn-title">am · is · are 🧩</h2>
+        <p class="learn-progress">Which little word goes with each one?</p>
+        <div class="rule-grid">
+            <div class="rule-card"><span class="rule-subj">🙋 I</span><span class="rule-arrow">→</span><span class="rule-be be-am">am</span></div>
+            <div class="rule-card"><span class="rule-subj">👉 You</span><span class="rule-arrow">→</span><span class="rule-be be-are">are</span></div>
+            <div class="rule-card"><span class="rule-subj">👦 He</span><span class="rule-arrow">→</span><span class="rule-be be-is">is</span></div>
+            <div class="rule-card"><span class="rule-subj">👧 She</span><span class="rule-arrow">→</span><span class="rule-be be-is">is</span></div>
+            <div class="rule-card"><span class="rule-subj">🐱 It</span><span class="rule-arrow">→</span><span class="rule-be be-is">is</span></div>
+            <div class="rule-card"><span class="rule-subj">👨‍👩‍👧 We</span><span class="rule-arrow">→</span><span class="rule-be be-are">are</span></div>
+            <div class="rule-card"><span class="rule-subj">👬 They</span><span class="rule-arrow">→</span><span class="rule-be be-are">are</span></div>
+        </div>
+        <button class="btn btn-primary" onclick="beginMoleGame()">Play Mole Game! 🔨</button>
     </div>
 
     <!-- Game Screen -->

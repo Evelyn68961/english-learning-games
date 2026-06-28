@@ -247,7 +247,7 @@ body {
 .mode-selector {
     display: flex;
     flex-direction: row;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
     gap: 12px;
     margin-bottom: 25px;
     justify-content: center;
@@ -386,6 +386,66 @@ body {
     0%, 100% { transform: scale(1); }
     50% { transform: scale(1.05); }
 }
+
+/* Grammar mode: the target shows a full sentence with a blank to fill */
+.target-letter.grammar-sentence {
+    font-size: clamp(1.5rem, 6vw, 2.6rem);
+    color: #5a3e1b;
+    line-height: 1.35;
+    animation: none;
+}
+
+.target-blank {
+    display: inline-block;
+    width: 1.8em;
+    border-bottom: 4px solid #FF6B6B;
+    vertical-align: bottom;
+    margin: 0 2px;
+}
+
+/* Grammar Teach Screen — be-verb rule cards */
+.rule-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(120px, 1fr));
+    gap: 12px;
+    width: 100%;
+    max-width: 460px;
+    margin: 18px auto 26px;
+}
+
+.rule-card {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: white;
+    border-radius: 18px;
+    padding: 14px 12px;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.08), 0 8px 18px rgba(0,0,0,0.1);
+}
+
+.rule-subj {
+    font-size: clamp(1rem, 4vw, 1.3rem);
+    font-weight: 800;
+    color: #444;
+}
+
+.rule-arrow {
+    font-size: 1.1rem;
+    color: #aaa;
+}
+
+.rule-be {
+    font-size: clamp(1.1rem, 4.5vw, 1.5rem);
+    font-weight: 800;
+    padding: 4px 14px;
+    border-radius: 14px;
+    color: white;
+}
+
+.be-am  { background: linear-gradient(180deg, #FF8A65, #F4511E); }
+.be-is  { background: linear-gradient(180deg, #4ECDC4, #3BA99C); }
+.be-are { background: linear-gradient(180deg, #7E9CF0, #5C7CE0); }
 
 /* Game Board */
 .game-board {
