@@ -35,6 +35,21 @@ A set of focused grammar exercises:
 - **Adverbs**
   - *How Often?* — Learn frequency adverbs (always, usually, often, sometimes, seldom, never)
 
+## Shared Content
+
+Every game draws its vocabulary and grammar from one place:
+
+- **`shared/question-bank.js`** — 17 themes covering ~1,840 words and ~1,965 grammar items,
+  each tagged with a difficulty from 0 (pre-A1 starter) to 8 (分科測驗). Call
+  `QUESTION_BANK.forLevel('elementary' | 'junior' | 'senior')` to get a filtered copy;
+  each band inherits everything below it.
+- **`shared/MOE-curriculum-reference.md`** — the Taiwan MOE 108 課綱 and 大考中心 mapping
+  the difficulty tiers are built from, plus the rules for placing a word at a tier.
+- **`shared/validate-bank.js`** — run `node shared/validate-bank.js` after editing the
+  bank. It checks that every grammar answer appears in its own options, that no word is
+  duplicated within a theme, that `level` and `difficulty` agree, and that every theme has
+  enough content at each tier for a game to build a round.
+
 ## Running Locally
 
 Open `index.html` in any modern browser. No server, bundler, or install step needed — every game is a self-contained HTML file.

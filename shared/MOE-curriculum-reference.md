@@ -21,7 +21,7 @@ Compiled from MOE 課綱 (108 課綱) materials, the MOE common-2000 word list, 
 
 | Bank diff | MOE grade band | Vocab pool | Grammar focus |
 |---|---|---|---|
-| 0 | G3 starter (pre-A1) | ~100 most iconic single-syllable items | noun ID, simple "is/are", vocab fill-in (no real grammar concept) |
+| 0 | G3 starter (pre-A1) | the ~12 words a beginner meets first in each theme | noun ID, simple "is/are", vocab fill-in (no real grammar concept) |
 | 1 | G3–G4 (A1) | basic 1200, common half | be-verb agreement, can/have, regular plural -s, articles a/the |
 | 2 | G5–G6 (A2) | basic 1200, full | present continuous, this/that/these/those, do/does, simple past (regular) |
 | 3 | G7–G8 (B1) | + 800 challenge, junior-only | past simple (irreg), comparative/superlative, present perfect, future will/be going to |
@@ -37,6 +37,26 @@ Compiled from MOE 課綱 (108 課綱) materials, the MOE common-2000 word list, 
 - Elementary stage prioritises listening + speaking, with reading/writing limited to single words and simple sentences.
 - Grammar should be inferred from meaningful context first, then formalised.
 - Basic and core grammar only — avoid obscure constructions in textbooks.
+
+## Tiering rule for the elementary band (diff 0–2)
+
+**Tier by teaching order, never by word length.** A short word is not automatically an
+easy one. `jade`, `plum`, `coal`, `sash`, `cuff` and `dna` are all ≤4 letters and all
+useless to a beginner, while `yellow`, `brother` and `sunny` are longer and taught in
+week one. An earlier pass had sorted diff 0 by length, which put `dot / ink / dye / tan /
+jade` ahead of `red / blue / green` in **colors** and `bro / sis / kin / lad / tot` ahead
+of `mom / dad` in **family**. Both have been corrected.
+
+- **diff 0** — the ~12 words a learner meets first in that theme. Highest frequency, most
+  concrete, easiest to picture.
+- **diff 1** — the next ~12. Still core A1, still everyday.
+- **diff 2** — rounds out the elementary band at A2.
+- A word that is rare, archaic, slangy, or belongs to another theme is **deleted**, not
+  demoted. `sun`/`leaf`/`snow` do not belong in **colors**; `star`/`moon` do not belong in
+  **weather**.
+
+Run `node shared/validate-bank.js` after editing the bank. It checks level/difficulty
+agreement, duplicate words, and that every grammar answer appears in its own options.
 
 ## Theme → eligible vocabulary (from common-2000 list, by topic)
 
@@ -140,6 +160,19 @@ soccer, tennis, golf, kick, ball, run (v), swim (v), team, race,
 basketball, volleyball, badminton, baseball, hockey, surf,
 football, rugby, swimming, running, cycling, skiing, skating, gym,
 champion, athlete, marathon, tournament, stadium, referee, gymnastics
+
+### actions
+The other fifteen themes are built around topic **nouns and adjectives**, which left the
+bank with almost no verbs — `see`, `like`, `want`, `have`, `sit`, `open` and `wash` were
+all absent. Any sentence-frame exercise ("I like ___", "I see four ___s") needs the verb
+that carries the frame, so this theme supplies them.
+
+go, come, eat, drink, see, look, like, want, have, make, take, give,
+sit, stand, sleep, open, close, put, get, find, help, ask, tell, say,
+wash, clean, carry, bring, push, pull, wear, buy, wait, start, finish, learn,
+choose, decide, follow, hold, keep, lose, meet, move, need, remember, share, try, build,
+accept, admit, allow, avoid, believe, borrow, complain, describe, discover, explain,
+improve, prepare, suggest
 
 ## Senior-high theme → eligible vocabulary (大考中心 L3–L6)
 
@@ -259,6 +292,14 @@ These are senior-high tiers (diff 5–8). **Source-of-truth principle:** every w
 - L4: discipline, opponent, spectator, rivalry, endurance, agility, stamina, prowess, beat, conquer
 - L5: triathlon, decathlon, athleticism, conditioning, perseverance, fortitude, kinesthetic, lap
 - L6: equestrian, calisthenics, gymnastics, parkour, paragliding, athletic
+
+### actions (senior — academic and formal verbs)
+Verbs dominate 學測/分科 cloze and vocabulary items far more than theme nouns do, so the
+senior tiers here are deliberately deep.
+- L3: achieve, acquire, adapt, analyze, assume, attempt, contribute, demonstrate, establish, indicate, maintain, obtain, pursue
+- L4: accumulate, anticipate, compensate, constitute, derive, diminish, enhance, illustrate, implement, integrate, undertake, convey, impose
+- L5: advocate, alleviate, comprise, deteriorate, facilitate, formulate, mitigate, perceive, reinforce, undermine, validate, exert, foster
+- L6: ameliorate, circumvent, delineate, disseminate, elucidate, exacerbate, extrapolate, promulgate, repudiate, scrutinize, transcend, relegate, supersede
 
 ## Grammar item bank by difficulty
 
