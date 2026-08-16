@@ -1,4 +1,15 @@
 // ==================== LEARNING PROGRESS ====================
+// Shared by every game in the repo. Two independent records live here:
+//
+//   WGD_PROGRESS  staged-level progress, keyed 'wgd-progress-v1'
+//   WT_PROGRESS   Word Town's town map,  keyed 'wt-progress-v1'
+//
+// They are deliberately separate keys. Word Town needs a different shape
+// (buildings, weeks) and mixing it into the existing object would risk a
+// migration on saves that already exist in the wild. Word Town still writes
+// every learned word through recordWordMastered(), so the two records agree on
+// what the learner actually knows.
+//
 // Persists per-theme progress for the staged level-based mode to localStorage
 // so a learner keeps their unlocked levels, stars, mastered words, and best
 // score across sessions. Progress is kept separately per school band
@@ -150,5 +161,110 @@
         grammarMasteredCount,
         bestScore,
         levelInfo,
+    };
+
+    // ==================== WORD TOWN ====================
+    // The town map is the season's motivator: every property a learner masters
+    // stays built, so by week 8 they can see a town they made out of ~68 words.
+    // It is also the review pool that Memory Lane draws from.
+    //
+    // Shape (key: WT_KEY):
+    //   { weeks: { "1": { cleared: true, buildings: 7, coins: 21, won: true } },
+    //     town:  { "cow": { level: 2, week: 1, themeId: "animals" } } }
+    //
+    // `level` is the building tier: 1 hut, 2 house, 3 shop. It only ever grows —
+    // replaying a week can improve a building but never demolish one, so a bad
+    // second run cannot take away something the learner already earned.
+    const WT_KEY = 'wt-progress-v1';
+    let wtMemoryFallback = null;
+
+    function wtEmpty() { return { weeks: {}, town: {} }; }
+
+    function wtLoad() {
+        if (!HAS_STORAGE) return wtMemoryFallback || (wtMemoryFallback = wtEmpty());
+        try {
+            const raw = window.localStorage.getItem(WT_KEY);
+            if (!raw) return wtEmpty();
+            const parsed = JSON.parse(raw);
+            if (!parsed || typeof parsed !== 'object') return wtEmpty();
+            if (!parsed.weeks || typeof parsed.weeks !== 'object') parsed.weeks = {};
+            if (!parsed.town  || typeof parsed.town  !== 'object') parsed.town  = {};
+            return parsed;
+        } catch (e) {
+            return wtEmpty();
+        }
+    }
+
+    function wtSave(data) {
+        if (!HAS_STORAGE) { wtMemoryFallback = data; return; }
+        try {
+            window.localStorage.setItem(WT_KEY, JSON.stringify(data));
+        } catch (e) {
+            wtMemoryFallback = data;
+        }
+    }
+
+    // Record a building. Also mirrors the word into the shared mastery record so
+    // the other games count it too. Never lowers an existing building's level.
+    function wtRecordBuilding(word, level, week, themeId) {
+        if (!word) return;
+        const data = wtLoad();
+        const existing = data.town[word];
+        data.town[word] = {
+            level: Math.max(existing ? existing.level : 0, level || 1),
+            week: existing ? existing.week : week,
+            themeId: themeId || (existing && existing.themeId) || null,
+        };
+        wtSave(data);
+        if (themeId) recordWordMastered('elementary', themeId, word);
+    }
+
+    function wtRecordWeekResult(week, result) {
+        const data = wtLoad();
+        const prev = data.weeks[week] || {};
+        data.weeks[week] = {
+            cleared: true,
+            buildings: Math.max(prev.buildings || 0, (result && result.buildings) || 0),
+            coins: Math.max(prev.coins || 0, (result && result.coins) || 0),
+            won: !!(prev.won || (result && result.won)),
+        };
+        wtSave(data);
+    }
+
+    // Week 1 is always open; week N opens once week N-1 has been played. The
+    // teacher can override this in the menu — they know the child, we don't.
+    function wtIsWeekUnlocked(week) {
+        if (week <= 1) return true;
+        const data = wtLoad();
+        return !!(data.weeks[week - 1] && data.weeks[week - 1].cleared);
+    }
+
+    function wtTown() { return wtLoad().town; }
+    function wtWeeks() { return wtLoad().weeks; }
+    function wtBuildingCount() { return Object.keys(wtLoad().town).length; }
+
+    // Words available for Memory Lane: everything already built, minus whatever
+    // this week is teaching fresh.
+    function wtReviewPool(excludeWords) {
+        const skip = new Set(excludeWords || []);
+        return Object.keys(wtLoad().town).filter(w => !skip.has(w));
+    }
+
+    function wtReset() {
+        if (HAS_STORAGE) {
+            try { window.localStorage.removeItem(WT_KEY); } catch (e) { /* ignore */ }
+        }
+        wtMemoryFallback = wtEmpty();
+    }
+
+    window.WT_PROGRESS = {
+        recordBuilding: wtRecordBuilding,
+        recordWeekResult: wtRecordWeekResult,
+        isWeekUnlocked: wtIsWeekUnlocked,
+        town: wtTown,
+        weeks: wtWeeks,
+        buildingCount: wtBuildingCount,
+        reviewPool: wtReviewPool,
+        reset: wtReset,
     };
 })();

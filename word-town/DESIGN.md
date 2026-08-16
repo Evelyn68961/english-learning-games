@@ -44,11 +44,21 @@ Week 2 is the Market. The 12 properties are stalls:
 🍎  →  "I like apples."   →  you own the stall
 ```
 
-Landing on the teacher's stall means saying it again with their word. Across ~40
-landings in 18 minutes the child produces **one frame roughly 40 times with 12
-different words in the slot**. That is how a beginner internalises a pattern: a
-high-frequency frame with a rotating slot. It beats 40 unrelated gap-fills, and it
-is less content to author, not more.
+Landing on the teacher's stall means saying it again with their word. The child
+produces **one frame with 12 different words rotating through the slot** — a
+high-frequency frame with a changing slot is how a beginner internalises a
+pattern, and it beats the same number of unrelated gap-fills.
+
+> **Measured, not estimated.** An earlier draft of this document claimed ~40
+> reps per lesson. A scripted full playthrough gives **~10–12 sentences spoken
+> by the child**, plus roughly as many heard from the teacher: about 22
+> encounters over 12 words, so **~2 exposures per word per lesson**.
+>
+> The arithmetic is fixed by the board: 12 of 20 squares are properties, so 60%
+> of ~20 child turns land on one. Getting to 40 would need ~66 turns — a
+> 45-minute lesson. If a rep count that low proves too thin in practice, the
+> levers are a denser board (fewer specials) or a second short lap, not a
+> longer clock.
 
 ### The depth ladder
 
@@ -169,7 +179,7 @@ per lap restores agency without adding rules.
 | Time | Phase | What happens |
 |---|---|---|
 | 0–8 min | **Teach** | Flashcards for the 9 new words. Momo speaks each; the child repeats. Then the week's frame, modelled 3 times. |
-| 8–26 min | **Play** | ~20 turns each. ≈40 word encounters, ~3 exposures per word. |
+| 8–26 min | **Play** | 20 rounds. ~22 word encounters, ~2 exposures per word (measured). |
 | 26–30 min | **Report** | Words mastered, words missed, next week's preview. |
 
 The teach phase reuses the flow already in [letter-mole](../letter-mole/) —

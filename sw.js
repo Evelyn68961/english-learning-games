@@ -1,4 +1,4 @@
-const CACHE_NAME = 'elg-cache-v3';
+const CACHE_NAME = 'elg-cache-v4';
 // Relative URLs resolve against the SW's scope, so this works on any
 // hosting path (e.g. GitHub Pages subpath /english-learning-games/).
 const ASSETS_TO_CACHE = [
@@ -23,7 +23,15 @@ const ASSETS_TO_CACHE = [
   './word-garden-defense/index.html',
   './word-garden-defense/styles.css',
   './word-garden-defense/game.js',
-  './shared/question-bank.js'
+  './word-town/index.html',
+  './word-town/styles.css',
+  './word-town/board.js',
+  './word-town/story.js',
+  './word-town/game.js',
+  './shared/question-bank.js',
+  './shared/curriculum.js',
+  './shared/progress.js',
+  './shared/speech.js'
 ];
 
 // Install: cache assets individually so a single 404 doesn't abort the whole install.

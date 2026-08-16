@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Word Town</title>
+<meta name="theme-color" content="#2E7D5B">
+<link rel="icon" href="../favicon.ico">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ============================ MENU ============================ -->
+<section class="screen active" id="screen-menu">
+    <a class="corner-btn back" href="../index.html" aria-label="Back to all games">←</a>
+    <button class="corner-btn sound" id="sound-toggle" aria-label="Toggle sound">🔊</button>
+
+    <div class="menu-inner">
+        <div class="logo">
+            <span class="logo-mole" aria-hidden="true">🐹</span>
+            <h1>Word Town</h1>
+            <p class="tagline">Help Momo build a town out of words</p>
+        </div>
+
+        <div class="town-summary" id="town-summary"></div>
+
+        <h2 class="section-label">Choose a lesson</h2>
+        <div class="week-grid" id="week-grid"></div>
+
+        <div class="menu-actions">
+            <button class="btn ghost" id="btn-view-town">🏘️ My Town</button>
+            <label class="unlock-toggle">
+                <input type="checkbox" id="unlock-all">
+                <span>Teacher: unlock all weeks</span>
+            </label>
+        </div>
+    </div>
+</section>
+
+<!-- ============================ TEACH ============================ -->
+<section class="screen" id="screen-teach">
+    <button class="corner-btn back" id="teach-back" aria-label="Back to menu">←</button>
+
+    <div class="teach-inner">
+        <header class="teach-head">
+            <span class="district-emoji" id="teach-emoji">🚜</span>
+            <div>
+                <h2 id="teach-title">Week 1 · The Farm</h2>
+                <p id="teach-blurb">Momo names the farm animals.</p>
+            </div>
+        </header>
+
+        <div class="teach-step" id="teach-step-cards">
+            <p class="teach-hint">Tap each card. Listen, then say it out loud.</p>
+            <div class="flashcards" id="flashcards"></div>
+            <p class="teach-progress"><span id="cards-seen">0</span> / <span id="cards-total">12</span> tapped</p>
+            <button class="btn primary" id="btn-to-frame" disabled>Next: the magic sentence →</button>
+        </div>
+
+        <div class="teach-step hidden" id="teach-step-frame">
+            <p class="teach-hint">This week's magic sentence. You will say it a lot!</p>
+            <div class="frame-demo" id="frame-demo"></div>
+            <button class="btn primary" id="btn-start-game">🎲 Start the game</button>
+        </div>
+    </div>
+</section>
+
+<!-- ============================ BOARD ============================ -->
+<section class="screen" id="screen-board">
+    <div class="hud">
+        <button class="corner-btn back inline" id="board-back" aria-label="Quit to menu">←</button>
+        <div class="hud-players" id="hud-players"></div>
+        <div class="hud-clock" id="hud-clock">🚂 20</div>
+    </div>
+
+    <div class="board-wrap">
+        <div class="board" id="board"></div>
+        <div class="board-center" id="board-center">
+            <div class="center-frame" id="center-frame"></div>
+            <div class="die" id="die">🎲</div>
+            <button class="btn primary roll" id="btn-roll">Roll!</button>
+            <p class="turn-label" id="turn-label">Your turn</p>
+        </div>
+    </div>
+</section>
+
+<!-- ============================ REPORT ============================ -->
+<section class="screen" id="screen-report">
+    <div class="report-inner">
+        <div class="report-card" id="report-card"></div>
+        <div class="report-actions">
+            <button class="btn ghost" id="btn-report-town">🏘️ See my town</button>
+            <button class="btn primary" id="btn-report-menu">Done</button>
+        </div>
+    </div>
+</section>
+
+<!-- ============================ TOWN MAP ============================ -->
+<section class="screen" id="screen-town">
+    <button class="corner-btn back" id="town-back" aria-label="Back">←</button>
+    <div class="town-inner">
+        <h2>🏘️ My Word Town</h2>
+        <p class="town-sub" id="town-sub"></p>
+        <div class="town-map" id="town-map"></div>
+    </div>
+</section>
+
+<!-- ============================ MODAL ============================ -->
+<div class="modal-layer" id="modal-layer" hidden>
+    <div class="modal" id="modal" role="dialog" aria-modal="true"></div>
+</div>
+
+<!-- ============================ BEAT ============================ -->
+<div class="beat-layer" id="beat-layer" hidden>
+    <div class="beat">
+        <span class="beat-mole" aria-hidden="true">🐹</span>
+        <p class="beat-text" id="beat-text"></p>
+        <p class="beat-zh" id="beat-zh"></p>
+        <button class="btn primary" id="beat-ok">OK!</button>
+    </div>
+</div>
+
+<script src="../shared/question-bank.js"></script>
+<script src="../shared/curriculum.js"></script>
+<script src="../shared/progress.js"></script>
+<script src="../shared/speech.js"></script>
+<script src="story.js"></script>
+<script src="board.js"></script>
+<script src="game.js"></script>
+</body>
+</html>
