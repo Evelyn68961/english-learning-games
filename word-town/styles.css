@@ -443,6 +443,63 @@ body {
 }
 .coin-note { font-weight: 800; color: var(--green); margin-top: 10px; }
 
+/* Listening questions lay their answers out as pictures, two across, so the
+   child is choosing between things rather than reading four words. */
+.modal .m-options-grid { grid-template-columns: 1fr 1fr; }
+.opt-btn.opt-emoji { font-size: 2.6rem; padding: 12px; line-height: 1.1; }
+
+/* The 🔊 face on a listening question replays the word when tapped. */
+.m-emoji-tap { cursor: pointer; user-select: none; }
+.m-emoji-tap:active { transform: scale(0.9); }
+
+/* Shop items carry a line explaining what the thing actually does — an item
+   whose effect is invisible is a coin spent on nothing. */
+.opt-btn.shop-item { display: flex; flex-direction: column; gap: 4px; font-size: 1.05rem; }
+.shop-note { font-size: 0.72rem; font-weight: 600; color: var(--ink-soft); }
+
+/* ------------------------------------------------- park mini-game */
+
+.timer-bar {
+    height: 10px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    margin: 4px 0 10px;
+}
+.timer-fill {
+    height: 100%;
+    width: 100%;
+    border-radius: 999px;
+    background: var(--gold);
+    /* Linear, not eased: the bar is a clock, so it must read as one. */
+    transition: width 0.06s linear;
+}
+.park-score {
+    font-weight: 900;
+    font-size: 1.3rem;
+    color: var(--green);
+    margin-bottom: 8px;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ------------------------------------------------- action cards */
+
+/* One pip per rep. A child can see how many jumps are left, which is the
+   difference between an instruction and a game. */
+.pip-row { display: flex; justify-content: center; gap: 8px; margin: 14px 0 18px; }
+.pip {
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.12);
+    transition: transform 0.15s ease, background 0.15s ease;
+}
+.pip.on { background: var(--gold); transform: scale(1.25); }
+.btn.tap-target { padding: 22px; font-size: 1.3rem; }
+
+/* The board is the answer sheet for "find it in the town". */
+.board.picking .square { cursor: pointer; }
+.board.picking .square:active { transform: scale(0.94); }
+
 /* ---------------------------------------------------------------- beat */
 
 .beat-layer {

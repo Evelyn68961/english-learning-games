@@ -42,23 +42,150 @@ function speakButton(text) {
     return b;
 }
 
+// ---------------------------------------------------------------- questions
+
+// A tap-to-answer question, used by Practice Corner, the Park game and the
+// quiz mystery cards. `q` is:
+//   prompt       the heading
+//   sub          a line under it, optional
+//   face         what the child looks at — an emoji, or 🔊 for listening
+//   speak        spoken on open, and again whenever `face` is tapped
+//   options      [{ label, value }] — labels are words, or emoji when `emoji`
+//   answer       the winning `value`
+//   emoji        true to lay the options out as a picture grid
+// Calls `done(correct)` once, after a beat long enough for the child to see
+// which button was right. A wrong tap always reveals the answer: a question
+// that ends without showing the truth has taught nothing.
+function showQuiz(q, done) {
+    let answered = false;
+
+    showModal(m => {
+        m.appendChild(el('h3', null, q.prompt));
+        if (q.sub) m.appendChild(el('p', 'm-sub', q.sub));
+
+        if (q.face) {
+            const face = el('div', 'm-emoji', q.face);
+            if (q.speak) {
+                face.classList.add('m-emoji-tap');
+                face.setAttribute('role', 'button');
+                face.setAttribute('aria-label', 'Say it again');
+                face.onclick = () => window.SPEECH.speak(q.speak);
+            }
+            m.appendChild(face);
+        }
+
+        const opts = el('div', 'm-options' + (q.emoji ? ' m-options-grid' : ''));
+        q.options.forEach(opt => {
+            const b = el('button', 'opt-btn' + (q.emoji ? ' opt-emoji' : ''), opt.label);
+            b.onclick = () => {
+                if (answered) return;
+                answered = true;
+                const right = opt.value === q.answer;
+                b.classList.add(right ? 'right' : 'wrong');
+
+                const buttons = opts.querySelectorAll('button');
+                buttons.forEach((node, i) => {
+                    node.disabled = true;
+                    if (!right && q.options[i].value === q.answer) node.classList.add('right');
+                });
+
+                if (q.answerSpeak) window.SPEECH.speak(q.answerSpeak);
+                window.setTimeout(() => { closeModal(); done(right); }, right ? 700 : 1300);
+            };
+            opts.appendChild(b);
+        });
+        m.appendChild(opts);
+    });
+
+    if (q.speak) window.SPEECH.speak(q.speak);
+}
+
+// A physical-action card: one tap per rep, the action spoken on every tap, and
+// no way to finish early. The pips are the whole point — a child can see how
+// many jumps are left, and the button only appears once they are done.
+function showTapCard(card, done) {
+    let taps = 0;
+
+    showModal(m => {
+        m.appendChild(el('div', 'm-emoji', '❓'));
+        m.appendChild(el('h3', null, card.text));
+        m.appendChild(el('div', 'm-zh', card.zh));
+
+        const pips = el('div', 'pip-row');
+        for (let i = 0; i < card.taps; i++) pips.appendChild(el('span', 'pip'));
+        m.appendChild(pips);
+
+        const finish = el('button', 'btn primary wide', `+${card.coins} 🪙 Done!`);
+        finish.hidden = true;
+        finish.onclick = () => { closeModal(); done(); };
+
+        const tap = el('button', 'btn coral wide tap-target', card.label || 'Tap!');
+        tap.onclick = () => {
+            if (taps >= card.taps) return;
+            taps += 1;
+            pips.children[taps - 1].classList.add('on');
+            // Counting cards say the number; action cards say the action. Both
+            // give the child English on every single tap.
+            window.SPEECH.speak(card.count
+                ? window.CURRICULUM.numberWords[taps]
+                : card.word);
+            if (taps >= card.taps) {
+                tap.hidden = true;
+                finish.hidden = false;
+            }
+        };
+
+        m.appendChild(tap);
+        m.appendChild(finish);
+    });
+}
+
 // ---------------------------------------------------------------- beats
 
 // Momo's story beat. Fires on completing a colour set, and once at the end of
 // the lesson regardless of progress — the child never misses the ending.
+//
+// Beats queue rather than replace each other. Each one carries the callback
+// that resumes the turn, and there is exactly one OK button: showing a second
+// beat on top of a live one used to overwrite that callback, dropping the
+// first beat's continuation and leaving the game with no way to move on.
+let beatQueue = [];
+let beatOpen = false;
+
 function showBeat(beat, done) {
+    beatQueue.push({ beat, done });
+    if (!beatOpen) nextBeat();
+}
+
+function nextBeat() {
+    const item = beatQueue.shift();
+    if (!item) { beatOpen = false; return; }
+    beatOpen = true;
+
     const layer = beatLayer();
-    document.getElementById('beat-text').textContent = beat.text;
-    document.getElementById('beat-zh').textContent = beat.zh || '';
+    document.getElementById('beat-text').textContent = item.beat.text;
+    document.getElementById('beat-zh').textContent = item.beat.zh || '';
     layer.hidden = false;
-    window.SPEECH.speak(beat.text, { rate: 0.9 });
+    window.SPEECH.speak(item.beat.text, { rate: 0.9 });
 
     const ok = document.getElementById('beat-ok');
     ok.onclick = () => {
         layer.hidden = true;
         window.SPEECH.stop();
-        if (done) done();
+        beatOpen = false;
+        // The continuation runs first and may queue the finale itself, so only
+        // fall through to the queue if it has not already taken over.
+        if (item.done) item.done();
+        if (!beatOpen && beatQueue.length) nextBeat();
     };
+}
+
+// Drop anything still queued — a new lesson must not inherit the last one's
+// beats, and neither must a lesson the child quit halfway through.
+function resetBeats() {
+    beatQueue = [];
+    beatOpen = false;
+    beatLayer().hidden = true;
 }
 
 // ---------------------------------------------------------------- report
@@ -131,7 +258,10 @@ window.STORY = {
     showModal,
     closeModal,
     isModalOpen,
+    showQuiz,
+    showTapCard,
     showBeat,
+    resetBeats,
     buildReport,
     el,
     speakButton,

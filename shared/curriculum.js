@@ -12,7 +12,8 @@
 // Frame templates understand these slots:
 //   {word}    the property's word (its `frameForm` if it has one, else `display`)
 //   {n}       the die roll, spelled in English  (week 5)
-//   {s}       "" when n is 1, otherwise "s"     (week 5 plural contrast)
+//   {wordN}   the word, pluralised to agree with {n} (week 5 plural contrast)
+//   {are}     "is" when n is 1, otherwise "are" (week 5)
 //   {review}  a random word from the Memory Lane set (week 3)
 //   {animal}  who is performing the action      (week 6)
 //   {subj}    the subject of the sentence       (week 7)
@@ -161,7 +162,6 @@ const WEEKS = [
             l2: 'I see {n} {wordN}.',
             l3: 'There {are} {n} {wordN}.',
         },
-        usesDie: true,
         teaches: NUMBER_WORDS,     // taught in the teach phase, not as properties
         // Irregular plurals are declared, not guessed. This is the plural
         // lesson, so "four fishs" would teach exactly the wrong thing.
@@ -268,7 +268,6 @@ const WEEKS = [
             l2: '{word}',       // overridden per-property by `frameFrom`
             l3: '{word}',
         },
-        mixed: true,
         sets: [
             { key: 'A', name: 'Festival Row',  color: '#C1793A', review: true, words: [
                 { id: 'cow', frameFrom: 1 },
@@ -296,19 +295,40 @@ const WEEKS = [
 
 // Mystery cards. Speaking-first and always doable — no "go back 3 spaces", no
 // fines. Every card is an opportunity, so a bad roll never feels like a loss.
+//
+// Every card asks for an action, not an acknowledgement. An earlier deck ended
+// each card with a single "Done!" button that paid out whether or not the child
+// had done anything, which made a quarter of the board free money.
+//
+// Cards are also built from *this week's* board wherever they can be. The old
+// deck was one fixed global list, so week 1 — farm animals, `This is a ___` —
+// could ask a child to name a colour (week 3), use week 2's frame, or spell,
+// none of which had been taught yet.
+//
+//   kind: 'quiz'    see the picture, tap its word      (board words)
+//   kind: 'listen'  hear the word, tap its picture     (board words)
+//   kind: 'echo'    Momo says a word, the child says it back
+//   kind: 'ask'     ask the teacher this week's level-3 question
+//   kind: 'find'    hunt the spoken word down on the board itself
+//   kind: 'tap'     a physical action, one tap per rep, spoken each time
+//   kind: 'gift'    coins, or a free upgrade the child chooses
+//
+// A `tap` card is total physical response: jumping while hearing "jump" is how
+// a beginner attaches a verb to a meaning rather than to a translation. The
+// actions are deliberately week-agnostic, because the words are instructions
+// here, not lesson content.
 const MYSTERY_CARDS = [
-    { text: 'Say 3 animals in 10 seconds!',        zh: '十秒內說出三種動物！', coins: 3 },
-    { text: 'Momo says a word — repeat it.',       zh: '摩摩說一個字，你跟著唸。', coins: 2, speakOwned: true },
-    { text: 'Ask your teacher: "Do you like cake?"', zh: '問老師：Do you like cake?', coins: 3 },
-    { text: 'Count from one to five out loud.',    zh: '大聲從一數到五。', coins: 2 },
-    { text: 'Free upgrade! Pick any house you own.', zh: '免費升級！選一間你的房子。', coins: 0, freeUpgrade: true },
-    { text: 'Momo is hungry. Say a food word.',    zh: '摩摩餓了，說一個食物的單字。', coins: 2 },
-    { text: 'Jump 3 times and say "jump"!',        zh: '跳三下並說 jump！', coins: 2 },
-    { text: 'Say your favourite colour in English.', zh: '用英文說出你最喜歡的顏色。', coins: 3 },
-    { text: 'Momo found a coin!',                  zh: '摩摩撿到錢！', coins: 3 },
-    { text: 'Point at something red and say "red".', zh: '指出紅色的東西並說 red。', coins: 2 },
-    { text: 'Spell your favourite word out loud.', zh: '大聲拼出你最喜歡的單字。', coins: 3 },
-    { text: 'Give Momo a high five! 🖐️',           zh: '跟摩摩擊掌！', coins: 2 },
+    { kind: 'quiz',   text: 'Quick question!',              zh: '快問快答！',             coins: 3 },
+    { kind: 'listen', text: 'Listen to Momo!',              zh: '聽摩摩說！',             coins: 3 },
+    { kind: 'find',   text: 'Find it in the town!',         zh: '在小鎮裡找出來！',        coins: 4 },
+    { kind: 'echo',   text: 'Momo says a word — say it back.', zh: '摩摩說一個字，你跟著唸。', coins: 2 },
+    { kind: 'ask',    text: 'Ask your teacher!',            zh: '用這句問問老師！',        coins: 3 },
+    { kind: 'tap',    text: 'Jump 3 times with Momo!',      zh: '跟摩摩跳三下！',   word: 'Jump!',      taps: 3, coins: 3 },
+    { kind: 'tap',    text: 'Clap 5 times and count!',      zh: '拍手五下，一起數！',  count: true,        taps: 5, coins: 3 },
+    { kind: 'tap',    text: 'Stand up and sit down twice!', zh: '站起來、坐下，兩次！', word: 'Stand up!',  taps: 2, coins: 2 },
+    { kind: 'tap',    text: 'High five Momo 3 times!',      zh: '跟摩摩擊掌三次！',   word: 'High five!', taps: 3, coins: 2 },
+    { kind: 'gift',   text: 'Free upgrade! Pick a house you own.', zh: '免費升級！選一間你的房子。', freeUpgrade: true },
+    { kind: 'gift',   text: 'Momo found a coin!',           zh: '摩摩撿到錢！',           coins: 3 },
 ];
 
 // ---------------------------------------------------------------------------
@@ -360,7 +380,7 @@ function propertiesFor(week) {
                 id, display, frameForm, slots, frameFrom,
                 emoji: bankWord ? bankWord.emoji : '❓',
                 hint:  bankWord ? bankWord.hint  : '',
-                themeId: bankWord ? week.theme : week.theme,
+                themeId: week.theme,
                 setKey: set.key,
                 setName: set.name,
                 color: set.color,
@@ -373,7 +393,7 @@ function propertiesFor(week) {
 
 // Fill a frame template. `ctx` may carry { word, n, review, animal }.
 function renderFrame(template, ctx) {
-    const n = ctx.n;
+    const n = ctx.n == null ? 1 : ctx.n;
     const pron = ctx.pron || 'She';
     // {wordN} agrees with the count. Irregulars declare `plural` on the word
     // (fish -> fish, baby -> babies); everything else takes a plain -s. Week 5
@@ -383,15 +403,13 @@ function renderFrame(template, ctx) {
     return template
         .replace(/\{wordN\}/g,  counted)
         .replace(/\{word\}/g,   word)
-        .replace(/\{n\}/g,      n == null ? '' : (NUMBER_WORDS[n] || String(n)))
-        .replace(/\{s\}/g,      n === 1 ? '' : 's')
+        .replace(/\{n\}/g,      NUMBER_WORDS[n] || String(n))
         .replace(/\{are\}/g,    n === 1 ? 'is' : 'are')
         .replace(/\{review\}/g, ctx.review || '')
         .replace(/\{animal\}/g, ctx.animal || 'dog')
         .replace(/\{subj\}/g,   ctx.subj || 'dog')
         .replace(/\{pron_\}/g,  pron.toLowerCase())   // mid-sentence: "Is he your dad?"
-        .replace(/\{pron\}/g,   pron)
-        .replace(/\{poss\}/g,   pron === 'He' ? 'his' : 'her');
+        .replace(/\{pron\}/g,   pron);
 }
 
 // The sentence a player must produce for a property at a given depth (1-3).

@@ -18,6 +18,7 @@ const RENT          = [0, 1, 2, 4];   // by building level
 const COST_HINT     = 3;
 const COST_WARP     = 5;
 const STEP_MS       = 170;
+const PARK_SECONDS  = 15;   // the park mini-game's clock
 
 // ------------------------------------------------------------------ state
 
@@ -95,12 +96,25 @@ function renderMenu() {
 
 let teachSeen = null;
 
-// Cards for the teach phase: this week's properties, plus any words the week
-// teaches without putting on the board (week 5's number words).
+// The properties a week warms up before play. Weeks 5 and 8 are consolidation
+// weeks where every set is review, so "new words" is empty for them and the
+// board itself is what gets modelled. Without this the frame step rendered
+// nothing at all on those two weeks.
+function warmupProps(week) {
+    const props = window.CURRICULUM.propertiesFor(week);
+    const fresh = props.filter(p => !p.review);
+    return fresh.length ? fresh : props;
+}
+
+function toCard(p) {
+    return { word: p.display, emoji: p.emoji, hint: p.hint };
+}
+
+// Cards for the teach phase: this week's new properties, plus any words the
+// week teaches without putting on the board (week 5's number words).
 function teachCards(week) {
-    const cards = window.CURRICULUM.propertiesFor(week)
-        .filter(p => !p.review)
-        .map(p => ({ word: p.display, emoji: p.emoji, hint: p.hint }));
+    const props = window.CURRICULUM.propertiesFor(week);
+    const cards = props.filter(p => !p.review).map(toCard);
 
     if (week.teaches) {
         const lookup = new Map();
@@ -112,12 +126,17 @@ function teachCards(week) {
             if (w) cards.push({ word: w.word, emoji: w.emoji, hint: w.hint });
         }
     }
-    return cards;
+
+    // Week 8 introduces nothing — no new properties and no extra words — so
+    // its warm-up is the board itself. Left empty, the Next button had nothing
+    // to enable it and the lesson could never be started at all.
+    return cards.length ? cards : props.map(toCard);
 }
 
 function startWeek(week) {
     state = newState(week);
     teachSeen = new Set();
+    STORY.resetBeats();
 
     $('teach-emoji').textContent = week.emoji;
     $('teach-title').textContent = `Week ${week.week} · ${week.district}`;
@@ -159,8 +178,7 @@ function startWeek(week) {
 // hears the pattern hold while the slot changes.
 function showFrameStep() {
     const week = state.week;
-    const props = window.CURRICULUM.propertiesFor(week).filter(p => !p.review);
-    const picks = props.slice(0, 3);
+    const picks = warmupProps(week).slice(0, 3);
 
     const demo = $('frame-demo');
     demo.innerHTML = '';
@@ -216,7 +234,10 @@ function renderHUD() {
         const box = STORY.el('div', 'hud-player' + (i === state.turn ? ' active' : ''));
         box.appendChild(STORY.el('span', null, p.token));
         box.appendChild(STORY.el('span', 'hp-name', p.name));
-        box.appendChild(STORY.el('span', 'hp-stats', `🪙${p.coins} 🏠${buildingsOf(i)}`));
+        // Hints are shown only when held. A bought hint that appears nowhere is
+        // a coin the child spent on nothing they can see.
+        const stats = `🪙${p.coins} 🏠${buildingsOf(i)}` + (p.hints ? ` 💡${p.hints}` : '');
+        box.appendChild(STORY.el('span', 'hp-stats', stats));
         wrap.appendChild(box);
     });
 
@@ -265,22 +286,40 @@ function setRollEnabled(on) {
     state.busy = !on;
 }
 
+// Let the child answer by tapping the board itself. Used by the shop's warp and
+// by the "find it in the town" mystery card.
+//
+// The board stays armed until the caller disarms it, because a wrong tap is not
+// necessarily an answer: "find it in the town" allows a second guess, and
+// disarming on the first tap would leave the child tapping a dead board.
+function armBoardPick(onPick) {
+    const board = $('board');
+    const handler = ev => {
+        const el = ev.target.closest('.square');
+        if (el) onPick(Number(el.dataset.index));
+    };
+    board.addEventListener('click', handler);
+    board.classList.add('picking');
+    return function disarm() {
+        board.removeEventListener('click', handler);
+        board.classList.remove('picking');
+    };
+}
+
 // "Choose your move" from the shop: one purchasable choice per lap so the dice
 // don't make the child a passenger.
 function armWarp() {
-    const board = $('board');
-    const handler = ev => {
-        const sq = ev.target.closest('.square');
-        if (!sq) return;
-        board.removeEventListener('click', handler);
+    const disarm = armBoardPick(target => {
+        disarm();
         const p = current();
         p.warp = false;
-        const target = Number(sq.dataset.index);
         const steps = (target - p.pos + window.BOARD.size) % window.BOARD.size || window.BOARD.size;
         $('btn-roll').textContent = 'Roll!';
-        walk(steps, 0);
-    };
-    board.addEventListener('click', handler);
+        // A warp still needs a number for the week-5 frame, which counts with
+        // the die. Passing 0 used to produce "I see zero cats." — a sentence no
+        // beginner should ever be asked to say.
+        walk(steps, 1 + Math.floor(Math.random() * 6));
+    });
 }
 
 function roll() {
@@ -335,50 +374,234 @@ function resolve(dieValue) {
     }
 }
 
+// ------------------------------------------------------------------ questions
+
+// The 12 property words on the current board.
+function boardProps() {
+    return state.squares.filter(s => s.type === 'property').map(s => s.prop);
+}
+
+function pickProp() {
+    const props = boardProps();
+    return props[Math.floor(Math.random() * props.length)];
+}
+
+// Picture -> word. The child sees the thing and picks its name; this is the
+// direction the board's own buy question already tests.
+function pictureQuestion(prop) {
+    const pool = boardProps().filter(p => p.display !== prop.display).map(p => p.display);
+    const options = shuffle([prop.display].concat(shuffle(pool).slice(0, 2)));
+    return {
+        prompt: 'What is this?',
+        face: prop.emoji,
+        options: options.map(w => ({ label: w, value: w })),
+        answer: prop.display,
+        answerSpeak: prop.display,
+    };
+}
+
+// Word -> picture. The child hears it and picks the thing. The board never
+// tests this direction, which is exactly why the drills do: recognising a
+// written word and recognising a spoken one are two different skills, and only
+// the second one survives contact with a real conversation.
+function listenQuestion(prop) {
+    const pool = boardProps().filter(p => p.display !== prop.display && p.emoji !== prop.emoji);
+    const options = shuffle([prop].concat(shuffle(pool).slice(0, 3)));
+    return {
+        prompt: 'Listen to Momo!',
+        sub: 'Tap the picture you hear.',
+        face: '🔊',
+        speak: prop.display,
+        emoji: true,
+        options: options.map(p => ({ label: p.emoji, value: p.display })),
+        answer: prop.display,
+        answerSpeak: prop.display,
+    };
+}
+
 // ------------------------------------------------------------------ squares
 
+// Landing on Start does not pay again — walk() already gave the pass-through
+// bonus on the way in, and the modal only reports it. What the square is for
+// is the lap review: the child picks one word they own and says it with Momo.
 function onStart() {
-    const p = current();
-    // The +5 for landing is on top of the pass-through bonus already given.
     const owned = state.squares.filter(s => s.type === 'property' && s.owner !== null);
-    const word = owned.length ? owned[Math.floor(Math.random() * owned.length)].prop.display : null;
-    if (word) window.SPEECH.speak(word);
+    const picks = shuffle(owned.slice()).slice(0, 3).map(s => s.prop);
 
     STORY.showModal(m => {
         m.appendChild(STORY.el('div', 'm-emoji', '🏠'));
         m.appendChild(STORY.el('h3', null, 'Home again!'));
-        m.appendChild(STORY.el('p', 'm-sub', word ? `Momo says: "${word}"` : 'Momo waves hello.'));
         m.appendChild(STORY.el('div', 'coin-note', `+${PASS_START} 🪙`));
+
+        if (!picks.length) {
+            m.appendChild(STORY.el('p', 'm-sub', 'Momo waves hello. Go and name something!'));
+        } else {
+            m.appendChild(STORY.el('p', 'm-sub', 'Tap a word and say it with Momo.'));
+            const opts = STORY.el('div', 'm-options');
+            for (const prop of picks) {
+                const b = STORY.el('button', 'opt-btn', `${prop.emoji} ${prop.display}`);
+                b.onclick = () => {
+                    b.classList.add('right');
+                    window.SPEECH.speak(prop.display);
+                };
+                opts.appendChild(b);
+            }
+            m.appendChild(opts);
+        }
+
         const ok = STORY.el('button', 'btn primary wide', 'Thanks, Momo!');
+        ok.style.marginTop = '14px';
         ok.onclick = () => { STORY.closeModal(); endTurn(); };
         m.appendChild(ok);
     });
 }
 
+// Four of the twenty squares are mystery, so a fifth of every lap lands here.
+// That is too much of the board to spend on a button that pays out whether or
+// not the child did anything, which is what the old single "Done!" card was.
+// Every kind below asks for an action first.
 function onMystery() {
-    const p = current();
     const cards = window.CURRICULUM.mysteryCards;
     const card = cards[Math.floor(Math.random() * cards.length)];
 
-    if (card.speakOwned) {
-        const owned = state.squares.filter(s => s.type === 'property' && s.owner !== null);
-        if (owned.length) {
-            window.SPEECH.speak(owned[Math.floor(Math.random() * owned.length)].prop.display);
-        }
+    switch (card.kind) {
+        case 'quiz':   return mysteryQuiz(card, pictureQuestion);
+        case 'listen': return mysteryQuiz(card, listenQuestion);
+        case 'find':   return mysteryFind(card);
+        case 'echo':   return mysteryEcho(card);
+        case 'ask':    return mysteryAsk(card);
+        case 'tap':    return STORY.showTapCard(card, () => award(card.coins));
+        default:       return mysteryGift(card);
     }
+}
+
+// A mystery card never punishes. Getting one wrong still pays a coin, because
+// a card the child learns to dread is worse than one that pays too generously.
+const CONSOLATION = 1;
+
+function award(coins) {
+    current().coins += coins || 0;
+    repaint();
+    endTurn();
+}
+
+function mysteryQuiz(card, build) {
+    const q = build(pickProp());
+    q.prompt = '❓ ' + card.text;
+    q.sub = card.zh;
+    STORY.showQuiz(q, ok => award(ok ? card.coins : CONSOLATION));
+}
+
+// The card that uses the board as its answer sheet. Momo says a word and the
+// child hunts for the square it lives on — reading practice dressed up as a
+// treasure hunt, and the only mechanic that makes them read the whole town.
+function mysteryFind(card) {
+    const squares = state.squares.filter(s => s.type === 'property');
+    const target = squares[Math.floor(Math.random() * squares.length)];
+    const word = target.prop.display;
+
+    const hunt = () => {
+        $('turn-label').textContent = `🔍 Find "${word}"`;
+        let tries = 0;
+        const disarm = armBoardPick(index => {
+            if (index === target.index) {
+                disarm();
+                window.BOARD.highlight($('board'), index);
+                window.SPEECH.speak(word);
+                return window.setTimeout(() => award(card.coins), 800);
+            }
+            tries += 1;
+            window.SPEECH.speak(word);
+            // Two misses and Momo points at it himself. Hunting forever is not
+            // a game, and the clock is still running.
+            if (tries >= 2) {
+                disarm();
+                window.BOARD.highlight($('board'), target.index);
+                window.setTimeout(() => award(CONSOLATION), 1000);
+            }
+        });
+    };
 
     STORY.showModal(m => {
-        m.appendChild(STORY.el('div', 'm-emoji', '❓'));
-        m.appendChild(STORY.el('h3', null, 'Mystery Card'));
-        m.appendChild(STORY.el('div', 'm-sentence', card.text));
+        m.appendChild(STORY.el('div', 'm-emoji', '🔍'));
+        m.appendChild(STORY.el('h3', null, card.text));
+        m.appendChild(STORY.el('div', 'm-zh', card.zh));
+        m.appendChild(STORY.el('div', 'm-sentence', word));
+        m.appendChild(STORY.speakButton(word));
+        const go = STORY.el('button', 'btn primary wide', 'Find it!');
+        go.onclick = () => { STORY.closeModal(); hunt(); };
+        m.appendChild(go);
+    });
+    window.SPEECH.speak(word);
+}
+
+function mysteryEcho(card) {
+    const owned = state.squares.filter(s => s.type === 'property' && s.owner !== null);
+    const pool = owned.length ? owned.map(s => s.prop) : boardProps();
+    const prop = pool[Math.floor(Math.random() * pool.length)];
+
+    STORY.showModal(m => {
+        m.appendChild(STORY.el('div', 'm-emoji', prop.emoji));
+        m.appendChild(STORY.el('h3', null, card.text));
+        m.appendChild(STORY.el('div', 'm-zh', card.zh));
+        m.appendChild(STORY.el('div', 'm-sentence', prop.display));
+
+        const row = STORY.el('div', 'm-buttons');
+        const again = STORY.el('button', 'btn ghost', '↻ Again');
+        again.onclick = () => window.SPEECH.speak(prop.display, { rate: 0.7 });
+        const said = STORY.el('button', 'btn primary', '✓ Said it!');
+        said.onclick = () => { STORY.closeModal(); award(card.coins); };
+        row.appendChild(again);
+        row.appendChild(said);
+        m.appendChild(row);
+    });
+    window.SPEECH.speak(prop.display);
+}
+
+// The old deck hardcoded 'Ask your teacher: "Do you like cake?"' — week 2's
+// frame and week 2's noun, dealt in every week of the season. This asks the
+// current week's level-3 sentence, which is the question form by design, so
+// the card produces real teacher<->child dialogue instead of a recital.
+function mysteryAsk(card) {
+    const p = current();
+    const prop = pickProp();
+    const sentence = sentenceAt(prop, 3, 1 + Math.floor(Math.random() * 6));
+
+    STORY.showModal(m => {
+        m.appendChild(STORY.el('div', 'm-emoji', prop.emoji));
+        m.appendChild(STORY.el('h3', null, card.text));
+        m.appendChild(STORY.el('div', 'm-zh', card.zh));
+        m.appendChild(STORY.el('div', 'm-sentence', sentence));
+
+        const row = STORY.el('div', 'm-buttons');
+        const again = STORY.el('button', 'btn ghost', '↻ Again');
+        again.onclick = () => window.SPEECH.speak(sentence, { rate: 0.7 });
+        const asked = STORY.el('button', 'btn primary', '✓ Asked it!');
+        asked.onclick = () => {
+            if (p.isChild) state.stats.framesSaid += 1;
+            STORY.closeModal();
+            award(card.coins);
+        };
+        row.appendChild(again);
+        row.appendChild(asked);
+        m.appendChild(row);
+    });
+    window.SPEECH.speak(sentence, { rate: 0.8 });
+}
+
+function mysteryGift(card) {
+    STORY.showModal(m => {
+        m.appendChild(STORY.el('div', 'm-emoji', card.freeUpgrade ? '🎁' : '🪙'));
+        m.appendChild(STORY.el('h3', null, card.text));
         m.appendChild(STORY.el('div', 'm-zh', card.zh));
         if (card.coins) m.appendChild(STORY.el('div', 'coin-note', `+${card.coins} 🪙`));
 
-        const ok = STORY.el('button', 'btn primary wide', 'Done!');
+        const ok = STORY.el('button', 'btn primary wide', card.freeUpgrade ? 'Pick one!' : 'Thanks, Momo!');
         ok.onclick = () => {
-            p.coins += card.coins || 0;
+            current().coins += card.coins || 0;
             STORY.closeModal();
             if (card.freeUpgrade) return offerFreeUpgrade();
+            repaint();
             endTurn();
         };
         m.appendChild(ok);
@@ -412,40 +635,144 @@ function offerFreeUpgrade() {
 }
 
 // Not jail. A free drill with no cost and no lost turn — landing here should
-// feel like a rest, not a punishment.
+// feel like a rest, not a punishment. It is a drill the child *answers*,
+// though: the old version dealt three cards with a Next button under each,
+// which asked nothing, so it taught nothing.
 function onPractice() {
-    const props = state.squares.filter(s => s.type === 'property').map(s => s.prop);
-    const picks = shuffle(props.slice()).slice(0, 3);
+    const picks = shuffle(boardProps()).slice(0, 3);
     let i = 0;
+    let got = 0;
 
     const next = () => {
-        if (i >= picks.length) { STORY.closeModal(); return endTurn(); }
-        const p = picks[i++];
-        STORY.showModal(m => {
-            m.appendChild(STORY.el('h3', null, '📚 Practice Corner'));
-            m.appendChild(STORY.el('p', 'm-sub', `Card ${i} of ${picks.length} — free practice!`));
-            m.appendChild(STORY.el('div', 'm-emoji', p.emoji));
-            m.appendChild(STORY.el('div', 'm-sentence', p.display));
-            m.appendChild(STORY.el('div', 'm-zh', p.hint));
-            m.appendChild(STORY.speakButton(p.display));
-            const ok = STORY.el('button', 'btn primary wide', i < picks.length ? 'Next card' : 'Done');
-            ok.onclick = next;
-            m.appendChild(ok);
+        if (i >= picks.length) return practiceDone(got);
+        const prop = picks[i];
+        // Alternate the direction: see the picture, then hear the word. Both
+        // halves of knowing a word, and the board only ever tests the first.
+        const q = i % 2 === 0 ? pictureQuestion(prop) : listenQuestion(prop);
+        q.sub = `📚 Practice Corner · ${i + 1} of ${picks.length}`;
+        i += 1;
+        STORY.showQuiz(q, ok => {
+            if (ok) got += 1;
+            else if (current().isChild) noteMissed(prop.display);
+            next();
         });
-        window.SPEECH.speak(p.display);
     };
     next();
 }
 
-function onPark() {
+function practiceDone(got) {
     const p = current();
+    // Never nothing: a square that can pay zero is a square the child hopes to
+    // miss, and this one is supposed to be the friendly one.
+    const paid = Math.max(1, got);
     STORY.showModal(m => {
-        m.appendChild(STORY.el('div', 'm-emoji', '🌳'));
-        m.appendChild(STORY.el('h3', null, 'The Park'));
-        m.appendChild(STORY.el('p', 'm-sub', 'Momo takes a little nap under the tree.'));
-        m.appendChild(STORY.el('div', 'coin-note', '+2 🪙'));
-        const ok = STORY.el('button', 'btn primary wide', 'Wake up!');
-        ok.onclick = () => { p.coins += 2; STORY.closeModal(); endTurn(); };
+        m.appendChild(STORY.el('div', 'm-emoji', got === 3 ? '🌟' : '📚'));
+        m.appendChild(STORY.el('h3', null, got === 3 ? 'All three!' : 'Good practice!'));
+        m.appendChild(STORY.el('p', 'm-sub', `${got} of 3 right.`));
+        m.appendChild(STORY.el('div', 'coin-note', `+${paid} 🪙`));
+        const ok = STORY.el('button', 'btn primary wide', 'Back to the board');
+        ok.onclick = () => { p.coins += paid; STORY.closeModal(); repaint(); endTurn(); };
+        m.appendChild(ok);
+    });
+}
+
+// Not a nap. The park is the season's one timed drill: Momo says a word, the
+// child taps the picture, over and over for fifteen seconds. A good run is
+// eight or nine reps — more than the rest of the lap puts together.
+//
+// This square used to be a modal saying "Momo takes a little nap" with one
+// button and two coins: the only square on the board that asked for nothing.
+function onPark() {
+    const props = boardProps();
+    if (props.length < 4) return endTurn();   // too small a board to build a round from
+
+    let score = 0;
+    let target = null;
+    let locked = false;
+    let timer = null;
+    let fill, scoreEl, grid;
+    const deadline = Date.now() + PARK_SECONDS * 1000;
+
+    STORY.showModal(m => {
+        m.appendChild(STORY.el('h3', null, '🌳 The Park'));
+        m.appendChild(STORY.el('p', 'm-sub', 'Momo says a word. Tap the right picture!'));
+
+        const bar = STORY.el('div', 'timer-bar');
+        fill = STORY.el('div', 'timer-fill');
+        bar.appendChild(fill);
+        m.appendChild(bar);
+
+        scoreEl = STORY.el('div', 'park-score', '🪙 0');
+        m.appendChild(scoreEl);
+
+        grid = STORY.el('div', 'm-options m-options-grid');
+        m.appendChild(grid);
+
+        const replay = STORY.el('button', 'btn ghost wide', '🔊 Again');
+        replay.style.marginTop = '12px';
+        replay.onclick = () => { if (target) window.SPEECH.speak(target.display); };
+        m.appendChild(replay);
+    });
+
+    const round = () => {
+        target = props[Math.floor(Math.random() * props.length)];
+        const pool = props.filter(x => x.display !== target.display && x.emoji !== target.emoji);
+        const options = shuffle([target].concat(shuffle(pool).slice(0, 3)));
+
+        grid.innerHTML = '';
+        locked = false;
+        options.forEach(opt => {
+            const b = STORY.el('button', 'opt-btn opt-emoji', opt.emoji);
+            b.onclick = () => {
+                if (locked) return;
+                locked = true;
+                const right = opt.display === target.display;
+                b.classList.add(right ? 'right' : 'wrong');
+                if (right) {
+                    score += 1;
+                    scoreEl.textContent = `🪙 ${score}`;
+                } else {
+                    Array.from(grid.children).forEach((node, i) => {
+                        if (options[i].display === target.display) node.classList.add('right');
+                    });
+                }
+                // A wrong tap lingers a little longer so the child sees where
+                // the right answer was before the next word arrives.
+                window.setTimeout(() => {
+                    if (state && Date.now() < deadline) round();
+                }, right ? 300 : 650);
+            };
+            grid.appendChild(b);
+        });
+        window.SPEECH.speak(target.display);
+    };
+
+    const tick = () => {
+        // Quitting to the menu clears `state`; without this the timer would
+        // fire the results modal over the menu screen.
+        if (!state) return window.clearInterval(timer);
+        const left = deadline - Date.now();
+        if (left <= 0) {
+            window.clearInterval(timer);
+            return parkDone(score);
+        }
+        fill.style.width = (left / (PARK_SECONDS * 1000) * 100) + '%';
+    };
+
+    round();
+    timer = window.setInterval(tick, 60);
+}
+
+function parkDone(score) {
+    const p = current();
+    const paid = Math.max(1, score);
+    STORY.showModal(m => {
+        m.appendChild(STORY.el('div', 'm-emoji', score >= 6 ? '🏆' : '🌳'));
+        m.appendChild(STORY.el('h3', null, score >= 6 ? 'Momo is amazed!' : 'Nice run!'));
+        m.appendChild(STORY.el('p', 'm-sub', `${score} right in ${PARK_SECONDS} seconds.`));
+        m.appendChild(STORY.el('div', 'coin-note', `+${paid} 🪙`));
+        const ok = STORY.el('button', 'btn primary wide', 'Back to the board');
+        ok.onclick = () => { p.coins += paid; STORY.closeModal(); repaint(); endTurn(); };
         m.appendChild(ok);
     });
 }
@@ -459,14 +786,19 @@ function onShop() {
 
         const opts = STORY.el('div', 'm-options');
 
-        const hint = STORY.el('button', 'opt-btn', `💡 Hint token — ${COST_HINT} 🪙`);
+        const hint = STORY.el('button', 'opt-btn shop-item',
+            `💡 Hint token — ${COST_HINT} 🪙`);
+        hint.appendChild(STORY.el('span', 'shop-note', 'Shows the 中文 when you buy a word'));
         hint.disabled = p.coins < COST_HINT;
-        hint.onclick = () => { pay(p, COST_HINT); p.hints += 1; STORY.closeModal(); endTurn(); };
+        hint.onclick = () => { pay(p, COST_HINT); p.hints += 1; STORY.closeModal(); repaint(); endTurn(); };
         opts.appendChild(hint);
 
-        const warp = STORY.el('button', 'opt-btn', `🚀 Choose your move — ${COST_WARP} 🪙`);
+        const warp = STORY.el('button', 'opt-btn shop-item',
+            `🚀 Choose your move — ${COST_WARP} 🪙`);
+        warp.appendChild(STORY.el('span', 'shop-note',
+            p.warp ? 'Already yours — use it next turn' : 'Next turn, tap any square instead of rolling'));
         warp.disabled = p.coins < COST_WARP || p.warp;
-        warp.onclick = () => { pay(p, COST_WARP); p.warp = true; STORY.closeModal(); endTurn(); };
+        warp.onclick = () => { pay(p, COST_WARP); p.warp = true; STORY.closeModal(); repaint(); endTurn(); };
         opts.appendChild(warp);
 
         m.appendChild(opts);
@@ -482,7 +814,7 @@ function onShop() {
 
 function onProperty(sq, dieValue) {
     if (sq.owner === null)             return offerBuy(sq, dieValue);
-    if (sq.owner === state.turn)       return sq.level < 3 ? offerUpgrade(sq, dieValue) : onOwnFull(sq);
+    if (sq.owner === state.turn)       return sq.level < 3 ? offerUpgrade(sq, dieValue) : onOwnFull(sq, dieValue);
     return chargeRent(sq, dieValue);
 }
 
@@ -495,37 +827,50 @@ function offerBuy(sq, dieValue) {
         .filter(s => s.type === 'property' && s.prop.display !== prop.display)
         .map(s => s.prop.display);
     const options = shuffle([prop.display].concat(shuffle(pool).slice(0, 2)));
-    const useHint = p.hints > 0;
 
     STORY.showModal(m => {
         m.appendChild(STORY.el('h3', null, `${prop.setName} — for sale!`));
         m.appendChild(STORY.el('p', 'm-sub', `Answer to build here · ${COST_BUY} 🪙`));
         m.appendChild(STORY.el('div', 'm-emoji', prop.emoji));
-        if (useHint) {
-            m.appendChild(STORY.el('div', 'm-zh', prop.hint));
-            p.hints -= 1;
+
+        // A hint is offered, not spent for you. The old code burned one on
+        // every purchase the moment you owned one, so a child could buy a hint
+        // and never once choose to use it.
+        if (p.hints > 0) {
+            const zh = STORY.el('div', 'm-zh', '');
+            const use = STORY.el('button', 'btn ghost wide', `💡 Use a hint (${p.hints})`);
+            use.onclick = () => {
+                p.hints -= 1;
+                zh.textContent = prop.hint;
+                use.hidden = true;
+                renderHUD();
+            };
+            m.appendChild(use);
+            m.appendChild(zh);
         }
 
         const opts = STORY.el('div', 'm-options');
+        // One tap is the answer, right or wrong. Locking every button on the
+        // way out matters twice over: it is what stops guess-until-right, and
+        // it stops a second tap queueing a second resolution for the same
+        // square — which could land a purchase after the clock had already run
+        // out and left the game with no way forward.
+        let answered = false;
         for (const word of options) {
             const b = STORY.el('button', 'opt-btn', word);
             b.onclick = () => {
-                if (b.disabled) return;
-                if (word === prop.display) {
-                    b.classList.add('right');
-                    opts.querySelectorAll('button').forEach(x => x.disabled = true);
+                if (answered) return;
+                answered = true;
+                const right = word === prop.display;
+                b.classList.add(right ? 'right' : 'wrong');
+                opts.querySelectorAll('button').forEach(x => x.disabled = true);
+
+                if (right) {
                     window.SPEECH.speakWordThenSentence(prop.display, sentenceAt(prop, 2, dieValue));
                     window.setTimeout(() => { STORY.closeModal(); completeBuy(sq); }, 900);
                 } else {
-                    b.classList.add('wrong');
-                    b.disabled = true;
                     if (p.isChild) noteMissed(prop.display);
-                    // One wrong tap ends the attempt: no penalty, but no
-                    // guess-until-right either, or the answer means nothing.
-                    window.setTimeout(() => {
-                        STORY.closeModal();
-                        wordRanAway(prop);
-                    }, 650);
+                    window.setTimeout(() => { STORY.closeModal(); wordRanAway(prop); }, 650);
                 }
             };
             opts.appendChild(b);
@@ -605,17 +950,36 @@ function applyUpgrade(sq, free) {
     checkSetComplete(sq, () => endTurn());
 }
 
-function onOwnFull(sq) {
+// A finished shop is the one square that could hand out coins for nothing. The
+// child already owns this word at full depth, so the customers get to hear it:
+// the cheapest rep on the board, and the only one that is pure reward.
+function onOwnFull(sq, dieValue) {
     const p = current();
+    const sentence = sentenceAt(sq.prop, 3, dieValue);
+
     STORY.showModal(m => {
         m.appendChild(STORY.el('div', 'm-emoji', '🏘️'));
-        m.appendChild(STORY.el('h3', null, 'Your shop is full!'));
-        m.appendChild(STORY.el('p', 'm-sub', `"${sq.prop.display}" is all built up.`));
-        m.appendChild(STORY.el('div', 'coin-note', '+1 🪙'));
-        const ok = STORY.el('button', 'btn primary wide', 'Nice!');
-        ok.onclick = () => { p.coins += 1; STORY.closeModal(); endTurn(); };
-        m.appendChild(ok);
+        m.appendChild(STORY.el('h3', null, 'Your shop is busy!'));
+        m.appendChild(STORY.el('p', 'm-sub', 'Say it for your customers.'));
+        m.appendChild(STORY.el('div', 'm-sentence', sentence));
+        m.appendChild(STORY.el('div', 'coin-note', '+2 🪙'));
+
+        const row = STORY.el('div', 'm-buttons');
+        const again = STORY.el('button', 'btn ghost', '↻ Again');
+        again.onclick = () => window.SPEECH.speak(sentence, { rate: 0.7 });
+        const done = STORY.el('button', 'btn primary', '✓ Said it!');
+        done.onclick = () => {
+            p.coins += 2;
+            if (p.isChild) state.stats.framesSaid += 1;
+            STORY.closeModal();
+            repaint();
+            endTurn();
+        };
+        row.appendChild(again);
+        row.appendChild(done);
+        m.appendChild(row);
     });
+    window.SPEECH.speak(sentence, { rate: 0.8 });
 }
 
 // Rent is the review engine: landing on someone else's word makes you say it.
@@ -806,7 +1170,11 @@ function init() {
     $('board-back').onclick = () => {
         if (!confirmQuit()) return;
         window.SPEECH.stop();
+        // Clearing state first is what stops the park timer; closing the modal
+        // is what stops a half-finished square hanging over the menu.
         state = null;
+        STORY.closeModal();
+        STORY.resetBeats();
         showScreen('screen-menu');
         renderMenu();
     };

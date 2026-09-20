@@ -50,15 +50,26 @@ high-frequency frame with a changing slot is how a beginner internalises a
 pattern, and it beats the same number of unrelated gap-fills.
 
 > **Measured, not estimated.** An earlier draft of this document claimed ~40
-> reps per lesson. A scripted full playthrough gives **~10–12 sentences spoken
-> by the child**, plus roughly as many heard from the teacher: about 22
-> encounters over 12 words, so **~2 exposures per word per lesson**.
+> reps per lesson. A scripted full playthrough showed the truth was far lower,
+> and the fix was not a longer clock but the eight non-property squares, which
+> were spending 40% of the board on nothing.
 >
-> The arithmetic is fixed by the board: 12 of 20 squares are properties, so 60%
-> of ~20 child turns land on one. Getting to 40 would need ~66 turns — a
-> 45-minute lesson. If a rep count that low proves too thin in practice, the
-> levers are a denser board (fewer specials) or a second short lap, not a
-> longer clock.
+> Figures below are averages over 30–40 scripted lessons, with a bot that taps
+> a random answer — so it is right about a third of the time, well below a real
+> child, and the absolute numbers are a floor rather than a forecast. Both
+> columns use the same one-tap-per-question rule.
+>
+> | Per lesson, during play | Specials as acknowledgements | Specials as interactions |
+> |---|---|---|
+> | English utterances the child hears | ~104 | **164–187** |
+> | Taps the child makes inside a card | ~80 | **173–213** |
+> | Sentences the child produces | 5.4 | 5.8–6.4 |
+>
+> Hearing and doing roughly doubled; *producing* barely moved, and that is the
+> honest result. Production is still gated by the 12 property squares, because
+> only a property asks for a whole sentence. The levers left for production are
+> a denser board or a second short lap — but the cheap win was never there. It
+> was in the squares that already existed and asked for nothing.
 
 ### The depth ladder
 
@@ -93,18 +104,26 @@ to revisit properties, and the child says a number 1–6 in English every single
 
 | # | Square | Effect |
 |---|---|---|
-| 1 | **Start** 🏠 | Pass or land: +5 coins. Momo speaks one owned word aloud. |
+| 1 | **Start** 🏠 | Pass or land: +5 coins. Tap one word you own to say it with Momo. |
 | 2–4 | Set A ▲ (3 properties) | |
 | 5 | **Mystery** ❓ | Draw a card (§4) |
 | 6–8 | Set B ● (3 properties) | |
-| 9 | **Practice Corner** 📚 | Not jail. Free flashcard drill, no penalty, no turn lost. |
+| 9 | **Practice Corner** 📚 | Not jail. Three free questions, +1 coin each, no penalty, no turn lost. |
 | 10 | **Mystery** ❓ | Draw a card |
 | 11–13 | Set C ■ (3 properties) | |
-| 14 | **Park** 🌳 | Rest. 15-second mini-game for +2 coins. |
+| 14 | **Park** 🌳 | 15-second listen-and-tap mini-game, +1 coin per hit. |
 | 15 | **Mystery** ❓ | Draw a card |
 | 16–18 | Set D ◆ (3 properties) | |
 | 19 | **Shop** 🛒 | Spend coins (§5) |
 | 20 | **Mystery** ❓ | Draw a card |
+
+> **Every square asks for something.** Eight of the twenty squares are not
+> properties, so 40% of landings happen off the word track. That budget only
+> pays for itself if those squares teach too. The rule for this board is that
+> no square may be resolved by acknowledging it: there is no square whose only
+> control is a button meaning "I have read this". Start asks for a word, the
+> Park and Practice Corner ask questions, the Shop asks for a decision, and
+> every mystery card asks for an action before it pays out.
 
 12 properties in 4 sets of 3. From Week 2 onward, **Set D is always Memory Lane** —
 review words from earlier weeks, visually distinct. So each board is 9 new + 3 review.
@@ -114,7 +133,7 @@ review words from earlier weeks, visually distinct. So each board is 9 new + 3 r
 ## 4. Rules
 
 **Setup.** Both players start on Start with **10 coins**. The clock reads
-`🚂 The train leaves in 20 turns.`
+`🚂 20` — twenty **rounds**, and a round is both players, so forty turns in all.
 
 **A turn.**
 1. Roll one die. Say the number in English. *(This is a free rep, every turn.)*
@@ -128,6 +147,13 @@ Answer the week's question at level 1 (tap the word for the picture). Correct �
 penalty for a wrong answer, ever.** The message is "the word ran away — catch it next
 lap," not "you lose."
 
+**One tap is the answer, right or wrong.** Every option locks the moment one is
+tapped. This is not a detail: while only the tapped button was disabled, a child
+could keep tapping until they hit the right word, which makes the answer mean
+nothing — and a second tap queued a second resolution for the same square, which
+could land a purchase after the clock had already run out and leave the game with
+no way forward.
+
 **Landing on your own property.**
 Offered an upgrade: pay 5 coins and answer at the next depth. Decline freely.
 
@@ -138,21 +164,51 @@ rent is paid either way. Coins floor at zero — a player at zero keeps playing 
 keeps answering.
 
 **Completing a set.** Own all 3 in a colour → the street lights up, rent doubles on
-those properties, and **a story beat plays** (§7).
+those properties, and **a story beat plays** (§7). Beats queue rather than replace
+each other: each one carries the callback that resumes the turn, and there is only
+one OK button, so a beat opening on top of a live one used to drop the first one's
+continuation and strand the game.
 
 **End.** When the clock hits zero, the finale beat plays regardless of progress, then
 the report card. **Winner owns the most buildings** — count 🏠=1, 🏡=2, 🏘️=3. Coins
 are not score; they are fuel.
 
-**Mystery cards.** 12 per week, drawn at random. Speaking-first, always doable:
-- *Say 3 animals in 10 seconds* → +3 coins
-- *Momo says a word — repeat it* → +2 coins
-- *Ask your teacher: "Do you like cake?"* → +3 coins
-- *Move to any Memory Lane square*
-- *Free upgrade on any property you own*
-- *Momo is hungry — give him a food word* → +2 coins
+**Mystery cards.** One deck, drawn at random, and four of the twenty squares draw
+from it — so a fifth of every lap is a card. Each card is a *kind*, and each kind
+asks the child to do something before it pays:
 
-No "go back 3 spaces", no "pay a fine". Every card is an opportunity.
+| Kind | What the child does | Pays |
+|---|---|---|
+| `quiz` | Sees a board picture, taps its word | 3 |
+| `listen` | Hears a board word, taps its picture | 3 |
+| `find` | Hears a word, hunts for its square **on the board** | 4 |
+| `echo` | Momo says a word they own; they say it back | 2 |
+| `ask` | Asks the teacher **this week's level-3 question** | 3 |
+| `tap` | A physical action — one tap per rep, spoken each time | 2–3 |
+| `gift` | Coins, or a free upgrade they choose | 3 |
+
+No "go back 3 spaces", no "pay a fine". Every card is an opportunity, and a wrong
+answer still pays one consolation coin — a card the child learns to dread is worse
+than a card that pays too generously.
+
+> **Two rules learned the hard way.**
+>
+> *Cards must come from the week.* The first deck was one fixed global list, so
+> Week 1 — farm animals, `This is a ___` — could deal *"say your favourite
+> colour"* (Week 3), *"spell your favourite word"* (a beginner cannot spell), or
+> *"ask your teacher: Do you like cake?"* (Week 2's frame **and** Week 2's noun).
+> Cards now build themselves from the current board and the current frame.
+>
+> *Cards must not be acknowledgements.* Every card used to end in a single
+> **Done!** button that paid out whether or not the child had done anything, which
+> made a fifth of the board free money. The `tap` cards are the clearest fix: one
+> pip per rep, the action spoken on every tap, and the payout button does not
+> appear until the pips are full.
+
+The `tap` cards are deliberately week-agnostic — *jump*, *clap*, *stand up*,
+*high five*. Those words are instructions here, not lesson content, and jumping
+while hearing "jump" is how a beginner attaches a verb to a meaning rather than to
+a translation.
 
 ---
 
@@ -164,13 +220,25 @@ No "go back 3 spaces", no "pay a fine". Every card is an opportunity.
 | Buy a property | −3 |
 | Upgrade a property | −5 |
 | Rent received | +1 / +2 / +4 by level, doubled on a complete set |
-| Park mini-game | +2 |
-| Mystery card | +2 or +3 |
-| Shop: hint token | −3 (reveals the 中文 hint once) |
+| Landing on your own finished shop | +2, for saying its level-3 sentence |
+| Park mini-game | +1 per correct tap (floor of 1) |
+| Practice Corner | +1 per correct answer (floor of 1) |
+| Mystery card | +2 to +4, or +1 for a wrong answer |
+| Shop: hint token | −3 (reveals the 中文 hint on one purchase, when you choose to spend it) |
 | Shop: choose your move | −5 (move exactly where you want next turn) |
 
 That last one matters. Pure dice makes a child a passenger; one purchasable choice
 per lap restores agency without adding rules.
+
+**Both shop items must be visible.** The hint token was originally invisible — it
+appeared in no HUD and spent itself automatically on the next purchase, so a child
+could buy one and never once decide to use it. A held hint now shows as `💡×n` in
+the HUD and is offered as a button on the question, and both shop items carry a
+line saying what they actually do.
+
+**Rewards floor at one, never zero.** The Park and the Practice Corner pay per
+correct answer, and a square that can pay nothing is a square the child hopes to
+miss — which is exactly backwards for the two squares meant to be the friendly ones.
 
 ---
 
@@ -178,9 +246,24 @@ per lap restores agency without adding rules.
 
 | Time | Phase | What happens |
 |---|---|---|
-| 0–8 min | **Teach** | Flashcards for the 9 new words. Momo speaks each; the child repeats. Then the week's frame, modelled 3 times. |
-| 8–26 min | **Play** | 20 rounds. ~22 word encounters, ~2 exposures per word (measured). |
+| 0–8 min | **Teach** | Flashcards for the week's new words. Momo speaks each; the child repeats. Then the week's frame, modelled 3 times. |
+| 8–26 min | **Play** | 20 rounds. ~170 taps and ~170 English utterances heard (measured, §2). |
 | 26–30 min | **Report** | Words mastered, words missed, next week's preview. |
+
+**Consolidation weeks need a warm-up too.** Most weeks teach 9 new properties, but
+Weeks 5 and 8 are all review, so "new words" is empty for them:
+
+| Week | Flashcards | Frame modelled with |
+|---|---|---|
+| 1 | its 12 new properties | 3 of them |
+| 2–4, 6–7 | its 9 new properties | 3 of them |
+| 5 | the 11 number words it teaches | 3 board properties |
+| 8 | its 12 board words | 3 of them |
+
+Both fall out of one rule: warm up what is new, and when nothing is new, warm up
+the board. Without it Week 8 could not be started at all — it had no card to tap,
+so the Next button had nothing to enable it — and Week 5's frame step rendered
+blank, because it modelled the frame using only new properties and Week 5 has none.
 
 The teach phase reuses the flow already in [letter-mole](../letter-mole/) —
 flashcards → matching → game. Step 3 is simply the board instead of the mole.
@@ -307,10 +390,15 @@ Momo's family arrives for the housewarming.
 
 | Set | Street | Properties |
 |---|---|---|
-| ▲ | Upstairs | mom · sister · baby |
-| ● | Downstairs | dad · brother · friend |
-| ■ | The Garden | girl · boy · family |
+| ▲ | Upstairs | mom · sister · grandma |
+| ● | Downstairs | dad · brother · grandpa |
+| ■ | The Garden | girl · boy · baby |
 | ◆ | Memory Lane | red · cake · bird |
+
+Sets ▲ and ● are all-*she* and all-*he* on purpose, so the contrast is audible
+street by street. Every word declares its own pronoun in the curriculum: a fixed
+`She is my ___` would generate *"She is my dad"*, and a beginner must never be
+asked to say a wrong sentence.
 
 **Ladder** — `mom` → `She is my mom.` → `Is she your mom?`
 
@@ -400,7 +488,7 @@ frame it belongs to**, so the board cycles through all seven patterns:
 | ▲ | cow · apple · red | `This is a ___` · `I like ___` · `It is ___` |
 | ● | mom · cat · jump | `She is my ___` · `I see three ___s` · `A frog can ___` |
 | ■ | running · dog · milk | `The dog is ___ing` · `This is a ___` · `I like ___` |
-| ◆ | Momo's Choice ×3 | any frame, child picks |
+| ◆ | Momo's Choice ×3 | bird · cake · blue — Weeks 1 · 2 · 3 |
 
 No new grammar. This is the assessment lesson and the emotional payoff: the report
 card shows the **whole season** — every word, every frame, the finished town.
@@ -416,9 +504,8 @@ weeks. Week 1 leaves a farm, Week 2 adds a market, Week 5 a fairground. By Week 
 child sees a town they built out of ~68 words they own.
 
 This is the single most motivating artifact in the app, and it is nearly free: it is a
-render of the `mastered` array that
-[word-garden-defense/progress.js](../word-garden-defense/progress.js) already keeps.
-Tapping any building replays its word.
+render of the town record that [shared/progress.js](../shared/progress.js) already
+keeps. Tapping any building replays its word.
 
 It doubles as the review pool — Memory Lane draws from it.
 
@@ -430,17 +517,22 @@ Plain HTML/CSS/JS, no build step, consistent with the rest of the repo.
 
 ```
 word-town/
-  index.html      screens: menu → teach → board → report
-  board.js        20 squares, dice, movement, ownership, rent
-  game.js         turn loop, economy, question flow
-  story.js        Momo beats, mystery cards
+  index.html      screens: menu → teach → board → report → town map
+  board.js        the 20 squares: layout, rendering, ownership, set completion
+  game.js         turn loop, dice, movement, economy, every square's behaviour
+  story.js        modal shells, question/action cards, Momo beats, report card
   styles.css
   DESIGN.md       this file
 shared/
-  curriculum.js   NEW — season/week definitions
-  progress.js     MOVED from word-garden-defense/
-  speech.js       NEW — thin Web Speech wrapper
+  curriculum.js   season/week definitions + the mystery deck
+  progress.js     the town record and week unlocks (shared with the other games)
+  speech.js       thin Web Speech wrapper
 ```
+
+`story.js` owns the *shapes* a screen can take — a question, an action card, a
+beat — and `game.js` owns what goes in them and what it means. The split is what
+keeps the turn logic readable: `onPractice` is nine lines because it does not also
+have to draw three buttons.
 
 **`shared/curriculum.js`** is the new piece. A week is data, not code:
 
@@ -492,8 +584,17 @@ it is far too much English for a beginner, and it stalls a 30-minute clock.
 1. **Does rent-as-speaking hold up?** The whole design rests on a child cheerfully
    saying a sentence to pay rent 20 times per lesson. Plausible, unverified. If it
    drags, the fallback is tap-to-answer at level 1 and speaking only at levels 2–3.
-2. **Is 20 turns right?** 18 minutes of play at ~25s/turn. Needs a real timing test.
+2. **Is 20 rounds right?** 18 minutes of play at ~25s/turn — and the specials now
+   take longer than they did, because they ask for something. The Park alone is a
+   fixed 15 seconds. Needs a real timing test before the clock is trusted.
 3. **Is Week 4 too dense?** he/she + is + my/your in one lesson. May need splitting,
    which would push the season to 9 weeks.
 4. **Season length.** 8 weeks keeps the theme order changeable between seasons. If a
    child needs food vocabulary sooner, Season 2 can reorder — a 40-week arc could not.
+5. **Is the Park too hard at 15 seconds?** It is the only timed thing in the game,
+   and timers are the fastest way to make a beginner freeze. The payout floors at
+   one coin so a bad run still pays, but if it reads as pressure rather than a
+   game, the fix is to drop the clock and give it a fixed five rounds instead.
+6. **Does "find it in the town" work on a phone?** The squares are small and the
+   word on them is 0.58rem. It gives up and points after two misses, but it may
+   simply be a tablet-only card.
