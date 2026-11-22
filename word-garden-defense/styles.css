@@ -478,6 +478,7 @@ body {
 .hud-sun { color: var(--sunflower); }
 .hud-score { color: #fff; }
 .hud-wave { color: var(--green-light); }
+.hud-learn { color: #8FD3FF; }
 .hud-lives { color: var(--danger); }
 
 .lives-hearts { letter-spacing: 3px; }

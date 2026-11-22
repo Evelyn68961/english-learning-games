@@ -56,10 +56,11 @@ const TROLLER_KILL_RADIUS = 30;
 const TROLLER_TRIGGER_X_BUFFER = 25; // fire when zombie reaches LAWN_LEFT + this
 
 // ==================== QUESTION PACING ====================
-// Strict 15-second gap between questions, measured in wall-clock ms (NOT frames),
-// so the cadence is identical on 60 Hz and 144 Hz displays. Reset on dismissal
-// so two questions can never appear closer than 15s apart.
-const QUESTION_INTERVAL_MS = 15000;
+// Gap between automatic questions, measured in wall-clock ms from when the
+// previous question closes. The battlefield freezes during a question, so a
+// short gap adds no time pressure; it just leaves room to teach a level's
+// content (a level teaches ~12 new items).
+const QUESTION_INTERVAL_MS = 6000;
 
 // Question reward shifts at this wave. Before: correct = +50 sun. From this
 // wave on, sunflowers should be self-sufficient for sun, so correct answers
@@ -81,7 +82,7 @@ const BAND_PLAN = {
     junior:     { minStage: 2, maxStage: 4, grammarShare: 0.35, waves: [5, 7] },
     senior:     { minStage: 4, maxStage: 8, grammarShare: 0.50, waves: [5, 8] },
 };
-const NEW_WORDS_PER_LEVEL = 8;
+const NEW_WORDS_PER_LEVEL = 6;
 const REVIEW_SHARE = 0.3;  // share of questions that revisit earlier content
 const STAGE_NAMES = ['Starter', 'Basic', 'Growing', 'Builder', 'Bridge', 'GSAT I', 'GSAT II', 'AST I', 'AST II'];
 const STAGE_EMOJI = ['🌱', '🌿', '🌻', '🌳', '🏅', '📘', '📗', '🎓', '🏆'];
@@ -575,6 +576,12 @@ function weightedPick(list, weightOf) {
 }
 
 function pickItem(sched) {
+    // 0. Final quiz: only the new items not yet answered right.
+    if (gameState.finalQuiz && gameState.learnGoal.size) {
+        let left = sched.items.filter(it => gameState.learnGoal.has(it.key));
+        if (left.length > 1) left = left.filter(it => it.key !== sched.lastKey);
+        return left[Math.floor(Math.random() * left.length)];
+    }
     // 1. Anything due (missed or re-check) comes first, oldest first.
     const due = sched.items.filter(it => it.dueAt !== null && it.dueAt <= sched.qIndex && it.key !== sched.lastKey)
         .sort((a, b) => a.dueAt - b.dueAt);
@@ -605,10 +612,14 @@ function pickItem(sched) {
 function scheduleAfterAnswer(sched, item, correct) {
     if (correct) {
         item.correct++;
+        item.misses = 0;
         item.dueAt = (item.isNew && item.correct === 1) ? sched.qIndex + RECHECK_GAP : null;
     } else {
+        // Each further miss in a row pushes the item a little further back
+        // (3, 5, 7 questions), so one hard word can't crowd out the rest.
         item.correct = 0;
-        item.dueAt = sched.qIndex + MISSED_GAP;
+        item.misses = (item.misses || 0) + 1;
+        item.dueAt = sched.qIndex + Math.min(MISSED_GAP + 2 * (item.misses - 1), 7);
     }
 }
 
@@ -859,12 +870,16 @@ function answerQuestion(selected) {
     scheduleAfterAnswer(gameState.sched, q.item, isCorrect);
     const P = window.WGD_PROGRESS;
     const { learnedNow } = P.recordAnswer(gameState.band, gameState.themeId, q.item.key, isCorrect, gameState.runId);
-    if (isCorrect) gameState.rightThisGame.add(q.item.key);
+    if (isCorrect) { gameState.rightThisGame.add(q.item.key); gameState.learnGoal.delete(q.item.key); }
 
     if (isCorrect) {
         gameState.correctAnswers++;
         gameState.score += 10;
-        if (gameState.wave >= UPGRADE_FROM_WAVE) {
+        if (gameState.finalQuiz) {
+            // No zombies left, so sun or upgrades would be useless here.
+            playSound('correct');
+            showFeedback(learnedNow ? '🎓 Learned!' : '✅');
+        } else if (gameState.wave >= UPGRADE_FROM_WAVE) {
             gameState.upgradesPending++;
             playSound('correct');
             showFeedback(learnedNow ? '🎓 Learned! ⬆️' : '⬆️ Tap a plant to upgrade!');
@@ -908,7 +923,7 @@ function closeQuestion() {
     const panel = document.getElementById('question-panel');
     panel.classList.remove('active', 'teach-mode', 'explain-mode');
     gameState.questionActive = false;
-    gameState.nextQuestionAt = performance.now() + QUESTION_INTERVAL_MS;
+    gameState.nextQuestionAt = performance.now() + (gameState.finalQuiz ? 600 : QUESTION_INTERVAL_MS);
     gameState.triggerZombie = null;
     updateAskBtn();
 }
@@ -928,6 +943,12 @@ function updateHUD() {
     document.getElementById('hud-sun').textContent = gameState.sun;
     document.getElementById('hud-score').textContent = gameState.score;
     document.getElementById('hud-wave').textContent = gameState.wave;
+    const learn = document.getElementById('hud-learn');
+    if (learn) {
+        const total = gameState.learnGoalTotal || 0;
+        learn.parentElement.style.display = total ? '' : 'none';
+        learn.textContent = `${total - (gameState.learnGoal ? gameState.learnGoal.size : 0)}/${total}`;
+    }
     document.getElementById('hud-total-waves').textContent = gameState.totalWaves;
     document.getElementById('hud-lives').innerHTML = '❤️'.repeat(Math.max(0, gameState.lives)) + '🖤'.repeat(Math.max(0, 3 - gameState.lives));
     updateAskBtn();
@@ -1053,6 +1074,10 @@ function startGame(levelDef) {
         runId: Date.now(),
     };
     gameState.sched = makeSchedule(levelDef);
+    // Learning goal: every new item of the level answered right once.
+    gameState.learnGoal = new Set(gameState.sched.items.filter(it => it.isNew).map(it => it.key));
+    gameState.learnGoalTotal = gameState.learnGoal.size;
+    gameState.finalQuiz = false;
 
     document.getElementById('hud').classList.add('active');
     document.getElementById('plant-cards').classList.add('active');
@@ -1115,7 +1140,7 @@ function update() {
     // Question pacing: strict 15s gap, gated by wall-clock time. Schedule the
     // NEXT question only once dismissal completes (see answerQuestion), so two
     // questions can never appear within 15s of each other regardless of fps.
-    if (!gs.questionActive && performance.now() >= gs.nextQuestionAt) {
+    if (!gs.finalQuiz && !gs.questionActive && performance.now() >= gs.nextQuestionAt) {
         gs.nextQuestionAt = Infinity; // disarm until dismissal reschedules
         showQuestion();
     }
@@ -1297,9 +1322,21 @@ function update() {
             gs.spawnInterval = Math.max(tune.minInterval, gs.spawnInterval - tune.dInterval);
             updateHUD();
             showFeedback(`🌊 Wave ${gs.wave}!`);
-        } else {
+        } else if (gs.learnGoal.size === 0) {
             finishLevel();
+        } else if (!gs.finalQuiz) {
+            // Waves are done but some new items haven't been answered right
+            // yet: no more zombies, just a short quiz on what's left.
+            gs.finalQuiz = true;
+            gs.nextQuestionAt = performance.now() + 1500;
+            showFeedback('📘 Finish learning!');
         }
+    }
+
+    // Final quiz: questions back to back until every new item is learned once.
+    if (gs.finalQuiz && !gs.questionActive) {
+        if (gs.learnGoal.size === 0) finishLevel();
+        else if (performance.now() >= gs.nextQuestionAt) { gs.nextQuestionAt = Infinity; showQuestion(); }
     }
 }
 
@@ -1585,6 +1622,7 @@ function finishLevel() {
 
 function showLevelResult(won, stars) {
     const gs = gameState;
+    document.getElementById('feedback').style.display = 'none'; // don't cover the results
     const P = window.WGD_PROGRESS;
     const lv = gs.levelDef;
     const accuracy = accuracyPct();
