@@ -22,9 +22,15 @@
 //   { <band>: { <themeId>: {
 //       levels:  { "1": { cleared: true, stars: 3 }, ... },
 //       bestScore: 0,
-//       mastered: ["cat", "dog", ...]        // distinct words answered correctly
-//       masteredGrammar: ["He ___ tall.", ...] // distinct grammar patterns (by sentence)
+//       mastered: ["cat", "dog", ...]        // words the learner has learned
+//       masteredGrammar: ["He ___ tall.", ...] // grammar patterns learned (by sentence)
+//       stats: { "w:cat": { runs: 1, lastRun: 1732... }, "g:He ___ tall.": {...} }
 //   } } }            band ∈ { elementary, junior, senior }
+//
+// `stats` is Word Garden Defense's per-item memory. An item counts as learned
+// only once it has been answered correctly in MASTERY_RUNS different games
+// (one correct answer can be a lucky guess or short-term memory). Entries
+// already in `mastered` / `masteredGrammar` from older saves stay learned.
 
 (function () {
     const STORAGE_KEY = 'wgd-progress-v1';
@@ -88,6 +94,7 @@
         if (typeof t.bestScore !== 'number') t.bestScore = 0;
         if (!Array.isArray(t.mastered)) t.mastered = [];
         if (!Array.isArray(t.masteredGrammar)) t.masteredGrammar = [];
+        if (!t.stats || typeof t.stats !== 'object') t.stats = {};
         return { data, theme: t };
     }
 
@@ -141,6 +148,49 @@
         return getThemeProgress(band, themeId).theme.masteredGrammar.length;
     }
 
+    // ---- Per-item memory (Word Garden Defense) ----
+    // key is 'w:<word>' or 'g:<sentence>'; runId identifies one game.
+    const MASTERY_RUNS = 2;
+
+    function isMasteredKey(theme, key) {
+        const body = key.slice(2);
+        return key[0] === 'w' ? theme.mastered.includes(body) : theme.masteredGrammar.includes(body);
+    }
+
+    // Record one answer. A correct answer earns at most one credit per game;
+    // a wrong answer takes one credit away. Reaching MASTERY_RUNS credits
+    // marks the item learned (and learned items are never un-learned, so the
+    // progress meters never go backwards). Returns { learnedNow }.
+    function recordAnswer(band, themeId, key, correct, runId) {
+        if (!key) return { learnedNow: false };
+        const { data, theme } = getThemeProgress(band, themeId);
+        const st = theme.stats[key] || (theme.stats[key] = { runs: 0, lastRun: null });
+        let learnedNow = false;
+        if (correct) {
+            if (st.lastRun !== runId) { st.runs++; st.lastRun = runId; }
+            if (st.runs >= MASTERY_RUNS && !isMasteredKey(theme, key)) {
+                (key[0] === 'w' ? theme.mastered : theme.masteredGrammar).push(key.slice(2));
+                learnedNow = true;
+            }
+        } else {
+            st.runs = Math.max(0, st.runs - 1);
+            st.lastRun = runId;
+        }
+        saveProgress(data);
+        return { learnedNow };
+    }
+
+    function isItemMastered(band, themeId, key) {
+        return isMasteredKey(getThemeProgress(band, themeId).theme, key);
+    }
+
+    // Has the learner met this item in an earlier game (answered it, or it is
+    // already learned)? Used to skip the teach card for familiar items.
+    function hasSeenItem(band, themeId, key) {
+        const { theme } = getThemeProgress(band, themeId);
+        return !!theme.stats[key] || isMasteredKey(theme, key);
+    }
+
     function bestScore(band, themeId) {
         return getThemeProgress(band, themeId).theme.bestScore;
     }
@@ -159,6 +209,10 @@
         wordsMasteredCount,
         recordGrammarMastered,
         grammarMasteredCount,
+        recordAnswer,
+        isItemMastered,
+        hasSeenItem,
+        MASTERY_RUNS,
         bestScore,
         levelInfo,
     };

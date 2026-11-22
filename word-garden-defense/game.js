@@ -68,32 +68,85 @@ const QUESTION_INTERVAL_MS = 15000;
 const UPGRADE_FROM_WAVE = 3;
 
 // ==================== STAGED LEVELS ====================
-// Every band plays a theme as a short series of unlockable levels. Each level
-// pins question difficulty to a `stage` ceiling (= the `difficulty` band in the
-// question bank) so content ramps gently, and clearing a level unlocks the next
-// (see progress.js). `stage` matches the bank's 0-8 difficulty scale:
+// Levels are built per theme from the question bank. Each band teaches the
+// difficulty range in BAND_PLAN; that content is sorted easiest-first and cut
+// into levels of about NEW_WORDS_PER_LEVEL new words (plus a matching share of
+// the grammar patterns), so every level teaches its OWN new items. Each level
+// also reviews what came before it (earlier levels, plus easier content from
+// the band below), and the band ends with a "Big Review" level that mixes
+// everything. Difficulty scale (bank `difficulty`):
 //   0 starter · 1 A1 · 2 A2 · 3 B1 · 4 B2-prep · 5-6 大考 L3-L4 · 7-8 L5-L6.
-// Each band's last level caps at the hardest difficulty its `forLevel()` filter
-// exposes, so no level ever asks for content the theme can't supply.
-const LEVEL_SETS = {
-    elementary: [
-        { id: 1, name: 'Starter', emoji: '🌱', stage: 0, waves: 4 },
-        { id: 2, name: 'Basic',   emoji: '🌿', stage: 1, waves: 4 },
-        { id: 3, name: 'Growing', emoji: '🌻', stage: 2, waves: 5 },
-    ],
-    junior: [
-        { id: 1, name: 'Foundation', emoji: '🌿', stage: 2, waves: 5 },
-        { id: 2, name: 'Builder',    emoji: '🌳', stage: 3, waves: 6 },
-        { id: 3, name: 'Mastery',    emoji: '🏅', stage: 4, waves: 7 },
-    ],
-    senior: [
-        { id: 1, name: 'Review',   emoji: '📗', stage: 4, waves: 5 },
-        { id: 2, name: '學測 GSAT', emoji: '📘', stage: 6, waves: 7 },
-        { id: 3, name: '分科 AST',  emoji: '🎓', stage: 8, waves: 8 },
-    ],
+const BAND_PLAN = {
+    elementary: { minStage: 0, maxStage: 2, grammarShare: 0.20, waves: [4, 6] },
+    junior:     { minStage: 2, maxStage: 4, grammarShare: 0.35, waves: [5, 7] },
+    senior:     { minStage: 4, maxStage: 8, grammarShare: 0.50, waves: [5, 8] },
 };
-// Levels for the active band; falls back to elementary for an unknown band.
-function levelsFor(band) { return LEVEL_SETS[band] || LEVEL_SETS.elementary; }
+const NEW_WORDS_PER_LEVEL = 8;
+const REVIEW_SHARE = 0.3;  // share of questions that revisit earlier content
+const STAGE_NAMES = ['Starter', 'Basic', 'Growing', 'Builder', 'Bridge', 'GSAT I', 'GSAT II', 'AST I', 'AST II'];
+const STAGE_EMOJI = ['🌱', '🌿', '🌻', '🌳', '🏅', '📘', '📗', '🎓', '🏆'];
+
+function itemDifficulty(x) { return x.difficulty ?? 1; }
+
+function buildLevels(band, theme) {
+    const plan = BAND_PLAN[band] || BAND_PLAN.elementary;
+    const inBand = x => itemDifficulty(x) >= plan.minStage && itemDifficulty(x) <= plan.maxStage;
+    const below = x => itemDifficulty(x) < plan.minStage;
+    const byDiff = (a, b) => itemDifficulty(a) - itemDifficulty(b); // stable sort keeps bank order
+    const uniqueGrammar = [];
+    const seen = new Set();
+    theme.grammar.forEach(g => { if (!seen.has(g.sentence)) { seen.add(g.sentence); uniqueGrammar.push(g); } });
+
+    const words = theme.words.filter(inBand).sort(byDiff);
+    const grammar = uniqueGrammar.filter(inBand).sort(byDiff);
+    const warmWords = theme.words.filter(below);
+    const warmGrammar = uniqueGrammar.filter(below);
+
+    const n = Math.max(1, Math.round(words.length / NEW_WORDS_PER_LEVEL));
+    const cut = (arr, i) => [Math.round(i * arr.length / n), Math.round((i + 1) * arr.length / n)];
+    const levels = [];
+    for (let i = 0; i < n; i++) {
+        const [w0, w1] = cut(words, i);
+        const [g0, g1] = cut(grammar, i);
+        const newWords = words.slice(w0, w1);
+        const newGrammar = grammar.slice(g0, g1);
+        // Name the level after the difficulty most of its new words have.
+        const counts = {};
+        newWords.forEach(w => { counts[itemDifficulty(w)] = (counts[itemDifficulty(w)] || 0) + 1; });
+        const common = Object.keys(counts).sort((x, y) => counts[y] - counts[x] || x - y)[0];
+        const stage = common !== undefined ? Number(common) : plan.minStage;
+        levels.push({
+            id: i + 1,
+            name: STAGE_NAMES[stage] || 'Level',
+            emoji: STAGE_EMOJI[stage] || '🌱',
+            stage,
+            waves: plan.waves[0] + Math.round((plan.waves[1] - plan.waves[0]) * (n > 1 ? i / (n - 1) : 0)),
+            newWords, newGrammar,
+            reviewWords: warmWords.concat(words.slice(0, w0)),
+            reviewGrammar: warmGrammar.concat(grammar.slice(0, g0)),
+            isReview: false,
+        });
+    }
+    // Several levels can share a stage: number them ("Builder 1", "Builder 2").
+    const perName = {};
+    levels.forEach(l => { perName[l.name] = (perName[l.name] || 0) + 1; });
+    const counter = {};
+    levels.forEach(l => { if (perName[l.name] > 1) l.name += ' ' + (counter[l.name] = (counter[l.name] || 0) + 1); });
+
+    levels.push({
+        id: n + 1, name: 'Big Review', emoji: '⭐', stage: plan.maxStage, waves: plan.waves[1],
+        newWords: [], newGrammar: [], reviewWords: words, reviewGrammar: grammar, isReview: true,
+    });
+    return levels;
+}
+
+// Levels for a band, built from the band-filtered current theme (cached).
+const levelCache = {};
+function levelsFor(band) {
+    if (!currentTheme) return [];
+    const key = band + '|' + currentTheme.id;
+    return levelCache[key] || (levelCache[key] = buildLevels(band, currentTheme));
+}
 
 // Zombie difficulty per learner band. Elementary is moderately gentler — it
 // starts with fewer, slower zombies and ramps more slowly so kids have time to
@@ -486,66 +539,147 @@ function renderThemes() {
     `).join('');
 }
 
-// ==================== QUESTION GENERATION ====================
-// Difficulty is pinned to the current level's stage. The question mix shifts
-// by band — elementary stays vocab-heavy so young learners spend more time on
-// words, while junior/senior lean harder into grammar to match their exam focus.
-function generateQuestion(theme) {
-    const maxDifficulty = gameState.levelDef.stage;
-    const r = Math.random();
-    let type;
-    if (gameState.band === 'senior')      type = r < 0.30 ? 'vocab' : r < 0.50 ? 'spelling' : 'grammar';
-    else if (gameState.band === 'junior') type = r < 0.40 ? 'vocab' : r < 0.65 ? 'spelling' : 'grammar';
-    else                                  type = r < 0.50 ? 'vocab' : r < 0.80 ? 'spelling' : 'grammar';
-    return buildQuestion(theme, type, maxDifficulty);
+// ==================== QUESTION SCHEDULING ====================
+// Each game keeps a small schedule over the level's items (spaced retrieval):
+//  - a missed item comes back after two other questions;
+//  - a new item answered right gets one quick re-check a few questions later;
+//  - otherwise ~REVIEW_SHARE of questions revisit earlier content (favouring
+//    items not yet learned) and the rest practise this level's new items
+//    (favouring the ones practised least so far).
+const MISSED_GAP = 3;    // asked again 3 questions later (two in between)
+const RECHECK_GAP = 5;   // first-time-correct new item re-checked 5 questions later
+
+function itemKey(kind, data) { return (kind === 'word' ? 'w:' : 'g:') + (kind === 'word' ? data.word : data.sentence); }
+
+function makeSchedule(levelDef) {
+    const mk = (kind, data, isNew, warm) => ({ kind, data, isNew, warm, key: itemKey(kind, data), correct: 0, dueAt: null });
+    const warmWords = new Set(levelDef.reviewWords.filter(w => itemDifficulty(w) < (BAND_PLAN[gameState.band] || BAND_PLAN.elementary).minStage));
+    const warmGrammar = new Set(levelDef.reviewGrammar.filter(g => itemDifficulty(g) < (BAND_PLAN[gameState.band] || BAND_PLAN.elementary).minStage));
+    return {
+        items: [
+            ...levelDef.newWords.map(w => mk('word', w, true, false)),
+            ...levelDef.newGrammar.map(g => mk('grammar', g, true, false)),
+            ...levelDef.reviewWords.map(w => mk('word', w, false, warmWords.has(w))),
+            ...levelDef.reviewGrammar.map(g => mk('grammar', g, false, warmGrammar.has(g))),
+        ],
+        qIndex: 0,
+        lastKey: null,
+    };
 }
 
-// Build a single question of the given type, drawing only from content at or
-// below maxDifficulty.
-function buildQuestion(t, type, maxDifficulty) {
-    if (type === 'grammar') {
-        const eligible = t.grammar.filter(g => (g.difficulty ?? 1) <= maxDifficulty);
-        if (eligible.length === 0) type = 'vocab';  // fall back if no grammar yet
+function weightedPick(list, weightOf) {
+    const total = list.reduce((sum, x) => sum + weightOf(x), 0);
+    let r = Math.random() * total;
+    for (const x of list) { r -= weightOf(x); if (r <= 0) return x; }
+    return list[list.length - 1];
+}
+
+function pickItem(sched) {
+    // 1. Anything due (missed or re-check) comes first, oldest first.
+    const due = sched.items.filter(it => it.dueAt !== null && it.dueAt <= sched.qIndex && it.key !== sched.lastKey)
+        .sort((a, b) => a.dueAt - b.dueAt);
+    if (due.length) return due[0];
+
+    // 2. Pick grammar vs word by band, falling back if one kind is empty.
+    const plan = BAND_PLAN[gameState.band] || BAND_PLAN.elementary;
+    const ofKind = k => sched.items.filter(it => it.kind === k);
+    let kind = Math.random() < plan.grammarShare ? 'grammar' : 'word';
+    if (ofKind(kind).length === 0) kind = kind === 'word' ? 'grammar' : 'word';
+    const pool = ofKind(kind);
+    const fresh = pool.filter(it => it.isNew);
+    const review = pool.filter(it => !it.isNew);
+
+    // 3. New items vs review.
+    const useReview = review.length > 0 && (fresh.length === 0 || Math.random() < REVIEW_SHARE);
+    let choices = useReview ? review : fresh;
+    if (choices.length > 1) choices = choices.filter(it => it.key !== sched.lastKey);
+    const P = window.WGD_PROGRESS;
+    return weightedPick(choices, it => {
+        let w = 1 / (1 + 2 * it.correct);                       // practised less → more likely
+        if (!it.isNew && !P.isItemMastered(gameState.band, gameState.themeId, it.key)) w *= 3;
+        return w;
+    });
+}
+
+// Update the schedule after an answer.
+function scheduleAfterAnswer(sched, item, correct) {
+    if (correct) {
+        item.correct++;
+        item.dueAt = (item.isNew && item.correct === 1) ? sched.qIndex + RECHECK_GAP : null;
+    } else {
+        item.correct = 0;
+        item.dueAt = sched.qIndex + MISSED_GAP;
     }
+}
 
-    // Cap word difficulty so an early stage/tier never pulls a harder word than
-    // it should out of the bank.
-    const wordsForTier = t.words.filter(w => (w.difficulty ?? 1) <= maxDifficulty);
-    const wordPool = wordsForTier.length > 0 ? wordsForTier : t.words;
+// ==================== QUESTION GENERATION ====================
+function generateQuestion() {
+    const sched = gameState.sched;
+    sched.qIndex++;
+    const item = pickItem(sched);
+    sched.lastKey = item.key;
+    const q = item.kind === 'grammar' ? grammarQuestion(item.data) : wordQuestion(item.data, chooseWordType(item.data));
+    q.item = item;
+    return q;
+}
 
+// Letters that are easy to mix up, so a wrong spelling option is a real
+// choice rather than an obviously random letter.
+const CONFUSABLE = {
+    a: 'eou', e: 'aiy', i: 'eay', o: 'aeu', u: 'oai', y: 'ie',
+    b: 'dp', d: 'bt', p: 'bq', q: 'pg', c: 'ks', k: 'cg', s: 'cz', z: 'sx',
+    m: 'nw', n: 'mh', f: 'vph', v: 'wf', w: 'vu', g: 'jq', j: 'gy', l: 'ri',
+    r: 'lw', t: 'df', h: 'nk', x: 'ks',
+};
+
+function isPlainWord(word) { return /^[a-z]+$/.test(word); }
+
+// Which question to ask about a word. Build-the-word needs a short, plain
+// lowercase word; spelling needs at least one plain lowercase letter.
+function chooseWordType(w) {
+    const r = Math.random();
+    const canBuild = isPlainWord(w.word) && w.word.length >= 3 && w.word.length <= 9;
+    const canSpell = /[a-z]/.test(w.word);
+    let type;
+    if (gameState.band === 'elementary') type = r < 0.5 ? 'vocab' : r < 0.75 ? 'spelling' : 'build';
+    else if (gameState.band === 'junior') type = r < 0.35 ? 'vocab' : r < 0.65 ? 'spelling' : 'build';
+    else type = r < 0.3 ? 'vocab' : r < 0.6 ? 'spelling' : 'build';
+    if (type === 'build' && !canBuild) type = canSpell ? 'spelling' : 'vocab';
+    if (type === 'spelling' && !canSpell) type = 'vocab';
+    return type;
+}
+
+function wordQuestion(w, type) {
+    const t = currentTheme;
     if (type === 'vocab') {
-        const w = wordPool[Math.floor(Math.random() * wordPool.length)];
-        const wrongs = t.words.filter(x => x.word !== w.word)
-            .sort(() => Math.random() - 0.5).slice(0, 2).map(x => x.word);
-        const options = shuffle([w.word, ...wrongs]);
-        return { type: 'vocab', image: w.emoji, prompt: 'What is this?', hint: w.hint, answer: w.word, options, speakText: w.word };
+        const wrongs = shuffle(t.words.filter(x => x.word !== w.word && x.emoji !== w.emoji)).slice(0, 2).map(x => x.word);
+        return { type: 'vocab', image: w.emoji, prompt: 'What is this?', hint: w.hint, answer: w.word, options: shuffle([w.word, ...wrongs]), speakText: w.word };
     }
 
-    if (type === 'spelling') {
-        // Only blank a plain lowercase letter. A capital (Monday), space
-        // (pencil case), hyphen (in-laws) or accent (résumé) would either be
-        // unanswerable or stand out next to the random a-z wrong options.
-        const blankable = w => [...w.word].map((c, i) => /[a-z]/.test(c) ? i : -1).filter(i => i >= 0);
-        const spellPool = wordPool.filter(w => blankable(w).length > 0);
-        if (spellPool.length === 0) return buildQuestion(t, 'vocab', maxDifficulty);
-        const w = spellPool[Math.floor(Math.random() * spellPool.length)];
-        const slots = blankable(w);
-        const idx = slots[Math.floor(Math.random() * slots.length)];
-        const blanked = w.word.slice(0, idx) + '_' + w.word.slice(idx + 1);
-        const correctLetter = w.word[idx];
-        const allLetters = 'abcdefghijklmnopqrstuvwxyz';
-        const wrongs = [];
-        while (wrongs.length < 2) {
-            const l = allLetters[Math.floor(Math.random() * 26)];
-            if (l !== correctLetter && !wrongs.includes(l)) wrongs.push(l);
-        }
-        const options = shuffle([correctLetter, ...wrongs]);
-        return { type: 'spelling', image: w.emoji, prompt: blanked, hint: w.hint, answer: correctLetter, options, speakText: w.word };
+    if (type === 'build') {
+        // Tap the letter tiles in order to build the whole word.
+        return { type: 'build', image: w.emoji, prompt: 'Build the word!', hint: w.hint, answer: w.word, tiles: shuffle([...w.word]), speakText: w.word };
     }
 
-    const eligible = t.grammar.filter(g => (g.difficulty ?? 1) <= maxDifficulty);
-    const pool = eligible.length > 0 ? eligible : t.grammar;
-    const g = pool[Math.floor(Math.random() * pool.length)];
+    // Spelling: blank one plain lowercase letter. A capital (Monday), space
+    // (pencil case), hyphen (in-laws) or accent (résumé) would be unanswerable
+    // or stand out next to the a-z wrong options.
+    const slots = [...w.word].map((c, i) => /[a-z]/.test(c) ? i : -1).filter(i => i >= 0);
+    const idx = slots[Math.floor(Math.random() * slots.length)];
+    const correctLetter = w.word[idx];
+    const blanked = w.word.slice(0, idx) + '_' + w.word.slice(idx + 1);
+    const wrongs = [];
+    for (const l of shuffle([...(CONFUSABLE[correctLetter] || '')])) {
+        if (wrongs.length < 2 && l !== correctLetter) wrongs.push(l);
+    }
+    while (wrongs.length < 2) {
+        const l = 'abcdefghijklmnopqrstuvwxyz'[Math.floor(Math.random() * 26)];
+        if (l !== correctLetter && !wrongs.includes(l)) wrongs.push(l);
+    }
+    return { type: 'spelling', image: w.emoji, prompt: blanked, hint: w.hint, answer: correctLetter, options: shuffle([correctLetter, ...wrongs]), speakText: w.word };
+}
+
+function grammarQuestion(g) {
     return { type: 'grammar', image: '', prompt: g.sentence, hint: g.hint, answer: g.answer, options: shuffle([...g.options]), speakText: g.sentence.replace('___', g.answer) };
 }
 
@@ -559,28 +693,29 @@ function shuffle(arr) {
 }
 
 // ==================== QUESTION UI ====================
-// Identifier for teach-once tracking: grammar by its sentence, vocab/spelling
-// by the word (so seeing a word taught once covers both its meaning and spelling).
-function teachKey(q) {
-    return q.type === 'grammar' ? 'g:' + q.prompt : 'w:' + q.speakText;
-}
-
 function showQuestion() {
     if (gameState.questionActive) return;
     gameState.questionActive = true;
 
-    const q = generateQuestion(currentTheme);
+    const q = generateQuestion();
     gameState.currentQuestion = q;
 
-    // Teach a brand-new word/pattern before quizzing it: show a teach card
-    // with the answer revealed, then quiz the same item.
-    if (!gameState.taught.has(teachKey(q))) {
-        gameState.taught.add(teachKey(q));
+    // Teach a brand-new item before quizzing it: a teach card with the answer
+    // revealed, then the quiz on the same item. Items met in an earlier game,
+    // and easy review content from the band below, skip the card.
+    const it = q.item;
+    const P = window.WGD_PROGRESS;
+    if (!it.warm && !gameState.taught.has(it.key) && !P.hasSeenItem(gameState.band, gameState.themeId, it.key)) {
+        gameState.taught.add(it.key);
         showTeachCard(q);
         return;
     }
 
     renderQuestion(q);
+}
+
+function setPanelLabel(text) {
+    document.querySelector('#question-panel .teach-label').textContent = text;
 }
 
 // Render the answerable question (options + tap handlers). Split out so the
@@ -594,29 +729,61 @@ function renderQuestion(q) {
     document.getElementById('q-hint').textContent = q.hint ? `💡 ${q.hint}` : '';
 
     const optDiv = document.getElementById('q-options');
-    // Buttons pass the option's index, not its text: an option like "don't"
-    // would otherwise close the quoted string and break the inline handler.
-    optDiv.innerHTML = q.options.map((o, i) => `<button class="q-btn" onclick="answerOption(${i})">${escapeHtml(o)}</button>`).join('');
+    if (q.type === 'build') {
+        q.built = [];
+        renderBuild(q);
+    } else {
+        // Buttons pass the option's index, not its text: an option like "don't"
+        // would otherwise close the quoted string and break the inline handler.
+        optDiv.innerHTML = q.options.map((o, i) => `<button class="q-btn" onclick="answerOption(${i})">${escapeHtml(o)}</button>`).join('');
+    }
 
     panel.classList.add('active');
     updateAskBtn();
 
-    if (q.type === 'vocab') speakWord(q.answer);
+    // Build-the-word is a listen-and-spell task, so say the word.
+    if (q.type === 'vocab' || q.type === 'build') speakWord(q.answer);
 }
 
-// Teaching card (elementary): reveals the answer with audio, then a single
-// "Got it" button leads into the actual question for the same item.
+// Build-the-word: slots show the letters placed so far; tiles are tapped in
+// order; ⌫ takes the last letter back. The answer is checked once every tile
+// is placed.
+function renderBuild(q) {
+    const slots = [...q.answer].map((_, i) => {
+        const tileIdx = q.built[i];
+        return `<span class="build-slot">${tileIdx === undefined ? '' : escapeHtml(q.tiles[tileIdx])}</span>`;
+    }).join('');
+    document.getElementById('q-prompt').innerHTML = `<div class="build-slots">${slots}</div>`;
+    const tiles = q.tiles.map((l, i) =>
+        `<button class="q-btn build-tile" ${q.built.includes(i) ? 'disabled' : ''} onclick="tapTile(${i})">${escapeHtml(l)}</button>`).join('');
+    document.getElementById('q-options').innerHTML = tiles +
+        `<button class="q-btn build-tile build-undo" ${q.built.length ? '' : 'disabled'} onclick="undoTile()" aria-label="Undo">⌫</button>`;
+}
+
+function tapTile(i) {
+    const q = gameState.currentQuestion;
+    if (!q || q.type !== 'build' || !gameState.questionActive || q.answered || q.built.includes(i)) return;
+    q.built.push(i);
+    renderBuild(q);
+    if (q.built.length === q.tiles.length) answerQuestion(q.built.map(k => q.tiles[k]).join(''));
+}
+
+function undoTile() {
+    const q = gameState.currentQuestion;
+    if (!q || q.type !== 'build' || q.answered || !q.built.length) return;
+    q.built.pop();
+    renderBuild(q);
+}
+
+// Teaching card: reveals the answer with audio, then a single "Got it" button
+// leads into the actual question for the same item.
 function showTeachCard(q) {
     const panel = document.getElementById('question-panel');
     panel.classList.add('teach-mode');
-
-    let promptText;
-    if (q.type === 'grammar')       promptText = q.prompt.replace('___', q.answer);
-    else if (q.type === 'spelling') promptText = q.speakText; // full word
-    else                            promptText = q.answer;    // vocab word
+    setPanelLabel('📘 Learn this!');
 
     document.getElementById('q-image').textContent = q.image || '📘';
-    document.getElementById('q-prompt').textContent = promptText;
+    document.getElementById('q-prompt').textContent = fullAnswerText(q);
     document.getElementById('q-hint').textContent = q.hint ? `💡 ${q.hint}` : '';
     document.getElementById('q-options').innerHTML =
         `<button class="q-btn teach-got-it" onclick="dismissTeach()">我會了 Got it! 👍</button>`;
@@ -624,6 +791,12 @@ function showTeachCard(q) {
     panel.classList.add('active');
     updateAskBtn();
     speakWord(q.speakText);
+}
+
+// The complete correct form: the word itself, or the sentence with the gap
+// filled in.
+function fullAnswerText(q) {
+    return q.type === 'grammar' ? q.prompt.replace('___', q.answer) : q.speakText;
 }
 
 function dismissTeach() {
@@ -659,20 +832,34 @@ function escapeHtml(s) {
 
 function answerOption(i) {
     const q = gameState.currentQuestion;
-    if (q) answerQuestion(q.options[i]);
+    if (q && q.options) answerQuestion(q.options[i]);
 }
 
 function answerQuestion(selected) {
     if (!gameState.questionActive) return;
     const q = gameState.currentQuestion;
+    if (!q || q.answered) return;
+    q.answered = true;
     const isCorrect = selected === q.answer;
     gameState.questionsAnswered++;
 
-    document.querySelectorAll('.q-btn').forEach(btn => {
-        btn.style.pointerEvents = 'none';
-        if (btn.textContent === q.answer) btn.classList.add('correct');
-        else if (btn.textContent === selected && !isCorrect) btn.classList.add('wrong');
-    });
+    if (q.type === 'build') {
+        document.querySelectorAll('.build-slots').forEach(el => el.classList.add(isCorrect ? 'correct' : 'wrong'));
+        document.querySelectorAll('.build-tile').forEach(btn => { btn.disabled = true; });
+    } else {
+        document.querySelectorAll('.q-btn').forEach(btn => {
+            btn.style.pointerEvents = 'none';
+            if (btn.textContent === q.answer) btn.classList.add('correct');
+            else if (btn.textContent === selected && !isCorrect) btn.classList.add('wrong');
+        });
+    }
+
+    // Spaced-retrieval bookkeeping: this game's schedule, plus the learner's
+    // long-term memory of the item (learned after right answers in 2 games).
+    scheduleAfterAnswer(gameState.sched, q.item, isCorrect);
+    const P = window.WGD_PROGRESS;
+    const { learnedNow } = P.recordAnswer(gameState.band, gameState.themeId, q.item.key, isCorrect, gameState.runId);
+    if (isCorrect) gameState.rightThisGame.add(q.item.key);
 
     if (isCorrect) {
         gameState.correctAnswers++;
@@ -680,37 +867,50 @@ function answerQuestion(selected) {
         if (gameState.wave >= UPGRADE_FROM_WAVE) {
             gameState.upgradesPending++;
             playSound('correct');
-            showFeedback('⬆️ Tap a plant to upgrade!');
+            showFeedback(learnedNow ? '🎓 Learned! ⬆️' : '⬆️ Tap a plant to upgrade!');
         } else {
             gameState.sun += 50;
             playSound('correct');
-            showFeedback('✅ +50 ☀️');
+            showFeedback(learnedNow ? '🎓 Learned! +50 ☀️' : '✅ +50 ☀️');
         }
         speakWord(q.speakText);
-        // Record mastery on first correct answer. Vocab/spelling feed the
-        // "Words learned" meter (keyed by the word); grammar feeds the parallel
-        // "Patterns learned" meter (keyed by the sentence). The two are tracked
-        // separately so a grammar-heavy band still shows real progress.
-        if (q.type === 'vocab' || q.type === 'spelling') {
-            window.WGD_PROGRESS.recordWordMastered(gameState.band, gameState.themeId, q.speakText);
-        } else if (q.type === 'grammar') {
-            window.WGD_PROGRESS.recordGrammarMastered(gameState.band, gameState.themeId, q.prompt);
-        }
+        updateHUD();
+        updatePlantCards();
+        setTimeout(() => { if (gameState.currentQuestion === q) closeQuestion(); }, 1000);
     } else {
         playSound('wrong');
-        showFeedback('❌ ' + q.answer);
+        updateHUD();
+        // Explain instead of flashing the answer: after a moment to see which
+        // option was right, show the full correct form, its meaning, and say
+        // it aloud. The battlefield stays frozen until the learner taps OK.
+        setTimeout(() => showExplainCard(q, selected), 700);
     }
+}
 
-    updateHUD();
-    updatePlantCards();
+function showExplainCard(q, selected) {
+    if (!gameState.isPlaying || gameState.currentQuestion !== q) return;
+    const panel = document.getElementById('question-panel');
+    panel.classList.add('teach-mode', 'explain-mode');
+    setPanelLabel("💪 Let's learn it!");
+    document.getElementById('q-image').textContent = q.image || '📘';
+    document.getElementById('q-prompt').textContent = fullAnswerText(q);
+    document.getElementById('q-hint').textContent = q.hint ? `💡 ${q.hint}` : '';
+    const yours = q.type === 'grammar' ? q.prompt.replace('___', selected)
+        : q.type === 'spelling' ? q.prompt.replace('_', selected) : selected;
+    document.getElementById('q-options').innerHTML =
+        `<div class="explain-yours">❌ ${escapeHtml(yours)}</div>` +
+        `<button class="q-btn teach-got-it" onclick="closeQuestion()">OK 👍</button>`;
+    speakWord(q.speakText);
+}
 
-    setTimeout(() => {
-        document.getElementById('question-panel').classList.remove('active');
-        gameState.questionActive = false;
-        gameState.nextQuestionAt = performance.now() + QUESTION_INTERVAL_MS;
-        gameState.triggerZombie = null;
-        updateAskBtn();
-    }, 1000);
+function closeQuestion() {
+    if (!gameState.questionActive) return;
+    const panel = document.getElementById('question-panel');
+    panel.classList.remove('active', 'teach-mode', 'explain-mode');
+    gameState.questionActive = false;
+    gameState.nextQuestionAt = performance.now() + QUESTION_INTERVAL_MS;
+    gameState.triggerZombie = null;
+    updateAskBtn();
 }
 
 function showFeedback(text) {
@@ -788,7 +988,7 @@ function renderLevelSelect() {
 
     const total = currentTheme.words.length;          // words available in this band
     const mastered = P.wordsMasteredCount(band, themeId);
-    document.getElementById('level-progress-label').textContent = `Words learned: ${mastered} / ${total}`;
+    document.getElementById('level-progress-label').textContent = `Words learned: ${mastered} / ${total} (right in ${P.MASTERY_RUNS} games)`;
     animateFill(document.getElementById('level-progress-fill'), total ? Math.round(mastered / total * 100) : 0);
 
     // Parallel grammar meter — distinct sentence patterns answered correctly.
@@ -807,6 +1007,7 @@ function renderLevelSelect() {
             <span class="level-emoji">${lv.emoji}</span>
             <div class="level-name">Level ${lv.id}</div>
             <div class="level-sub">${lv.name}</div>
+            <div class="level-teaches">${lv.isReview ? 'Mix of everything' : `${lv.newWords.length} words · ${lv.newGrammar.length} patterns`}</div>
             <div class="level-stars">${starStr}</div>
         </div>`;
     }).join('');
@@ -840,15 +1041,18 @@ function startGame(levelDef) {
         shovelMode: false,
         sunTokenTimer: 0,
         damageCooldown: 0,
-        // Stage-pinned difficulty, in-game teaching, and progress tracking.
-        // `taught` keys items already shown on a teach card this session
-        // (see teachKey).
+        // Level content, in-game teaching, and progress tracking.
+        // `taught` holds item keys already shown on a teach card this game;
+        // `runId` identifies this game for the learned-in-2-games rule.
         band: selectedLevel,
         levelDef,
         themeId: pendingThemeId,
         tuning: tune,
         taught: new Set(),
+        rightThisGame: new Set(),
+        runId: Date.now(),
     };
+    gameState.sched = makeSchedule(levelDef);
 
     document.getElementById('hud').classList.add('active');
     document.getElementById('plant-cards').classList.add('active');
@@ -1347,6 +1551,8 @@ function spawnZombie() {
     });
 }
 
+const MIN_ANSWERS_FOR_STARS = 5;
+
 function accuracyPct() {
     return gameState.questionsAnswered > 0
         ? Math.round(gameState.correctAnswers / gameState.questionsAnswered * 100) : 0;
@@ -1367,9 +1573,12 @@ function finishLevel() {
     stopGame();
     const gs = gameState;
     const accuracy = accuracyPct();
+    // Stars reward learning: they come from answer accuracy, and need at
+    // least MIN_ANSWERS_FOR_STARS answers so skipping questions can't earn them.
+    const enough = gs.questionsAnswered >= MIN_ANSWERS_FOR_STARS;
     let stars = 1;
-    if (gs.lives >= 3 || accuracy >= 90) stars = 3;
-    else if (gs.lives >= 2 || accuracy >= 70) stars = 2;
+    if (enough && accuracy >= 85) stars = 3;
+    else if (enough && accuracy >= 65) stars = 2;
     window.WGD_PROGRESS.recordLevelResult(gs.band, gs.themeId, gs.levelDef.id, { stars, score: gs.score });
     showLevelResult(true, stars);
 }
@@ -1391,6 +1600,7 @@ function showLevelResult(won, stars) {
     document.getElementById('result-stats').innerHTML = `
         Score: ${gs.score}<br>
         Correct: ${gs.correctAnswers}/${gs.questionsAnswered} (${accuracy}%)<br>
+        Got right this game: ${gs.rightThisGame.size} words &amp; patterns<br>
         Words learned: ${mastered} / ${total}<br>
         Patterns learned: ${gMastered} / ${gTotal}
     `;
