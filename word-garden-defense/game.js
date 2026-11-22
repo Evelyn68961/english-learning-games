@@ -22,13 +22,17 @@ const PUMPKIN_LEAP_FRAMES = 30;   // ~0.5s leap animation
 const PUMPKIN_TRIGGER_CELLS = 2;  // trigger when a zombie is within N cell-widths (either direction)
 const PUMPKIN_SQUASH_RADIUS = 38; // landing kill zone (px)
 
-// Wallnut rolls when tapped: direction is set by tap position relative to the
-// nut (tap right → roll right, tap left → roll left). It plows through zombies
+// Wallnut rolls when tapped: a tap on the nut rolls it forward (right, into
+// the horde). Only a tap clearly left of the nut's body — past
+// WALLNUT_BODY_HALF_WIDTH but still within WALLNUT_TAP_RADIUS — rolls it
+// backward, so a fingertip landing slightly off-centre never sends it the
+// wrong way. It plows through zombies
 // in its lane, crashing up to WALLNUT_ROLL_MAX_KILLS before it shatters.
 const WALLNUT_ROLL_SPEED = 4.5;
 const WALLNUT_ROLL_HIT_RADIUS = 26;
 const WALLNUT_ROLL_MAX_KILLS = 3;
 const WALLNUT_TAP_RADIUS = 30;
+const WALLNUT_BODY_HALF_WIDTH = 18; // matches the drawn nut's x-radius
 // Auto-trigger: once a wallnut has been chewed down to this fraction of its
 // max HP, it goes out swinging — auto-rolls forward into the horde rather
 // than dying uselessly. Manual tap still works at full HP.
@@ -214,15 +218,15 @@ function handleCanvasTap(e) {
         }
     }
 
-    // 3. Tap an idle wallnut (no card selected) to roll it. Tap side of the nut
-    // picks direction: right of it rolls forward into the horde, left of it
-    // rolls backward through plants that have already been overrun.
+    // 3. Tap an idle wallnut (no card selected) to roll it. Any tap on the nut
+    // rolls it forward into the horde; only a tap clearly left of its body
+    // rolls it backward through plants that have already been overrun.
     if (!gameState.selectedPlant) {
         for (const p of gameState.plants) {
             if (p.type !== 'wallnut' || p.rolling) continue;
             if (Math.hypot(x - p.x, y - p.y) < WALLNUT_TAP_RADIUS) {
                 p.rolling = true;
-                p.rollDir = (x >= p.x) ? 1 : -1;
+                p.rollDir = (x < p.x - WALLNUT_BODY_HALF_WIDTH) ? -1 : 1;
                 p.rollKills = 0;
                 p.rollHits = new Set();
                 playSound('plant');
@@ -926,14 +930,10 @@ function update() {
         if (p.type === 'wallnut') {
             if (!p.rolling && p.hp <= p.maxHp * WALLNUT_AUTO_ROLL_HP_RATIO) {
                 p.rolling = true;
-                // Roll toward the denser side of the lane so the nut takes out
-                // the most zombies. Tie / empty lane → forward (right).
-                let leftCount = 0, rightCount = 0;
-                gs.zombies.forEach(z => {
-                    if (z.dead || z.lane !== p.lane) return;
-                    if (z.x < p.x) leftCount++; else rightCount++;
-                });
-                p.rollDir = (leftCount > rightCount) ? -1 : 1;
+                // Always roll forward (right): the zombie chewing the nut is
+                // on that side. Zombies that already slipped past are left to
+                // the lawn trolley.
+                p.rollDir = 1;
                 p.rollKills = 0;
                 p.rollHits = new Set();
                 playSound('plant');
