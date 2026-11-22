@@ -144,6 +144,7 @@ const ctx = canvas.getContext('2d');
 let W, H, GROUND_Y, LANE_H, LAWN_LEFT, CELL_W, GRID_COLS;
 
 function resizeCanvas() {
+    const old = (W === undefined) ? null : { GROUND_Y, LANE_H, LAWN_LEFT, CELL_W };
     // Prefer visualViewport: on iOS it excludes the dynamic URL bar / keyboard,
     // so the canvas matches what's actually visible instead of overflowing
     // under the toolbar.
@@ -155,6 +156,7 @@ function resizeCanvas() {
     LAWN_LEFT = 90;
     CELL_W = Math.min(95, Math.max(60, (W - LAWN_LEFT - 10) / 9));
     GRID_COLS = Math.max(4, Math.floor((W - LAWN_LEFT - 10) / CELL_W));
+    if (old) remapBattlefield(old);
 
     // Pin the plant-cards bar directly under the HUD, regardless of HUD height.
     const hud = document.getElementById('hud');
@@ -163,6 +165,31 @@ function resizeCanvas() {
         document.documentElement.style.setProperty('--hud-h', hudH + 'px');
     }
 }
+// Everything on the lawn stores pixel positions, so when the lawn is resized
+// (rotation, or the iOS URL bar showing/hiding) move every object to the same
+// spot in the new geometry: x scales with the cell width from the lawn's left
+// edge, y with the lane height from the top of the ground. A plant's cell
+// centre therefore lands exactly on its new cell centre, and a zombie keeps
+// the same distance (in cells) from the plant it is chewing.
+function remapBattlefield(old) {
+    const gs = gameState;
+    if (!gs || !gs.plants) return;
+    const kx = CELL_W / old.CELL_W;
+    const ky = LANE_H / old.LANE_H;
+    const mx = x => LAWN_LEFT + (x - old.LAWN_LEFT) * kx;
+    const my = y => GROUND_Y + (y - old.GROUND_Y) * ky;
+    gs.plants.forEach(p => {
+        p.x = mx(p.x); p.y = my(p.y);
+        if (p.leapStartX !== undefined) p.leapStartX = mx(p.leapStartX);
+        if (p.leapTargetX !== undefined) p.leapTargetX = mx(p.leapTargetX);
+    });
+    gs.zombies.forEach(z => { z.x = mx(z.x); z.y = my(z.y); });
+    gs.projectiles.forEach(pr => { pr.x = mx(pr.x); pr.y = my(pr.y); });
+    gs.sunTokens.forEach(t => { t.x = mx(t.x); t.y = my(t.y); t.targetY = my(t.targetY); });
+    gs.explosions.forEach(e => { e.x = mx(e.x); e.y = my(e.y); });
+    (gs.trollers || []).forEach(tr => { tr.x = tr.fired ? mx(tr.x) : LAWN_LEFT - 28; });
+}
+
 window.addEventListener('resize', resizeCanvas);
 window.addEventListener('orientationchange', () => {
     // iOS sometimes reports stale dimensions until after the rotation animation;
@@ -200,6 +227,25 @@ function handleCanvasTap(e) {
     }
 
     if (gameState.questionActive) return;
+
+    // 1b. Shovel: dig up the plant closest to the tap (same lane, within half
+    // a cell). No sun is refunded. The shovel puts itself away after one dig.
+    if (gameState.shovelMode) {
+        let target = null, best = CELL_W / 2;
+        for (const p of gameState.plants) {
+            const d = Math.hypot(x - p.x, y - p.y);
+            if (d < best) { best = d; target = p; }
+        }
+        if (target) {
+            // A chomper dug up mid-bite must let go of the zombies it froze.
+            (target.chompTargets || []).forEach(z => { z.beingEaten = false; });
+            gameState.plants = gameState.plants.filter(p => p !== target);
+            playSound('plant');
+            showFeedback('🪏 Dug up!');
+        }
+        setShovelMode(false);
+        return;
+    }
 
     // 2. Spend a pending upgrade token on a tapped plant. Has to come before
     // the wallnut-roll handler so a queued upgrade applies first; tap the
@@ -302,20 +348,40 @@ function renderPlantCards() {
             <div class="card-icon">${info.icon}</div>
             <div class="card-cost">☀️${info.cost}</div>
         </button>`;
-    }).join('');
+    }).join('') + `<button class="plant-card shovel-card" onclick="toggleShovel()" aria-label="Shovel: dig up a plant">
+            <div class="card-icon">🪏</div>
+            <div class="card-cost">Dig</div>
+        </button>`;
     updatePlantCards();
+}
+
+// Shovel: tap the card, then tap a plant to remove it. Picking a plant card
+// puts the shovel away, and picking the shovel puts any plant card away.
+function setShovelMode(on) {
+    gameState.shovelMode = on;
+    if (on) gameState.selectedPlant = null;
+    canvas.classList.toggle('plant-mode', on || !!gameState.selectedPlant);
+    updatePlantCards();
+}
+
+function toggleShovel() {
+    if (!gameState.isPlaying) return;
+    setShovelMode(!gameState.shovelMode);
 }
 
 function selectPlantType(type) {
     if (!gameState.isPlaying) return;
     if (gameState.sun < PLANT_TYPES[type].cost) return;
     gameState.selectedPlant = (gameState.selectedPlant === type) ? null : type;
+    gameState.shovelMode = false;
     canvas.classList.toggle('plant-mode', !!gameState.selectedPlant);
     updatePlantCards();
 }
 
 function updatePlantCards() {
-    document.querySelectorAll('.plant-card').forEach(card => {
+    const shovel = document.querySelector('.shovel-card');
+    if (shovel) shovel.classList.toggle('selected', !!gameState.shovelMode);
+    document.querySelectorAll('.plant-card[data-type]').forEach(card => {
         const type = card.dataset.type;
         const cost = PLANT_TYPES[type].cost;
         card.classList.toggle('disabled', gameState.sun < cost);
@@ -456,8 +522,15 @@ function buildQuestion(t, type, maxDifficulty) {
     }
 
     if (type === 'spelling') {
-        const w = wordPool[Math.floor(Math.random() * wordPool.length)];
-        const idx = Math.floor(Math.random() * w.word.length);
+        // Only blank a plain lowercase letter. A capital (Monday), space
+        // (pencil case), hyphen (in-laws) or accent (résumé) would either be
+        // unanswerable or stand out next to the random a-z wrong options.
+        const blankable = w => [...w.word].map((c, i) => /[a-z]/.test(c) ? i : -1).filter(i => i >= 0);
+        const spellPool = wordPool.filter(w => blankable(w).length > 0);
+        if (spellPool.length === 0) return buildQuestion(t, 'vocab', maxDifficulty);
+        const w = spellPool[Math.floor(Math.random() * spellPool.length)];
+        const slots = blankable(w);
+        const idx = slots[Math.floor(Math.random() * slots.length)];
         const blanked = w.word.slice(0, idx) + '_' + w.word.slice(idx + 1);
         const correctLetter = w.word[idx];
         const allLetters = 'abcdefghijklmnopqrstuvwxyz';
@@ -764,6 +837,7 @@ function startGame(levelDef) {
         animFrame: null, nextQuestionAt: performance.now() + QUESTION_INTERVAL_MS,
         triggerZombie: null,
         selectedPlant: null,
+        shovelMode: false,
         sunTokenTimer: 0,
         damageCooldown: 0,
         // Stage-pinned difficulty, in-game teaching, and progress tracking.
@@ -797,9 +871,27 @@ function stopGame() {
     canvas.style.display = 'none';
 }
 
-function gameLoop() {
+// All gameplay tuning (speeds, timers, fuses) is in "ticks" of 1/60 s. The
+// loop runs update() a whole number of ticks per real elapsed time, so the
+// game plays at the same speed on 60 Hz, 120 Hz and 144 Hz screens. Drawing
+// still happens once per screen refresh.
+const TICK_MS = 1000 / 60;
+const MAX_TICKS_PER_FRAME = 5; // after a stall (e.g. tab hidden), don't fast-forward
+
+function gameLoop(now) {
     if (!gameState.isPlaying) return;
-    update();
+    if (now === undefined) now = performance.now();
+    if (gameState.lastFrameTime === undefined) gameState.lastFrameTime = now - TICK_MS;
+    gameState.tickAccumulator = (gameState.tickAccumulator || 0) + (now - gameState.lastFrameTime);
+    gameState.lastFrameTime = now;
+    let ticks = 0;
+    while (gameState.tickAccumulator >= TICK_MS && ticks < MAX_TICKS_PER_FRAME) {
+        update();
+        gameState.tickAccumulator -= TICK_MS;
+        ticks++;
+        if (!gameState.isPlaying) return; // level ended inside this tick
+    }
+    if (ticks === MAX_TICKS_PER_FRAME) gameState.tickAccumulator = 0;
     draw();
     gameState.animFrame = requestAnimationFrame(gameLoop);
 }
@@ -826,8 +918,8 @@ function update() {
 
     if (gs.damageCooldown > 0) gs.damageCooldown--;
 
-    // Periodic sky sun (every ~10s while playing)
-    gs.sunTokenTimer++;
+    // Periodic sky sun (every ~10s of play; paused during a question)
+    if (!gs.questionActive) gs.sunTokenTimer++;
     if (gs.sunTokenTimer > 600) {
         spawnSkySun();
         gs.sunTokenTimer = 0;
@@ -943,45 +1035,52 @@ function update() {
     });
     gs.plants = gs.plants.filter(p => !p.exploded && !p.spent);
 
-    // Lawn trolleys — auto-fire safety net for breached lanes
-    updateTrollers(gs);
+    // Lawn trolleys — auto-fire safety net for breached lanes. Paused with
+    // the rest of the battlefield while a question is up.
+    if (!gs.questionActive) updateTrollers(gs);
 
     // Tick explosion animations
     gs.explosions.forEach(e => e.age++);
     gs.explosions = gs.explosions.filter(e => e.age < 25);
 
-    // Update falling sun tokens
-    gs.sunTokens.forEach(s => {
+    // Update falling sun tokens. Their 10s lifetime doesn't count down while a
+    // question is up, so a child answering never loses sun they had earned.
+    if (!gs.questionActive) gs.sunTokens.forEach(s => {
         if (s.y < s.targetY) s.y += s.fallSpeed;
         s.age++;
     });
     gs.sunTokens = gs.sunTokens.filter(s => s.age < 600); // 10s before disappearing
 
-    // Move projectiles
-    gs.projectiles.forEach(proj => {
-        proj.x += proj.speed;
-    });
+    // Move projectiles and resolve hits (paused during a question). Each pea
+    // damages only the single closest zombie it touches, then disappears.
+    if (!gs.questionActive) {
+        gs.projectiles.forEach(proj => {
+            proj.x += proj.speed;
+        });
 
-    // Collision: projectile vs zombie
-    gs.projectiles = gs.projectiles.filter(proj => {
-        let hit = false;
-        gs.zombies.forEach(z => {
-            if (!z.dead && z.lane === proj.lane && Math.abs(z.x - proj.x) < 25) {
-                z.hp--;
-                hit = true;
-                if (z.hp <= 0) {
-                    z.dead = true;
+        gs.projectiles = gs.projectiles.filter(proj => {
+            let target = null, best = 25;
+            for (const z of gs.zombies) {
+                if (z.dead || z.lane !== proj.lane) continue;
+                const d = Math.abs(z.x - proj.x);
+                if (d < best) { best = d; target = z; }
+            }
+            if (target) {
+                target.hp--;
+                if (target.hp <= 0) {
+                    target.dead = true;
                     gs.score += 5;
                     playSound('zombieDie');
                     updateHUD();
                 }
+                return false;
             }
+            return proj.x < W + 20;
         });
-        return !hit && proj.x < W + 20;
-    });
+    }
 
-    // Clean dead zombies
-    gs.zombies = gs.zombies.filter(z => !z.dead || z.x > -50);
+    // Clean dead zombies (nothing draws or targets them once dead)
+    gs.zombies = gs.zombies.filter(z => !z.dead);
 
     // Wave complete check
     if (gs.waveZombiesSpawned >= gs.zombiesPerWave && gs.zombies.filter(z => !z.dead).length === 0) {
@@ -1368,6 +1467,17 @@ function draw() {
     }
 
     gameState.plants.forEach(p => drawPlant(p));
+    if (gameState.shovelMode) {
+        ctx.strokeStyle = 'rgba(255,80,80,0.8)';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([5, 4]);
+        gameState.plants.forEach(p => {
+            ctx.beginPath();
+            ctx.arc(p.x, p.y - 8, 26, 0, Math.PI * 2);
+            ctx.stroke();
+        });
+        ctx.setLineDash([]);
+    }
 
     gameState.projectiles.forEach(proj => {
         ctx.fillStyle = '#4CAF50';
